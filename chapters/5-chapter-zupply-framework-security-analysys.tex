@@ -1,0 +1,722 @@
+%======================================================================
+\chapter{Zupply Framework Security Analysis}
+%======================================================================
+
+This chapter starts with fundamental definitions essential to our security model, progresses to the adversary model built upon these definitions, and concludes by defining and proving the security properties of the framework.
+
+\section*{Declaration of Contributions}
+This chapter is based on \cite{Badakhshan2024Zupply}. I am the sole author of this chapter.
+
+
+
+\section{Definitions for Security Concepts}
+
+\begin{definition}[Valid \gls{aat}]
+\label{def:Valid Authentication Token}
+    $T_{i_2}$ is a valid \gls{aat} for authenticating a data record $d_{n_2}$ if and only if
+    the $\texttt{cm}_{i_2} := \mathsf{COMM}_{\rho_{i_2}}(T_{i_2})$ is included in \textsf{MHT}.
+\end{definition}
+
+
+\begin{definition}[Authenticated Data]
+\label{def:Authenticated Data}
+    A data record $d_{n}$ is an authenticated data if and only if $d_{n}$ contains
+    \begin{enumerate}
+        \item  a valid zero-knowledge proof of ($\pi_\texttt{Auth}$) of owning a \textit{valid \gls{aat}} $T_{i}$ (Definition \ref{def:Valid Authentication Token}).
+        \item a valid signature $\sigma$ is created using the secret key $\text{SKsig}_{i}$, ensuring that both it and its corresponding public key $\text{PKsig}_{i}$ are included in $T_{i}$.
+        \item valid tag(s) if and only if the predecessor data record is signed by different key(s) and $d_{n}.\text{pred} \neq \emptyset$
+    \end{enumerate}
+\end{definition}
+
+\begin{definition}[Valid Transaction]
+\label{def:Valid Transaction}
+    A transaction $\texttt{tx} $ $ \in $ $ \{ \texttt{tx}_\textsf{Init}, $ $ \texttt{tx}_\textsf{Trans}, $ $ \texttt{tx}_\textsf{Merge}, $ $ \texttt{tx}_\textsf{Div} \}$ is a valid transaction if and only if
+    \begin{enumerate}
+        \item $\mathsf{MHT}.\mathsf{Verify}(\texttt{rt}_{\tau}, \texttt{rt}^\text{new}, \texttt{cm}, \mathsf{ind}, \mathsf{path}_\mathsf{ind}) = 1$, where The root of \textsf{MHT} was $\texttt{rt}_{\tau}$ before $\texttt{tx}$. For $\textsf{Div}$ transaction (i.e., $\texttt{tx}= \texttt{tx}_\textsf{Div}$) the transition of the root is examined in two rounds of running $\mathsf{MHT}.\mathsf{Verify}$ algorithm: $\texttt{rt}_\tau \rightarrow \texttt{rt}^\text{new}_1 \rightarrow \texttt{rt}^\text{new}_2$. 
+
+
+        \item $\texttt{eol} \notin  \mathbf{X}_\tau$. Where $\texttt{tx}_\mathsf{Trans}$ and $\texttt{tx}_\mathsf{Div}$ contain one and $\texttt{tx}_\mathsf{Merge}$ contains two \texttt{eol}s. This value represents the \gls{aat} that is expired during the owner transferring algorithms.
+
+        \item $\mathsf{Verify}(\text{vk}_\mathbbm{x}, x_\mathbbm{x}, \pi_\mathbbm{x}) = 1$ for $\mathbbm{x} \in \{\mathsf{Trans}$, $\mathsf{Merge}$, $\mathsf{Div} \}$
+        
+    \end{enumerate}
+\end{definition}
+
+\section{Adversary Model}
+\label{sec:Attacker Model}
+\begin{definition}[Adversary Model]
+\label{def:Adversary}
+    In the Zupply framework $\Pi$, defined in Definition \ref{def:Zupply Framework}, the adversary $\mathcal{A}$ embodies the assumptions detailed in Definition \ref{def:Adversary Assumptions}, driven by the motivations outlined in Definition \ref{def:Adversary Goals}.
+\end{definition}
+
+
+\begin{definition}[Adversary Assumptions]
+\label{def:Adversary Assumptions}
+The adversary $\mathcal{A}$ is probabilistic polynomial-time (\gls{ppt}) and possesses the following capabilities in the Zupply framework:
+        \begin{enumerate}
+            \item The adversary $\mathcal{A}$, at one point, may have possessed \gls{aat}s,  transferred from honest entities, and used it to contribute to a progressive data sequence in a manner that was both legitimate and honest. Currently, all such tokens are considered expired. 
+            
+            \item The adversary $\mathcal{A}$ has access to $\mathbf{TX}_\tau$, $\mathbf{E}_\tau$, $\mathbf{C}_\tau$,  $\mathbf{X}_\tau$, $\mathsf{MHT}$ and $\mathbf{D}_\tau$.
+            
+            \item \textit{\gls{aat} commitment attribution oracle}: The adversary $\mathcal{A}$ can query an oracle, denoted as $\mathcal{O}^\mathsf{Attr}: \mathbf{C}_\tau \mapsto \mathbf{E}_\tau$. This oracle acts as a mapping function, $\mathcal{O}^\mathsf{Attr}(\texttt{cm}_i) = e_j$, where it assigns each commitment $\texttt{cm}_i$ to the entity $e_j$ that created it. 
+            
+            \item \textit{\gls{aat} commitment classification oracle}: The adversary $\mathcal{A}$ has the capability to categorize commitments based on the type of transaction they're contained in. The Adversary's oracle access for classifying \gls{aat} commitments is:\\ $\mathcal{O}^\mathsf{Class}: \mathbf{C}_\tau \mapsto \{\textsf{Init}, \textsf{Trans}, \textsf{Merge}, \textsf{Div}\}$. 
+
+            \item \textit{Framework algorithms}: The adversary  is capable of executing either the exact or modified versions of the algorithms defined in $\Pi$, except the $\mathsf{Setup}$ algorithm, when a trusted setup zkSNARK is employed..        
+        \end{enumerate}
+
+        \end{definition}
+
+
+\begin{definition}[Adversary Goals]
+        \label{def:Adversary Goals}
+            The adversary $\mathcal{A}$ has the following motivations in the Zupply framework:
+
+        \begin{enumerate}        
+
+            \item \textit{Data de-anonymizing attack}: The adversary $\mathcal{A}$ attempts to link a data record, $d_n$, to its corresponding \gls{aat} commitment, $\texttt{cm}_i$.
+
+           
+            
+            \item \textit{Linking attack}: The adversary $\mathcal{A}$ attempts to determine whether two \gls{aat} commitments, $\texttt{cm}_i$ and $\texttt{cm}_j$, which are created by different entities are consecutive authentication tokens, with one having been transferred to the other.
+            
+            \item \textit{Data forging attack}:
+            The adversary $\mathcal{A}$ aims to forge $\pi_\mathsf{Auth}^\ast$ and $\sigma^\ast$ such that they are consistent to an \gls{aat} that the attacker does not have access to. 
+
+
+            \item \textit{\gls{aat} ownership spoofing attack}:
+            The attack generates transactions $\texttt{tx}_\mathsf{Trans}$, $\texttt{tx}_\mathsf{Merge}$, $\texttt{tx}_\mathsf{Div}$ to  transfer, merge, or divide\gls{aat}s that the attacker does not have access to.
+
+            
+            \item \textit{Data tampering attack}:
+            The adversary $\mathcal{A}$ aims to alter any existing $d_{n} \in \mathbf{D}_\tau$.
+
+            \item \textit{\gls{aat} double transfer attack}:
+            The attacker attempts to re-transfers a token that is already transferred, merged, or divided.
+    \end{enumerate}
+
+\end{definition}
+
+
+\section{Security Properties}
+\label{sec:Security Properties}
+
+In the following, we provide an informal definition of the security properties of the Zupply framework. In the subsequent subsections, we present a formal definition and a proof for each property.
+
+    \begin{definition}[Zupply Security, Informal]
+    The Zupply framework $\Pi$, as defined in Definition \ref{def:Zupply Framework}, is deemed secure against any adversary $\mathcal{A}$, defined within the adversary model in Definition \ref{def:Adversary}, provided it fulfills the following security properties:
+
+    \begin{enumerate}
+        \item \textit{Data Anonymity}:  $\mathcal{A}$ cannot establish a link between an arbitrary data record $d_n$ and it's corresponding \gls{aat} commitment $\texttt{cm}_i$.
+
+        \item \textit{Token Unlinkability}:  Given two \gls{aat}s, $\texttt{cm}_i$ and $\texttt{cm}_j$. $\mathcal{A}$ cannot decide whether $\texttt{cm}_i$ has been transferred from or to $\texttt{cm}_j$.
+
+        \item \textit{Token Anonymity}: $\mathcal{A}$ cannot decide whether entity $e_i$ is the receiver of a commitment to transferred, merged or divided \gls{aat} $\texttt{cm}_j$ by any $e \in \mathbf{E}_\tau$ (including $e_i$).
+        
+        \item \textit{Data and Token Authenticity}:  Let $\mathcal{A}$ does not own $T_i$, $\mathcal{A}$ cannot transfer, merge or divide $T_i$, or use $T_i$ to authenticate $d^*$, or alter an already existing $d_{n} \in \mathbf{D}_\tau$.
+
+
+        \item \textit{Token Undeniability}: $\mathcal{A}$ cannot transfer, merge, or divide \gls{aat}s that they are already transferred, merged or divided.
+
+        \end{enumerate}
+\end{definition}
+
+
+
+\subsection{Data Anonymity}
+\label{app-sec:Data Anonymity}
+
+The informal definition of data anonymity is as follows:
+
+\begin{definition}[Data Anonymity, Informal]
+    \label{def:informal-Data Anonymity}
+    For the system $\Pi$ under the adversary model defined in Definition \ref{def:Adversary}, if any \gls{ppt} adversary $\mathcal{A}$ cannot establish a link between an arbitrary data record $d_i$ and it's corresponding \gls{aat} commitment $\texttt{cm}_i$, then the system $\Pi$ is said to have \textit{data anonymity}. 
+\end{definition}
+
+Before providing a formal definition of \textit{data anonymity}, we need to define \textit{Data de-anonymizing Advantage} of the adversary.
+
+\begin{definition}[Data De-anonymizing Advantage]
+            \label{def:Data Deanonymizing Advantage} 
+            The data de-anonymizing advantage is the advantage of every \gls{ppt} adversary $\mathcal{A}$ in the following experiments:
+
+            $\mathsf{DD-ANONY}^\textsf{Init}$  $(\Pi, \mathcal{A}, \lambda)$%\vspace{-.2em}
+        \begin{itemize}
+        % \setlength\itemsep{-.2em}
+                \item [] $\textsc{pp} \leftarrow \textsf{Setup}(1^\lambda)$ 
+
+                
+                \item []  For $ i \in \{1, 2\}$:
+                \begin{itemize}
+                % \setlength\itemsep{-.2em}
+                    \item [] $q_i$ $\xleftarrow{R}$ $\{0, 1\}^{N_q}$ 
+                    \item [] $(\texttt{tx}_{\mathsf{Init}, i}, T_i) \leftarrow \textsf{Init}(\textsc{pp}, q_i)$
+                \end{itemize}
+                
+                
+                \item[] $d_\mathsf{pri}, d_\mathsf{pub} \xleftarrow{R} \{0,1\}^\ast$
+                \item[] $\textsc{k} \xleftarrow{R} \{0,1\}^{O(\lambda)}$
+                \item[] $b \xleftarrow{R} \{1, 2\}$
+                \item[] $d$ $\leftarrow$ $\mathsf{Upload}(\textsc{pp}, \text{pred} = \emptyset , T_b, d_\mathsf{pri}, d_\mathsf{pub}, \textsc{k}, \text{tag} = \emptyset)$
+
+                
+                \item[] Output: $b^\prime \leftarrow \mathcal{A}(\textsc{pp}, d, \texttt{tx}_{\mathsf{Init}, 1}, \texttt{tx}_{\mathsf{Init}, 2} )$
+        \end{itemize}
+We define $\mathcal{A}$'s advantage in the above experiment as
+\begin{equation}
+\label{eq:Adv_DD-ANONY_Init}
+    \mathsf{Adv}^{\mathsf{DD-ANONY}^\textsf{Init}}_{\Pi, \mathcal{A}}(\lambda) := |Pr[b=b^\prime] - \frac{1}{2}|
+\end{equation}
+
+The $\mathsf{DD-ANONY}^\textsf{Trans}$, $\mathsf{DD-ANONY}^\textsf{Merge}$, $\mathsf{DD-ANONY}^\textsf{Div}$ experiments are the modified versions of $\mathsf{DD-ANONY}^\textsf{Init}$ such that \gls{aat}s generated from \textsf{Trans}, \textsf{Merge}, and \textsf{Div} are passed as a argument to \textsf{Upload} algorithm. The adversary's advantages for those experiments are defined accordingly. Therefore, we can define  $\mathsf{Adv}^{\mathsf{DD-ANONY}}_{\Pi, \mathcal{A}}(\lambda)$ as follows:
+\begin{align}
+\label{eq:Adv_DD-ANONY}
+    \notag
+    \mathsf{Adv}^{\mathsf{DD-ANONY}}_{\Pi, \mathcal{A}}(\lambda) :=
+    % & \mathsf{Adv}^{\mathsf{DD-ANONY}^\textsf{Init}}_{\Pi, \mathcal{A}}(\lambda) +
+    % \mathsf{Adv}^{\mathsf{DD-ANONY}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) +\\
+    % \notag &\mathsf{Adv}^{\mathsf{DD-ANONY}^\textsf{Merge}}_{\Pi, \mathcal{A}}(\lambda) +
+    % \mathsf{Adv}^{\mathsf{DD-ANONY}^\textsf{Div}}_{\Pi, \mathcal{A}}(\lambda)\\
+    % \simeq & 4 \cdot 
+    \mathsf{Adv}^{\mathsf{DD-ANONY}^\textsf{Init}}_{\Pi, \mathcal{A}}(\lambda)
+\end{align}
+
+            \end{definition}
+
+Next, we are going to provide a definition for \textit{Data anonymity} security ($\mathsf{DANONY}$ Security) in our framework, which is the adversary $\mathcal{A}$'s advantage defined in Definition \ref{def:Data Deanonymizing Advantage} is negligible.
+
+\begin{definition}[$\mathsf{DANONY}$ Secure]
+    \label{def:DANONY}
+    Framework $\Pi$ is \textit{$\mathsf{DANONY}$ Secure} if for every \gls{ppt} adversary defined in \ref{def:Adversary} and sufficiently large $\lambda$:
+    \begin{equation*}
+        \mathsf{Adv}^{\mathsf{DD-ANONY}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)
+    \end{equation*}
+    Where $\mathsf{Adv}^{\mathsf{DD-ANONY}}_{\Pi, \mathcal{A}}(\lambda)$ is defined in Definition \ref{def:Data Deanonymizing Advantage} and Equation (\ref{eq:Adv_DD-ANONY}).
+    \end{definition}
+
+In conclusion, we present the Data Anonymity definition of the proposed framework $\Pi$. 
+\begin{definition}[Data Anonymity]
+    \label{def:Data Anonymity}
+    Framework $\Pi$ has \textit{data anonymity}  if and only if it satisfies $\mathsf{DANONY}$ security property defined in Definition \ref{def:DANONY}.
+\end{definition}
+
+
+    \begin{theorem}
+        \label{theorem:DANONY}
+        The framework $\Pi$, as defined in Definition \ref{def:Zupply Framework}, satisfies \textit{$\mathsf{DANONY}$ Security} property as it is defined in Definition \ref{def:DANONY}, against any \gls{ppt} adversary $\mathcal{A}$, defined within the adversary model in Definition \ref{def:Adversary}.
+    \end{theorem}
+    \begin{proof}
+        To prove this theorem, we first need to specify the knowledge the adversary can gain from  the experiment $\mathsf{DD-ANONY}^\mathsf{Init}$. We denote it as the view of the adversary in the experiment described in Equation (\ref{eq:view_danony_init}).
+
+
+\begin{figure}[h]
+    \resizebox{\linewidth}{!}{
+    \begin{minipage}{\linewidth}
+    \begin{align}
+    \label{eq:view_danony_init}
+        \mathsf{View}^{\mathsf{DD-ANONY}^\mathsf{Init}}_{\Pi, \mathcal{A}} = \left\{
+        \begin{array}{l@{\hspace{0.1em}}l}
+            \textsc{pp}, & d = \left( 
+            \begin{array}{l@{\hspace{0.05em}}l}
+                \text{pred} & = \emptyset, \\
+                d_{\mathsf{pub}}, & c, \\
+                \text{tag} & = \emptyset, \\
+                \pi_{\texttt{Auth}, b}, & \\
+                x_{\texttt{Auth}, b} & = \{\texttt{rt}_2, \text{PKsig}_b\}, \\
+                \sigma_{b}, & \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_2)
+            \end{array} 
+            \right), \\
+            \texttt{tx}_{\mathsf{Init}, 1} & = \left( \texttt{cm}_1, \texttt{rt}_1, 1, \texttt{path}_1 \right), \\
+            \texttt{tx}_{\mathsf{Init}, 2} & = \left( \texttt{cm}_2, \texttt{rt}_2, 2, \texttt{path}_2 \right)
+        \end{array} 
+        \right\}
+    \end{align}
+    \end{minipage}
+    }
+\end{figure}
+
+
+The adversary is aware of the transaction order: $\texttt{cm}_2$ is added after $\texttt{cm}_1$, and $\texttt{rt}_2$ is constructed based on this order. The attacker does not know $b$ and their goal is to deduce which \gls{aat} commitment $\texttt{cm}_b$ where b is either $1$ or $2$ corresponds to the data record $d$.
+
+Each variable in $\mathsf{View}^{\mathsf{DD-ANONY}^\mathsf{Init}}_{\Pi, \mathcal{A}}$ is computed independently of  $b$ except $\text{PKsig}_b$, $\sigma_{b}$, and $\pi_{\texttt{Auth}, b}$:
+\begin{enumerate}
+    \item $\text{PKsig}_b$ is directly used as one part of the \gls{aat} $T_b$ whose commitment is $\texttt{cm}_b$. If $\mathcal{A}$ be able to decide whether $\text{PKsig}_b$ is a part of the pre-image of $\texttt{cm}_0$ or $\texttt{cm}_1$, they will be able to deduce $b$. According to the \textit{Statistically Hiding} property of the commitment scheme \textsf{COMM}, a \gls{ppt} attacker $\mathcal{A}$ has a negligible chance to determine $b$ from $\text{PKsig}_b$.
+
+    \item $\sigma_b = \mathcal{S}_\mathsf{sig}(\text{SKsig}_b, m)$. The signature $\sigma_b$ does not include any pre-image of the authentication token without needing to consider the security properties of the signature scheme. We have discussed above that $\text{PKsig}_b$ used for verifying $\sigma_b$, also does not help $\mathcal{A}$ guess $b$. Hence, the attacker will not gain any advantage from $\sigma_b$.
+
+    \item According to the \textit{Statistical Zero-knowledge} property of the zkSNARK scheme, any \gls{ppt} adversary $\mathcal{A}$ has a negligible chance of learning the private inputs (witnesses) of the \gls{zkp} $\pi_{\texttt{Auth}, b}$. The public inputs to consider are $\texttt{rt}_2$ and $\text{PKsig}_b$.  $\texttt{rt}_2$ is independent of $b$. As previously mentioned, having knowledge of $\text{PKsig}_b$ doesn’t reveal any information about the $b$.
+\end{enumerate}
+
+We can conclude that the adversary achieves negligible advantage to determine $b$ by having a view $\mathsf{View}^{\mathsf{DD-ANONY}^\mathsf{Init}}_{\Pi, \mathcal{A}}$ of the $\mathsf{DD-ANONY}^\mathsf{Init}$ experiment. Hence $\mathsf{Adv}^{\mathsf{DD-ANONY}^\textsf{Init}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$.
+
+For other properties, i.e.,  $\mathsf{DANONY}^\mathsf{Trans}$, $\mathsf{DANONY}^\mathsf{Merge}$, and $\mathsf{DANONY}^\mathsf{Div}$, we can employ the same approach to show that a \gls{ppt} adversary $\mathcal{A}$ gains negligible advantages from the views of the other experiments.
+    \end{proof}
+
+Hence, the Zupply framework satisfies the data anonymity security property, defined in Definition \ref{def:Data Anonymity}.
+
+
+\subsection{Token Unlinkability}
+\label{app-sec:Token Unlinkability}
+
+The informal definition of token unlinkability is as follows:
+
+\begin{definition}[Token Unlinkability, Informal]
+    \label{def:informal-Token Unlinkability}
+For the framework $\Pi$ under the adversary model defined in Definition \ref{def:Adversary}, given two \gls{aat}s, \( T_i \) and \( T_j \), belong to different entities, if any \gls{ppt} adversary $\mathcal{A}$ cannot decide whether $\texttt{cm}_i$ has been transferred from or to $\texttt{cm}_j$, then the system $\Pi$ is said to have \textit{token unlinkability}. %
+\end{definition}
+
+Before providing a formal definition of \textit{token unlinkability}, we need to define \textit{Internal and External Linking Advantage} of the adversary.
+
+\begin{definition}[Internal Linking Advantage]
+            \label{def:Internal Linking Advantage}
+            Internal linking advantage is the advantage of every \gls{ppt} adversary $\mathcal{A}$ in the following experiment:
+
+            $\mathsf{ILINK}^\textsf{Trans}$  $(\Pi, \mathcal{A}, \lambda, e)$%\vspace{-.0em}
+        \begin{itemize}
+        % \setlength\itemsep{-.2em}
+                \item [] $\textsc{pp} \leftarrow \textsf{Setup}(1^\lambda)$ 
+
+                
+                \item []  For $ i \in \{1, 2\}$:
+                \begin{itemize}
+                % \setlength\itemsep{-.2em}
+                    \item [] $q_i$ $\xleftarrow{R}$ $\{0, 1\}^{N_q}$ 
+                    \item [] $(\texttt{tx}_{\mathsf{Init}, i}^e, T_i^e) \leftarrow e^\textsf{Init}(\textsc{pp}, q_i)$
+                \end{itemize}
+                
+                % \item[] $\text{PKsig}_3 \xleftarrow{R} \{0,1\}^{O(\lambda)}$
+                \item[] $(\text{PKsig}^e_3, \text{SKsig}^e_3) \leftarrow e^{\mathcal{K}_\mathsf{sig}}(\textsc{pp})  $ 
+                \item[] $b \xleftarrow{R} \{1, 2\}$
+                \item[] $(\texttt{tx}_\mathsf{Trans}^e, \Tilde{T}_3, \texttt{Tag})$ $\leftarrow$ $e^\mathsf{Trans}(\textsc{pp}, T_b, \text{PKsig}_3)$
+
+                
+                \item[] Output: $b^\prime \leftarrow \mathcal{A}(\textsc{pp},\texttt{tx}_{\mathsf{Init}, 1}^e, \texttt{tx}_{\mathsf{Init}, 2}^e, \texttt{tx}_\mathsf{Trans}^e)$
+        \end{itemize}
+We define $\mathcal{A}$'s advantage in the above experiment as
+\begin{equation}
+\label{eq:Adv_ILINK_Trans}
+    \mathsf{Adv}^{\mathsf{ILINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) := |Pr[b=b^\prime] - \frac{1}{2}|
+\end{equation}
+
+Similarly, if entity $e_1$ has two \gls{aat}s and divide that into two new \gls{aat}s, $\mathcal{A}$'s advantage $\mathsf{Adv}^{\mathsf{ILINK}^\textsf{Div}}_{\Pi, \mathcal{A}}(\lambda)$ is identifying which \gls{aat} has been Divided. Also, if $e_1$ holds three \gls{aat}s and merges two of them, $\mathcal{A}$'s advantage $\mathsf{Adv}^{\mathsf{ILINK}^\textsf{Merge}}_{\Pi, \mathcal{A}}(\lambda)$ is identifying which two \gls{aat}s has been merged. We can define $\mathsf{Adv}^{\mathsf{ILINK}}_{\Pi, \mathcal{A}}(\lambda)$ as follows:
+\begin{align}
+\label{eq:Adv_ILINK}
+    \mathsf{Adv}^{\mathsf{ILINK}}_{\Pi, \mathcal{A}}(\lambda) :=
+    \mathsf{Adv}^{\mathsf{ILINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda)
+\end{align}
+            \end{definition}
+            In the above experiment, we assumed that all transactions are created and uploaded by the same entity ($e$). 
+            % Otherwise, the adversary $\mathcal{A}$ may query $\mathcal{O}^\mathsf{Attr}$ to attribute $\texttt{cm}_1$, $\texttt{cm}_2$, and $\texttt{cm}_3$. Consequently, if $\texttt{cm}_1$ and $\texttt{cm}_2$ are attributed to different entities (i.e., $\mathcal{O}^\mathsf{Attr}(\texttt{cm}_1) = e_1 $ and $\mathcal{O}^\mathsf{Attr}(\texttt{cm}_2) = e_2$), $\texttt{cm}_3$ must be attributed to one of those entities, since there are no other commitments and entities in this experiment. As a result, the adversary can easily link $\texttt{cm}_3$ to one of $\texttt{cm}_1$ and $\texttt{cm}_2$ who is uploaded by the same entity as $\texttt{cm}_3$. However, if both $\texttt{cm}_1$ and $\texttt{cm}_2$ are attributed to the same entity, $\mathcal{O}^\mathsf{Attr}$ does not help $\mathcal{A}$ to deduce $b$. 
+            Hence, we consider $\mathsf{Adv}^{\mathsf{ILINK}^\textsf{Init}}_{\Pi, \mathcal{A}}(\lambda)$ as an advantage of the adversary $\mathcal{A}$ to find a  link between \gls{aat} commitments owned by the same entity.
+
+Moreover, within the Zupply framework, another adversary's objective is to discover links between \gls{aat} commitments owned by different entities. Doing so would enable the adversary to identify all the entities participating in a supply chain. To transfer an \gls{aat} to a new entity, two entity participate engage in the \textsf{OT-Protocol} presented in the Figure \ref{fig:Ownership Transfer}.
+
+
+            \begin{definition}[External Linking Advantage]
+            \label{def:External Linking Advantage}
+            External linking advantage is the advantage of any \gls{ppt} adversary $\mathcal{A}$ in the following experiment:
+
+            $\mathsf{ELINK}^\textsf{Trans}$  $(\Pi, \mathcal{A}, \lambda, e_1, e_2)$%\vspace{-.0em}
+        \begin{itemize}
+        % \setlength\itemsep{-.2em}
+                \item [] $\textsc{pp} \leftarrow \textsf{Setup}(1^\lambda)$ 
+
+                
+                \item []  For $ i \in \{1, 2\}$:
+                \begin{itemize}
+                % \setlength\itemsep{-.2em}
+                    \item [] $q_i$ $\xleftarrow{R}$ $\{0, 1\}^*$ 
+                    \item [] $(\texttt{tx}_{\mathsf{Init}, i}^{e_i}, T_i^{e_i}) \leftarrow {e_i}^\textsf{Init}(\textsc{pp}, q_i)$
+                \end{itemize}
+
+                \item []  For $ i \in \{3, 4\}$:
+                \begin{itemize}
+                    \item[] $(\text{PKsig}^{e_2}_i, \text{SKsig}^{e_2}_i) \leftarrow {e_2}^{\mathcal{K}_\mathsf{sig}}(\textsc{pp})$
+                \end{itemize}
+                \item [] $e_2$ passes $\text{PKsig}^{e_2}_3$ to $e_1$
+                
+                \item[] $(\texttt{tx}_{\mathsf{Trans},1}^{e_1}, \Tilde{T}^{e_1}_3, \texttt{Tag}_3)$ $\leftarrow$ ${e_1}^\mathsf{Trans}(\textsc{pp}, T_1^{e_1}, \text{PKsig}^{e_2}_3)$
+
+                \item [] $e_1$ passes $\Tilde{T}^{e_1}_3$ to $e_2$
+
+                \item []  $e_2$ computes $T^{e_2}_3 \leftarrow (\Tilde{T}^{e_1}_3, \text{SKsig}^{e_2}_3)$
+                
+                \item[] $b \xleftarrow{R} \{2, 3\}$
+
+                \item[] $(\texttt{tx}_{\mathsf{Trans},2}^{e_2}, \Tilde{T}^{e_2}_4, \texttt{Tag}_4)$ $\leftarrow$ ${e_2}^\mathsf{Trans}(\textsc{pp}, T_b^{e_2}, \text{PKsig}^{e_2}_4)$
+                
+                \item[] Output: $b^\prime \leftarrow \mathcal{A}(\textsc{pp},\texttt{tx}_{\mathsf{Init}, 1}^{e_1}, \texttt{tx}_{\mathsf{Init}, 2}^{e_2}, \texttt{tx}_\mathsf{Trans}^{e_1}, \texttt{tx}_\mathsf{Trans}^{e_2})$
+        \end{itemize}
+We define $\mathcal{A}$'s advantage in the above experiment as
+\begin{equation}
+\label{eq:Adv_ELINK_Trans}
+    \mathsf{Adv}^{\mathsf{ELINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) := |Pr[b=b^\prime] - \frac{1}{2}|
+\end{equation}
+
+% In practice, for merging,  entity $e_1$ first merges two of their tokens and then transfer that to the next entity $e_2$. Accordingly, for dividing a token, two new tokens after division are transferred to $e_2$ separately.
+
+In the $\mathsf{ELINK}^\textsf{Trans}$ experiment the adversary $\mathcal{A}$ aims to link the \gls{aat} commitment $\texttt{cm}_4$ minted by $e_2$ to either $\texttt{cm}_3$ minted by $e_1$ or $\texttt{cm}_2$ minted by the same entity ($e_2$). 
+
+
+In practice, the process of merging involves entity $e_1$ first combining two of their tokens into one, and then transferring this merged token to the next entity, $e_2$. Similarly, when dividing a token, $e_1$ splits it into two new tokens, which are then transferred separately to $e_2$. Therefore, $\mathsf{Adv}^{\mathsf{ELINK}^\textsf{Merge}}_{\Pi, \mathcal{A}}(\lambda)$ and $\mathsf{Adv}^{\mathsf{ELINK}^\textsf{Div}}_{\Pi, \mathcal{A}}(\lambda)$ are equivalent to $\mathsf{Adv}^{\mathsf{ELINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda)$. We can define $\mathsf{Adv}^{\mathsf{ELINK}}_{\Pi, \mathcal{A}}(\lambda)$ as follows:
+\begin{equation}
+\label{eq:Adv_ELINK}
+    \mathsf{Adv}^{\mathsf{ELINK}}_{\Pi, \mathcal{A}}(\lambda) := 
+    \mathsf{Adv}^{\mathsf{ELINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) 
+\end{equation}
+            \end{definition}
+
+
+We are going to provide a definition for \textit{token unlinkability} security ($\mathsf{ULINK}$ Security) in our framework, which ensures the adversary $\mathcal{A}$'s advantages defined in Definitions \ref{def:Internal Linking Advantage}  and \ref{def:External Linking Advantage} are negligible.
+
+
+\begin{definition}[$\mathsf{ULINK}$ Secure]
+    \label{def:ULINK}
+    Framework $\Pi$ is \textit{$\mathsf{ULINK}^\mathsf{Trans}$ Secure} if for every \gls{ppt} adversary and sufficiently large $\lambda$:
+    \begin{equation*}
+        \mathsf{Adv}^{\mathsf{ILINK}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda), \text{and}\ \mathsf{Adv}^{\mathsf{ELINK}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda) 
+    \end{equation*}
+    Where $\mathsf{Adv}^{\mathsf{ILINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda)$ is defined in Definition \ref{def:Internal Linking Advantage}, Equation (\ref{eq:Adv_ILINK}) and $\mathsf{Adv}^{\mathsf{eLINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda)$  is defined in Definition \ref{def:External Linking Advantage}, Equation (\ref{eq:Adv_ELINK}).
+\end{definition}
+
+In conclusion, we present Definition of \textit{Token Unlinkability} in framework $\Pi$.
+
+\begin{definition}[Token Unlinkability]
+    \label{def:Token Unlinkability}
+     Framework $\Pi$ has \textit{token unlinkability}  if and only if it satisfies $\mathsf{ULINK}$ security property defined in Definition \ref{def:ULINK}.
+    \end{definition}
+
+% In Appendix \ref{app-sec:Token Unlinkability}, we prove that the framework has the \textit{token unlinkability} security property.
+
+
+\begin{theorem}
+    
+        The framework $\Pi$, as defined in Definition \ref{def:Zupply Framework}, satisfies \textit{$\mathsf{ULINK}$ Security} property as it is defined in Definition \ref{def:ULINK}, against any \gls{ppt} adversary $\mathcal{A}$, defined within the adversary model in Definition \ref{def:Adversary}.
+\end{theorem}
+
+
+\begin{proof}
+    Step 1, we are going to prove $\mathsf{Adv}^{\mathsf{ILINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$:
+    
+    Similarly to the proof of Theorem \ref{theorem:DANONY}, we first need to denote the view of the adversary $\mathcal{A}$ in the experience presented in Definition \ref{def:Internal Linking Advantage}.
+
+\begin{figure}[!h]
+    \resizebox{\linewidth}{!}{
+    \begin{minipage}{\linewidth}
+    
+    %Equation goes here
+        \begin{align*}
+    \mathsf{View}^{\mathsf{ILINK}^\mathsf{Trans}}_{\Pi, \mathcal{A}} = \left\{
+    \begin{array}{l@{\hspace{0.1em}}l}
+        \textsc{pp}, & \\
+        \texttt{tx}_{\mathsf{Init}, 1} & = \left( \texttt{cm}_1, \texttt{rt}_1, 1, \texttt{path}_1 \right), \\
+        \texttt{tx}_{\mathsf{Init}, 2} & = \left( \texttt{cm}_2, \texttt{rt}_2, 2, \texttt{path}_2 \right), \\
+        % \texttt{tx}_{\mathsf{Trans}} & = \left( \texttt{cm}_2, \texttt{rt}_2, 2, \texttt{path}_2 \right)
+         \texttt{tx}_\mathsf{Trans} & = \left( 
+        \begin{array}{l@{\hspace{0.05em}}l}
+            \pi_{\mathsf{Trans}, b}, & \\
+            x_{\mathsf{Trans}, b} & = (\texttt{eol}_{b}, \texttt{cm}_{3}, \texttt{rt}_2) ,\\
+            \texttt{eol}_{b}, & \texttt{cm}_{3}, \\
+            \texttt{rt}_3, & 3, \mathsf{path}_{3}
+        \end{array} 
+        \right) \\
+    \end{array} 
+    \right\}
+\end{align*}
+
+    \end{minipage}
+    }
+\end{figure}
+
+
+
+Again, similarly to the proof of  the Theorem \ref{theorem:DANONY}, adversary aims to deduce $b$ from their view of the experiment ($\mathsf{View}^{\mathsf{ILINK}^\mathsf{Trans}}_{\Pi, \mathcal{A}}$). Each variable in $\mathsf{View}^{\mathsf{ILINK}^\mathsf{Trans}}_{\Pi, \mathcal{A}}$ is computed independently of  $b$ except $\texttt{eol}_{b}$ and $\pi_{\mathsf{Trans}, b}$:
+
+\begin{enumerate}
+    \item $\texttt{eol}_{b} \leftarrow \mathcal{H}(\rho_b)$ where $\rho_b \in T_b$. Since $\mathcal{H}$ is a \textit{Preimage Resistance} hash function which is defined in Definition \ref{def:Collision-resistance hash function}, a \gls{ppt} adversary $\mathcal{A}$ has a negligible chance to deduce $\rho_b$ and $b$ from $\texttt{eol}_{b}$. 
+    
+    \item $\pi_{\mathsf{Trans}, b}$ is a \gls{zkp} that proves a private input $T_b$, where $\texttt{cm}_b$ is in the \textsf{MHT}, has been expired to create the new token $T_3$, where $\texttt{cm}_3$ is a public input to the proof. Due to the \textit{Statistical Zero-knowledge} property of the employed zero-knowledge protocol defined in Definition \ref{def:Zero-knowledge succinct non-interactive argument of knowledge}, a \gls{ppt} adversary $\mathcal{A}$ has a negligible chance to deduce $T_b$, $\texttt{cm}_b$, and $b$ from $\pi_{\mathsf{Trans}, b}$. 
+    
+\end{enumerate}
+
+Therefore, a \gls{ppt} adversary $\mathcal{A}$ has a negligible chance to deduce $b$ from $\mathsf{View}^{\mathsf{ILINK}^\mathsf{Trans}}_{\Pi, \mathcal{A}}$. Hence $\mathsf{Adv}^{\mathsf{ILINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$. Accordingly, we can conclude that $\mathsf{Adv}^{\mathsf{ILINK}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$.
+
+
+Step 2, we are going to prove $\mathsf{Adv}^{\mathsf{ELINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$:
+
+Again, we need to present the view of adversary $\mathcal{A}$ in the experiment $\mathsf{ELINK}^\mathsf{Trans}$. According to the adversary model defined in Definition \ref{def:Adversary}, $\mathcal{A}$ can query $\mathcal{O}^\mathsf{Attr}$ to attribute each transaction and \gls{aat} commitment to an entity. This capability is reflected in $\mathsf{View}^{\mathsf{ELINK}^\mathsf{Trans}}_{\Pi, \mathcal{A}}$.
+
+
+\begin{figure}[!h]
+    \resizebox{\linewidth}{!}{
+    \begin{minipage}{\linewidth}
+    
+    %Equation goes here
+    \begin{align*}
+    \mathsf{View}^{\mathsf{ELINK}^\mathsf{Trans}}_{\Pi, \mathcal{A}} = \left\{
+    \begin{array}{l@{\hspace{0.1em}}l}
+        \textsc{pp}, & \\
+        \texttt{tx}^{e_1}_{\mathsf{Init}, 1} & = \left( \texttt{cm}^{e_1}_1, \texttt{rt}_1, 1, \texttt{path}_1 \right), \\
+        \texttt{tx}^{e_2}_{\mathsf{Init}, 2} & = \left( \texttt{cm}^{e_2}_2, \texttt{rt}_2, 2, \texttt{path}_2 \right), \\
+         \texttt{tx}^{e_1}_\mathsf{Trans} & = \left( 
+        \begin{array}{l@{\hspace{0.05em}}l}
+            \pi_{\mathsf{Trans}, 1}, & \\
+            x_{\mathsf{Trans}, 1} & = (\texttt{eol}_{1}, \texttt{cm}^{e_1}_{3}, \texttt{rt}_2) ,\\
+            \texttt{eol}_{1}, & \texttt{cm}^{e_1}_{3}, \\
+            \texttt{rt}_3, & 3,  \mathsf{path}_{3}
+        \end{array} 
+        \right), \\
+        \texttt{tx}^{e_2}_\mathsf{Trans} & = \left( 
+        \begin{array}{l@{\hspace{0.05em}}l}
+            \pi_{\mathsf{Trans}, b}, & \\
+            x_{\mathsf{Trans}, b} & = (\texttt{eol}_{b}, \texttt{cm}^{e_2}_{4}, \texttt{rt}_3) ,\\
+            \texttt{eol}_{b}, & \texttt{cm}^{e_2}_{4}, \\
+            \texttt{rt}_4, & 4, \mathsf{path}_{4}
+        \end{array} 
+        \right) \\
+    \end{array} 
+    \right\}
+\end{align*}
+
+    \end{minipage}
+    }
+\end{figure}
+
+
+
+
+
+The adversary $\mathcal{A}$ aims to determine whether $b$ is equal to 2 or 3. Namely, whether entity $e_2$ transferred $\texttt{cm}_2$ or $\texttt{cm}_3$ to $\texttt{cm}_4$. As discussed in the previous step, $\mathcal{A}$ has a negligible chance to deduce $b$ from $\pi_{\mathsf{Trans}, b}$ and $\texttt{eol}_{b}$. Hence, $\mathsf{Adv}^{\mathsf{ELINK}^\textsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$. Accordingly, we can conclude that $\mathsf{Adv}^{\mathsf{ELINK}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$.
+
+This proof can be generalized to show that the adversary has a negligible chance of linking an \gls{aat} commitment created by $e_2$ to any other commitments, whether they were created by $e_2$ or not.
+
+\end{proof}
+
+Hence, the Zupply framework satisfies the token unlinkability security property, defined in Definition \ref{def:Token Unlinkability}.
+
+
+\subsection{Token Anonymity}
+\label{app-sec:Token Anonymity}
+
+The informal definition of token anonymity is as follows:
+
+\begin{definition}[{Token Anonymity, Informal}]
+    \label{def:informal-Token anonymity}
+    The framework  \( \Pi \) and under the adversary model defined in Definition \ref{def:Adversary}, \textit{token anonymity} is ensured if the adversary cannot decide whether entity $e_i$ is the receiver of the commitment to transferred, merged and divided \gls{aat}s that are sent to blockchain by any $e \in \mathbf{E}_\tau$ including $e_i$. Then, the system $\Pi$ is said to have \textit{token anonymity}. 
+\end{definition}
+
+\begin{theorem}
+\label{theorem:token-anonymity}
+If the framework \( \Pi \), as defined in Definition \ref{def:Zupply Framework}, satisfies the \textit{Token Unlinkability} property as specified in Definition \ref{def:Token Unlinkability}, then it also satisfies \textit{Token Anonymity} against any \gls{ppt} adversary $\mathcal{A}$ as defined in the adversary model in Definition \ref{def:Adversary}.
+\end{theorem}
+\begin{proof}
+    If the framework $\Pi$ has \textit{token unlinkability}, then it satisfies \textsf{ULINK} security property. Consequenlty, the adversary $\mathcal{A}$ has a negligible advantage in \textsf{ELINK} experiment, i.e., $\mathsf{Adv}^{\mathsf{ELINK}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$. Therefore, in \textsf{ELINK} experiment, adversary $\mathcal{A}$ has a negligble chance to decide the authentication token commitment $\texttt{cm}_4$ minted by $e_2$ is transferred from $\texttt{cm}_3$ which is minted by $e_1$ or it is transferred from $\texttt{cm}_2$ minted by the same entity ($e_2$). In the former case, the owner of $\texttt{cm}_4$ is $e_2$ and in the later case, $e_2$ has initiated a transfer protocol and passed $T_4$ which is the authentication token related to $\texttt{cm}_4$ to another entity. Hence, the adversary $\mathcal{A}$ cannot decide whether $\texttt{cm}_4$ belongs to $e_2$ or other unknown entity owns that token. 
+
+    We can generalize this proof for any transferred \gls{aat}, such that it is infeasible for $\mathcal{A}$ 
+\end{proof}
+
+According to Theorem \ref{theorem:token-anonymity}, we can formally define token anonymity.
+
+\begin{definition}[{Token Anonymity}]
+    \label{def:Token anonymity}
+    The framework \( \Pi \) satisfies \textit{token anonymity} for transferred \gls{aat}s if it satisfies the \textit{token unlinkability} property as defined in Definition \ref{def:Token Unlinkability}.
+\end{definition}
+
+
+\subsection{Authenticity}
+\label{app-sec:Authenticity}
+
+The informal definition of token authenticity is as follows:
+
+\begin{definition}[Authenticity, Informal]
+    \label{def:informal-Authenticity}
+    For the system  \( \Pi \) and under the adversary model defined in Definition \ref{def:Adversary}, \textit{authenticity} is ensured if any \gls{ppt} adversary \( \mathcal{A} \) can neither (1) authenticate a data record using an \gls{aat} which is inaccessible to \( \mathcal{A} \), or (2) transfer, merge, or divide \gls{aat}s that are beyond \( \mathcal{A} \)'s access. 
+\end{definition}
+
+Before providing a formal definition of \textit{authenticity}, we need to define \textit{data forging advantage} and \textit{token ownership spoofing advantage} of the adversary.
+
+\begin{definition}[Data Forging Advantage]
+            \label{def:Data forging advantage}
+            Data forging advantage is the advantages of every \gls{ppt} adversary $\mathcal{A}$ in the following experiments:
+
+            $\mathsf{FORGE}$  $(\Pi, \mathcal{A}, \lambda, \mathbf{T})$%\vspace{-.2em}
+        \begin{itemize}
+        % \setlength\itemsep{-.2em}
+                \item [] $\textsc{pp} \leftarrow \textsf{Setup}(1^\lambda)$ 
+
+                \item [] $T \leftarrow \mathbf{T}/\mathbf{T}^\mathcal{A} $   {\color{gray} // $\forall T \in \mathbf{T} : T \notin \mathbf{T}^\mathcal{A}$}
+                
+                \item[] $d_\mathsf{pri}, d_\mathsf{pub} \xleftarrow{R} \{0,1\}^\ast$
+                \item[] $\textsc{k} \xleftarrow{R} \{0,1\}^{O(\lambda)}$                
+                \item[] $d^\ast$ $\leftarrow$ $\mathcal{A}^{\mathsf{Upload}^*}(\textsc{pp}, \text{pred} = \emptyset , T, d_\mathsf{pri}, d_\mathsf{pub}, \textsc{k}, \text{tag} = \emptyset)$
+
+                \item[] Output: $b \leftarrow \mathsf{Audit}(\textsc{pp}, d^\ast)$
+        \end{itemize}
+We define $\mathcal{A}$'s advantage in the above experiment as
+\begin{equation}
+\label{eq:Adv_FORGE}
+    \mathsf{Adv}^{\mathsf{FORGE}}_{\Pi, \mathcal{A}}(\lambda) := Pr[b=1]
+\end{equation}
+            \end{definition}
+
+In the above experiment, the goal of the adversary, denoted as $\mathcal{A}$, is to deceive the \textsf{Audit} algorithm. The adversary attempts to present $d^\ast$ as a legitimate authenticated data record, as defined in Definition \ref{def:Authenticated Data}. The challenge for $\mathcal{A}$ is to do this using a valid \gls{aat}, which $\mathcal{A}$ is not supposed to have access to.
+
+\begin{definition}[\textsf{UFORGE} secure]
+    \label{def:UFORGE}
+    Framework $\Pi$ satisfies \textit{\textsf{UFORGE} security}  if and only if for every \gls{ppt} adversary and suffciently large $\lambda$:
+
+    \begin{equation*}
+        \mathsf{Adv}^{\mathsf{FORGE}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)
+    \end{equation*}
+\end{definition}
+
+\begin{definition}[Token Ownership Spoofing Advantage]
+            \label{def:Token ownership spoofing advantage}
+            Token ownership spoofing advantage is the advantages of every \gls{ppt} adversary $\mathcal{A}$ in the following experiments:
+
+            $\mathsf{SPOOF}^\mathsf{Trans}$  $(\Pi, \mathcal{A}, \lambda, \mathbf{T})$%\vspace{-.2em}
+        \begin{itemize}
+        % \setlength\itemsep{-.2em}
+                \item [] $\textsc{pp} \leftarrow \textsf{Setup}(1^\lambda)$ 
+
+                \item [] $T \leftarrow \mathbf{T}/\mathbf{T}^\mathcal{A} $  {\color{gray} // $\forall T \in \mathbf{T} : T \notin \mathbf{T}^\mathcal{A}$}
+                
+                \item[] $(\text{PKsig}^\mathcal{A}, \text{SKsig}^\mathcal{A}) \leftarrow \mathcal{A}^{\mathcal{K}_\mathsf{sig}}(\textsc{pp})  $ 
+                
+                \item[] $\texttt{tx}_\mathsf{Trans}^{\mathcal{A}\ast}$ $\leftarrow$ $\mathcal{A}^{\mathsf{Trans}^*}(\textsc{pp}, T, \text{PKsig}^\mathcal{A})$
+
+                \item[] Output: $b \leftarrow \mathsf{VerifyTX}(\textsc{pp}, \texttt{tx}_\mathsf{Trans}^{\mathcal{A}\ast})$
+        \end{itemize}
+We define $\mathcal{A}$'s advantage in the above experiment as
+\begin{equation}
+\label{eq:Adv_SPOOF}
+    \mathsf{Adv}^{\mathsf{SPOOF}^\mathsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) := Pr[b=1]
+\end{equation}
+            \end{definition}
+
+
+In the above experiment, adversary \( \mathcal{A} \) aims to deceive \( \mathsf{VerifyTX} \) into accepting the transaction \( \texttt{tx}^{\mathcal{A}*}_{\mathsf{Trans}} \), where it attempts to transfer the ownership of any token \( T \), which is not owned by \( \mathcal{A} \).
+
+
+
+\begin{definition}[\textsf{USPOOF} secure]
+    \label{def:USPOOF}
+    Framework $\Pi$ satisfies \textit{\textsf{USPOOF} security}  if and only if for every \gls{ppt} adversary and sufficiently large $\lambda$:
+
+    \begin{equation*}
+        \mathsf{Adv}^{\mathsf{SPOOF}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)
+    \end{equation*}
+\end{definition}
+
+\begin{definition}[Authenticity]
+    \label{def:Authenticity}
+     Framework $\Pi$ has \textit{authenticity}  if and only if it satisfies $\mathsf{UFORG}$ and $\mathsf{USPOOF}$ security property.
+    \end{definition}
+
+
+\begin{theorem}
+
+ The framework $\Pi$, as defined in Definition \ref{def:Zupply Framework}, satisfies \textit{$\mathsf{UFORGE}$} property as it is defined in Definition \ref{def:UFORGE}, against any \gls{ppt} adversary $\mathcal{A}$, defined within the adversary model in Definition \ref{def:Adversary}.
+ 
+\end{theorem}
+
+
+\begin{proof}
+    The adversary $\mathcal{A}$ can gain advantage in the \text{FORGE} experiment, denoted as $\mathsf{Adv}^{\mathsf{FORGE}}$, by deceiving \textsf{Audit} function by passing a data record $d^\ast$ that $\mathcal{A}$ claimed of having an \gls{aat} $T$ that they do not have any access to that. The function checks that all of the conditions defined in Definition \ref{def:Authenticated Data} are met. To do so, 
+    \begin{enumerate}
+        \item $\mathcal{A}$ should generate an invalid \gls{zkp} $\pi^\ast_\mathsf{Auth}$ and its public inputs $x_\mathsf{Auth}$ without knowing their corresponding witnesses $w_\mathsf{Auth}$ that it must be derived from the \gls{aat}. $\mathcal{A}$ tries to deceive $\mathsf{Verify}(\text{vk}_\mathsf{Auth}$, $x_\mathsf{Auth}$, $\pi_\mathsf{Auth})$ to output 1. However, according to the \textit{soundness} property of the zkSNARK scheme employed in $\Pi$  (Definition \ref{def:Zero-knowledge succinct non-interactive argument of knowledge}) $\mathcal{A}$ can deceive $\mathsf{Verify}$  algorithm with probability $\mathsf{negl}(\lambda)$.
+
+        \item $\mathcal{A}$ should forge a signature $\sigma^\ast$ which should be signed by employing the secret key $\text{SKsig}$ in $T$. $\mathcal{A}$ does not know  SKsig, and tries to forge $\sigma^\ast$ such that  $\mathcal{V}_\mathsf{sig}(\text{PKsig}, d^\ast, \sigma^\ast)$ outputs 1. Since the digital signature scheme employed in $\Pi$ satisfies \textit{\gls{suf-cma}} security property, $\mathcal{A}$ cannot produce $\sigma^\ast$ for the data record $d^\ast$ using the authentication token $T$.
+    \end{enumerate}
+
+    Therefore, the adversary $\mathcal{A}$, has a negligible chance to win the $\mathsf{FORGE}$ experiment. Namely, $\mathsf{Adv}^{\mathsf{FORGE}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$. 
+\end{proof}
+
+
+
+
+
+\begin{theorem}
+
+The framework $\Pi$, as delineated in Definition \ref{def:Zupply Framework}, satisfies \textit{$\mathsf{USPOOF}$ Security} property as it is defined in Definition \ref{def:USPOOF}, against any \gls{ppt} adversary $\mathcal{A}$, defined within the adversary model in Definition \ref{def:Adversary}.
+
+% The framework $\Pi$ satisfies  \textit{\textsf{USPOOF} security}  property as it is defined in Definition \ref{def:UFORGE}.
+\end{theorem}
+
+\begin{proof}
+    In the $\mathsf{SPOOF}^\mathsf{Trans}$ experiment, $\mathcal{A}$ attempts to transfer a token $T$ which does not have access to. Hence, $\mathcal{A}$'s challenge is to meet the conditions in Definition \ref{def:Valid Transaction} to be able to deceive \textsf{VerifyTX} algorithm. To do so, $\mathcal{A}$ should be able to generate a proof $\pi^\ast_\mathsf{Trans}$ of owning $T$. Hence, due to the \textit{soundness} property of the zkSNARK protocol defined in Definition \ref{def:Zero-knowledge succinct non-interactive argument of knowledge}, the probability that $\mathcal{A}$ can generate that proof is negligible. Therefore, $\mathsf{Adv}^{\mathsf{SPOOF}}_{\Pi, \mathcal{A}}(\lambda) = \mathsf{Adv}^{\mathsf{SPOOF}^\mathsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$.   
+\end{proof}
+
+
+\subsection{Token Undeniability}
+
+The informal definition of token undeniability is as follows:
+
+\begin{definition}[Token Undeniability, Informal]
+    For the system  \( \Pi \) and under the adversary model defined in Definition \ref{def:Adversary}, \textit{undeniability} is ensured if any \gls{ppt} adversary $\mathcal{A}$ cannot transfer, merge, or divide \gls{aat}s that they are already transferred.
+\end{definition}
+
+Before providing a formal definition of \textit{token undeniability}, we need to define \textit{Token Double Transfer Advantage} of the adversary.
+
+
+\begin{definition}[Token Double Transfer Advantage]
+            \label{def:Token double transfer advantage}
+            Token double transfer advantage is the advantages of every \gls{ppt} adversary $\mathcal{A}$ in the following experiment:
+
+            $\mathsf{DOUBLE}^\mathsf{Trans}$  $(\Pi, \mathcal{A}, \lambda)$
+            \begin{itemize}
+        % \setlength\itemsep{-.2em}
+                \item [] $\textsc{pp} \leftarrow \textsf{Setup}(1^\lambda)$ 
+
+                
+                % \item []  For $ i \in \{1, 2\}$:
+                % \begin{itemize}
+                % \setlength\itemsep{-.2em}
+                    \item [] $q$ $\xleftarrow{R}$ $\{0, 1\}^*$ 
+                    \item [] $(\texttt{tx}_{\mathsf{Init}}^\mathcal{A}, T_1^\mathcal{A}) \leftarrow \mathcal{A}^\textsf{Init}(\textsc{pp}, q)$
+                % \end{itemize}
+                
+                % \item[] $\text{PKsig}_3 \xleftarrow{R} \{0,1\}^{O(\lambda)}$
+                \item[] $(\text{PKsig}^\mathcal{A}_2, \text{SKsig}^\mathcal{A}_2) \leftarrow \mathcal{A}^{\mathcal{K}_\mathsf{sig}}(\textsc{pp})  $ 
+                
+                \item[] $(\texttt{tx}_{\mathsf{Trans},1}^\mathcal{A}, \Tilde{T}_2, \texttt{Tag}_1)$ $\leftarrow$ $\mathcal{A}^\mathsf{Trans}(\textsc{pp}, T_1, \text{PKsig}_2)$
+
+                \item[] $(\text{PKsig}^\mathcal{A}_3, \text{SKsig}^\mathcal{A}_3) \leftarrow \mathcal{A}^{\mathcal{K}_\mathsf{sig}}(\textsc{pp})  $ 
+                
+                \item[] $(\texttt{tx}_{\mathsf{Trans},2}^{\mathcal{A}\ast}, \Tilde{T}^\ast_3, \texttt{Tag}_2)$ $\leftarrow$ $\mathcal{A}^{\mathsf{Trans}^\ast}(\textsc{pp}, T_1, \text{PKsig}_3)$
+                
+                
+                \item[] Output: $b \leftarrow \mathsf{VerifyTX}(\textsc{pp}, \texttt{tx}_{\mathsf{Trans},2}^{\mathcal{A}\ast})$
+        \end{itemize}
+        We define $\mathcal{A}$'s advantage in the above experiment as
+\begin{equation}
+\label{eq:Adv_DOUBLE}
+    \mathsf{Adv}^{\mathsf{DOUBLE}^\mathsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) := Pr[b=1]
+\end{equation}
+\end{definition}
+
+
+In the above experiment, adversary $\mathcal{A}$ aims to deceive \( \mathsf{VerifyTX} \) into accepting the transaction \( \texttt{tx}^{\mathcal{A}*}_{\mathsf{Trans}} \), where it attempts to transfer the ownership of any \gls{aat} \( T_1 \), which is already transferred to \( T_2 \).
+
+    \begin{definition}[Token Undeniability]
+    \label{def:Undeniability}
+    Framework $\Pi$ has \textit{token undeniability}  if and only if for every \gls{ppt} adversary and suffciently large $\lambda$:
+
+    \begin{equation*}
+        \mathsf{Adv}^{\mathsf{DOUBLE}^\mathsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)
+    \end{equation*}
+    \end{definition}
+    
+\label{app-sec:Token Undeniability}
+\begin{theorem}
+The framework $\Pi$ satisfies \textit{token undeniability} security property as it is defined in Definition \ref{def:Undeniability}.
+\end{theorem}
+
+\begin{proof}
+    The adversary $\mathcal{A}$, attempts to re-transfer an \gls{aat} $T$ in the transaction $\texttt{tx}_{\mathsf{Trans},2}^{\mathcal{A}\ast}$. $\mathcal{A}$ tries to deceive $\mathsf{VerifyTX}$ algorithm to accept $\texttt{tx}_{\mathsf{Trans},2}^{\mathcal{A}\ast}$. The adversary's challenge is to forge the transaction such that it meets the conditions of a valid transaction defined in Definition \ref{def:Valid Transaction}. If $\mathcal{A}$ execute algorithm \textsf{Trans} in $\Pi$ to generate $\texttt{tx}_{\mathsf{Trans},2}^{\mathcal{A}\ast}$ to re-transfer the \gls{aat} $T$, the algorithm will outputs the same \texttt{eol} as in the previous transaction which transferred $T$.
+    
+    Consequently, the adversary tries to generate a new $\texttt{eol}^\prime \notin \mathbf{X}_\tau$, such that $\texttt{eol}^\prime \neq \mathcal{H}(\rho)$ where $\rho$ is in $T$. However, using  $\texttt{eol}^\prime \in  \texttt{tx}_{\mathsf{Trans},2}^{\mathcal{A}\ast}$ is inconsistent with $\pi_\mathsf{Trans}$. Moreover, due to the soundness property of the zkSNARK scheme (Definition \ref{def:Zero-knowledge succinct non-interactive argument of knowledge}), the probability that the adversary $\mathcal{A}$  forges a new proof $\pi^\ast_\mathsf{Trans}$ such that $\mathsf{Verify}(\text{vk}_\mathsf{Trans}$, $x^\ast_\mathsf{Trans}$, $\pi^\ast_\mathsf{Trans}) = 1$ is negligible. In conclusion, $\mathsf{Adv}^{\mathsf{DOUBLE}^\mathsf{Trans}}_{\Pi, \mathcal{A}}(\lambda) < \mathsf{negl}(\lambda)$.
+        
+\end{proof}
+
+
+

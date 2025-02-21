@@ -1,0 +1,143 @@
+\documentclass[tikz]{standalone}
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{esvect}
+\usetikzlibrary{arrows, automata, shapes}
+\usetikzlibrary{shapes.multipart}
+\usetikzlibrary{positioning}
+
+
+\begin{document}
+\large
+
+\tikzstyle{data_block} = [
+           rectangle split,
+           rounded corners,
+           draw=black, very thick,
+           rectangle split parts=6,
+           text width = 5.1cm,
+           ]
+           
+\tikzstyle{faded_data_block} = [rectangle,
+           rounded corners,
+           draw=black, very thick,
+           minimum width = 2cm,
+           minimum height = 3cm,
+           fill = {lightgray}]
+
+\tikzstyle{textbox} = [rectangle, minimum width=1cm, minimum height=1cm,text centered]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+\begin{tikzpicture}[->,>=stealth]
+
+ \node[data_block=6, rectangle split part fill={lightgray!50, white!50, white!50, white!50, white!50, lightgray!50}] (MAINBLOCK) at (0,0) 
+ {
+ % \raggedleft
+ \centering
+ \begin{tabular}{c}
+ $\textsc{cid}_n = \texttt{Multihash}(d_n)$ 
+ \end{tabular}
+ 
+ \nodepart{two}
+ \begin{tabular}{l}
+{\normalsize Public data:}\\
+      \ $d_{n, \mathsf{pub}}$
+ \end{tabular}
+
+\nodepart{three}
+\begin{tabular}{l}
+ {\normalsize Private data:}\\
+      $c_n = \mathcal{E}_\mathsf{sym}\left(\textsc{k}_n, d_{n, \mathsf{pri}}\right)$
+\end{tabular}
+\nodepart{four}
+ \begin{tabular}{l}
+      {\normalsize Preceding data records:}\\
+      $\mathsf{pred} = \left\{ \textsc{cid}_{n-1}, \textsc{cid}_{m} \right\}$\\
+ \end{tabular}
+ \nodepart{five}
+  \begin{tabular}{l}
+      {\normalsize Tags:}\\
+      $\mathsf{tags} = \left\{ \texttt{Tag}_{n-1}, \texttt{Tag}_{m} \right\}$\\
+\end{tabular}
+\nodepart{six}
+\begin{tabular}{c}
+ $\pi_\mathsf{Auth}, x_\mathsf{Auth}, \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau),  \sigma_n$ 
+ \end{tabular}
+ %   $\mathrm{Sig}(\mathrm{sk_{sig}}_e, d_i)$\\
+ % $\pi_\texttt{Auth} = \mathrm{Prove}\big(\mathrm{pk}_\texttt{Auth}, \vv{w_e}, \vv{x_e} \big)$
+ };
+ 
+\node[textbox, above =of MAINBLOCK, yshift = -1cm] (TITLE)
+{
+\begin{tabular}{c}
+     $d_n$      
+\end{tabular}
+};
+
+%%%FADE 1
+\node[faded_data_block, left =of MAINBLOCK] (FADE1) at (-3, -1){};
+\node[textbox, above =of FADE1, yshift = -1.1cm] (TITLE_fade1)
+{
+\begin{tabular}{c}
+      $d_{n-1}$
+\end{tabular}
+};
+
+%%%FADE d_m
+\node[textbox, below =of FADE1, yshift = .95cm, xshift = 1.85cm] (TITLE_fade1)
+{
+\begin{tabular}{c}
+      $\boxed{d_{m}}$
+\end{tabular}
+};
+
+%%%%FADE 2
+\node[faded_data_block, left =of FADE1] (FADE2) at (-6, -1){};
+\node[textbox, above =of FADE2, yshift = -1.1cm] (TITLE_fade2)
+{
+\begin{tabular}{c}
+      $d_{{0}}$
+\end{tabular}
+};
+
+%%%%FADE 3
+\node[faded_data_block, right =of MAINBLOCK] (FADE3) at (3, -1){};
+\node[textbox, above =of FADE3, yshift = -1.1cm] (TITLE_fade3)
+{
+\begin{tabular}{c}
+      $d_{n+1}$
+\end{tabular}
+};
+
+% %%%%Legend
+% \node[textbox, draw=black, dotted] (Legend) at (-6,2.5)
+% {
+% \normalsize
+% \begin{tabular}{l}
+%       $k_i = \mathrm{PRBG}\big(s \oplus i\big)$\\
+%       $\vv{w_e} = \big(\rho_e, q_e, \mathrm{Path}_e\big)$\\
+%       $\vv{x_e} = \big(\mathrm{pk_{sig}}_e, \mathrm{rt}, \mathrm{EthProof}\big)$
+% \end{tabular}
+% };
+
+\draw [arrow] ([yshift=-.8cm] MAINBLOCK) -| +(-3.2,.2) |-  ([yshift=+1.1cm] FADE1.east);
+\draw [arrow, dotted] ([yshift=-.9cm] MAINBLOCK) -| +(-3.2,-1.9) ;
+
+\draw [arrow,dotted] ([yshift=-.9cm] FADE1.west) -| +(-.5,) |-  ([yshift=+1.1cm] FADE2.east);
+
+\draw [arrow] ([yshift=-.9cm] FADE3.west) -| +(-.5,) |-  ([yshift=+3.4cm] MAINBLOCK);
+
+\draw [arrow,dotted] +(6.5,.1) |-  ([yshift=+1.1cm] FADE3.east);
+
+ % % draw the paths and and print some Text below/above the graph
+ % \path (FADE1) 	edge[bend left=20]  node[anchor=south,above]
+ %                                    node[anchor=north,below]{$RN_{16}$} (ACK)
+ % (QUERY)     	edge[bend right=20] node[anchor=south,above]{$SC_n\neq 0$} (QUERYREP)
+ % (FADE1)       	edge                                                     (MAINBLOCK)
+ % (EPC)       	edge[bend left]                                          (QUERYREP)
+ % (QUERYREP)  	edge[loop below]    node[anchor=north,below]{$SC_n\neq 0$} (QUERYREP)
+ % (QUERYREP)  	edge                node[anchor=left,right]{$SC_n = 0$} (ACK);
+
+\end{tikzpicture}
+\end{document}

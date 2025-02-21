@@ -1,0 +1,325 @@
+%======================================================================
+\chapter{Zupply Framework Implementation}
+%======================================================================
+
+\section*{Declaration of Contributions}
+This chapter is based on \cite{Badakhshan2024Zupply}. I am the sole author of this chapter.
+
+\section{Introduction}
+
+In the previous two chapters, we introduced the design and security analysis of the Zupply framework. This chapter focuses on its implementation, detailing the 
+% construction of \gls{r1cs} instances, the 
+instantiation of core building blocks, and the implementation of the zero-knowledge proving and verification algorithms. Specifically, we describe the arithmetic circuits for the \gls{np} problems associated with \textsf{Auth}, \textsf{Trans}, \textsf{Merge}, and \textsf{Div}. These circuits generate \gls{r1cs} instances in a manner that enables succinct zero-knowledge proofs (\gls{zkp}s) while preserving confidentiality. To optimize on-chain costs (i.e., smart contract execution) we minimize the public inputs to these circuits. 
+We provide two implementation variants of Zupply based on its \gls{zkp} algorithms. The first employs Groth16 \cite{Groth2016} \gls{zksnark} over BN254 \cite{BNcurve} and BLS12-381 \cite{BLS_curve2003} elliptic curves, accommodating different security levels. The second leverages Aurora \cite{Aurora}, a \gls{zksnark} designed for a transparent setup and post-quantum security against quantum-capable malicious provers.
+
+Zupply is implemented in C++ and Solidity, demonstrating both computational and cost efficiency. This development validates the framework's practicality for real-world applications. While directed acyclic graphs (\gls{dag}s) are widely used for maintaining product histories in supply chains, Zupply's utility extends beyond this domain. We show that Zupply provides a practical, cost-efficient, and privacy-preserving solution for decentralized supply chain management (\gls{scm}) systems.
+
+\section{Zupply Arithmetic Circuits}
+\label{sec:Zupply Arithmetic Circuits}
+
+\begin{figure*}
+    \centering
+    \begin{subfigure}[b]{0.35\textwidth}  % Adjusted to fit four images in one row
+        \centering
+        \includegraphics[scale=0.6]{Figures/Auth.pdf} % Replace with your image file
+        \caption{\textsf{Auth} circuit}
+        \label{fig:Authcircuits}
+        
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.60\textwidth}  % Adjusted to fit four images in one row
+        \centering
+        \includegraphics[scale=0.6]{Figures/Merge.pdf} % Replace with your image file
+        \caption{\textsf{Merge} circuit}
+        \label{fig:Mergecircuits}
+    \end{subfigure}
+    \hfill\vspace{5mm}
+    \begin{subfigure}[t]{0.35\textwidth}  % Adjusted to fit four images in one row
+        \centering
+        \includegraphics[scale=0.6]{Figures/Trans.pdf} % Replace with your image file
+        \caption{\textsf{Trans} circuit}
+        \label{fig:Transcircuits}
+        
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.60\textwidth}  % Adjusted to fit four images in one row
+        \centering
+        \includegraphics[scale=0.6]{Figures/Div.pdf} % Replace with your image file
+        \caption{\textsf{Div} circuit}
+        \label{fig:Divcircuits}
+        
+    \end{subfigure}
+    
+   \caption[Zupply arithmetic circuits]{Schematic representation of the arithmetic circuits for \gls{zkp}s in the Zupply framework. The Merkle hash tree has a depth of $L$, with public inputs highlighted in \textcolor{blue}{\textbf{blue}}. Inputs highlighted in \textcolor{orange}{\textbf{orange}}, along with the intermediate values within the arithmetic circuits, are private (auxiliary) inputs. The hash function used in the implementation is SHA-256.}
+    \label{fig:circuits}
+\end{figure*}
+
+
+The \textsf{Auth}, \textsf{Trans}, \textsf{Merge}, and \textsf{Divide} algorithms in the Zupply framework generate \gls{zkp}s to demonstrate knowledge of the pre-image for one or two commitments to anonymous authentication tokens (\gls{aat}s) in the Merkle hash tree (\textsf{MHT}), with the root at time $\tau$ is denoted by $\texttt{rt}_\tau$. These \gls{zkp}s are used in Zupply algorithms to prove ownership of an \gls{aat} for authenticating a data record or to transfer ownership of the \gls{aat}s. In all cases, the prover avoids revealing the \gls{aat} or its commitment stored in the \textsf{MHT}. Figure \ref{fig:circuits} shows a schematic view of the arithmetic circuits associated with each of these \gls{zkp}s.
+
+
+These circuits represent the \gls{np} problem related to each \gls{zkp} and are converted into \gls{r1cs}, which are satisfied only when the prover provides consistent inputs to the constraint system. For example, in a circuit designed to prove knowledge of the pre-image of a leaf in a Merkle hash tree with root \texttt{rt}, without revealing the specific leaf, the root of the Merkle hash tree is given as a public input. The private inputs include the corresponding leaf pre-image and the Merkle proof. These private inputs must align with the root and satisfy the circuit constraints. As a result, the prover must provide valid private inputs, thereby demonstrating knowledge of the pre-image of a leaf in the Merkle hash tree.
+In the Zupply framework, the root value is determined by the shared \textsf{MHT}, which is maintained within the framework and serves as a public input to the circuits. The prover must demonstrate knowledge of the pre-image of a leaf in the fully decentralized \textsf{MHT}. Importantly, this process does not reveal any information about the \gls{aat} or its commitment (the leaf itself).
+
+
+
+Each arithmetic circuit in the Zupply framework includes a proof of knowledge for one or two leaves within the \textsf{MHT}. These circuits are constructed using the arithmetic circuits for the hash function and the Merkle hash tree. The \gls{r1cs}  generated by the hash function arithmetic circuit is satisfied if and only if, for a given input value $x$ assigned to the circuit, the output value $y$ satisfies $y = \mathcal{H}(x)$, where $\mathcal{H}$ is the hash function.
+The arithmetic circuit of the Merkle hash tree implements the Merkle proving algorithm. At each level, a hash function output is concatenated to either the left or right of its adjacent hash. The concatenated value is then input to the hash function of the subsequent layer, continuing until the root is reached. Formally, this chain of hash functions is expressed as:
+\[
+h_{i,j+1} = \mathcal{H}\left( s_{i,j}\cdot(h_{i,j} \,|\ \textsf{path}_{i,j}) + (1-s_{i,j})\cdot(\textsf{path}_{i,j} \,|\ h_{i,j}) \right),
+\]
+where at layer $j$, $h_{i,j}$ is the output from the previous hash in the chain. Let $h_{i,0}$ denote the $i$-th leaf value and $h_{i,L}$ is equal to the root \texttt{rt}. $\textsf{path}_{i,j}$ represents the adjacent hash at layer $j$ in the Merkle proof related to index $i$, and $s_{i,j} \in \{0,1\}$ determines whether $h_{i,j}$ is concatenated to the left or right of its adjacent hash. 
+The arithmetic circuit responsible for managing this order selection is called the ``Swap'' block. The \gls{r1cs}  generated by the arithmetic circuit of a Merkle hash tree with $L$ layers is satisfied if and only if the leaf $h_0$ exists in a Merkle hash tree with root \texttt{rt}, and the Merkle proof, comprising $\{\textsf{path}_{i,0}, \dots, \textsf{path}_{i,L-1}\}$ and $\{s_{i,0}, \dots, s_{i,L-1}\}$, is consistent with both the leaf and the root.
+
+
+In the following, we delve into the details of each circuit.
+
+
+
+\subsection{\textsf{Auth} Circuit} 
+The \textsf{Auth} circuit, illustrated in Figure \ref{fig:Authcircuits}, generates the \gls{zkp} $\pi_\textsf{Auth}$, which is embedded in data records to prove that the data creator possesses an \gls{aat} within a Merkle hash tree. The root $\texttt{rt}_\tau$ serves as a public input to this proof to allow the auditor to verify that the commitment to the claimed \gls{aat} is stored in the \textsf{MHT} with root $\texttt{rt}_\tau$. Specifically, the prover asserts, ``she knows a preimage of one of the commitments to an \gls{aat} in the \textsf{MHT} with root $\texttt{rt}_\tau$,'' without revealing which commitment. Additionally, the PKsig associated with the \gls{aat} is also provided as a public input. The data creator signs the data record using the corresponding SKsig, thereby proving that the data has been signed by the token owner and remains unaltered.
+
+
+\subsection{\textsf{Trans} Circuit} 
+The \textsf{Trans} circuit generates the \gls{zkp} $\pi_\textsf{Trans}$, which is submitted to the blockchain platform when an entity transfers ownership of an \gls{aat} during \textsf{OT-Protocol}. Specifically, it obsoletes an \gls{aat} owned by the entity and creates a new \gls{aat} that is consistent with the obsoleted \gls{aat}. The circuit used for generating this proof is depicted in Figure \ref{fig:Transcircuits}.  In the \textsf{Trans} circuit, the pre-images of the commitments to both the new and obsoleted \gls{aat}s are private inputs. The circuit ensures that the $q$ value, representing the quantity of the product, remains unchanged. The commitment to the new \gls{aat} serves as a public input to the circuit, which will be added to the \textsf{MHT}. Additionally, the end of life (\texttt{eol}) value of the obsoleted \gls{aat} is a public input to the circuit and is published on the blockchain platform. This ensures that an entity cannot reuse an \gls{aat} included in the \textsf{MHT} but transferred before. In this proof, the prover asserts: ``She knows an \gls{aat} in the \textsf{MHT} with root $\texttt{rt}_\tau$, where the end-of-life value of the claimed token is \texttt{eol}, and she has created a new \gls{aat} with a commitment \texttt{cm}, such that the quantity in the new token matches the quantity in the originally claimed token.''
+
+
+
+\subsection{\textsf{Merge} Circuit} 
+The \textsf{Merge} circuit is similar to the \textsf{Trans} circuit, but it merges two existing commitments to two known \gls{aat}s in \textsf{MHT} with root $\texttt{rt}$. Hence, this circuit generates the \gls{zkp} $\pi_\textsf{Merge}$ which proves the knowledge of two \gls{aat}s, where their corresponding \texttt{eol}s are public inputs to this circuit, allowing the verification algorithm to check whether those \gls{aat}s have been transferred before. This circuit also guarantees that the quantity of the product in the new commitment is equivalent to the sum of the product quantities in the two preceding \gls{aat}s. The new commitment to the new \gls{aat} is a public input to this circuit.
+
+
+\subsection{\textsf{Div} Circuit} 
+The \textsf{Div} circuit is the opposite of the \textsf{Merge} circuit. It generates the \gls{zkp} $\pi_\textsf{Div}$, which proves that a known existing \gls{aat} in \textsf{MHT} with root $\texttt{rt}$ divides into two new \gls{aat}s. The \texttt{eol} of the divided token and the commitments to the two new \gls{aat}s are public inputs to this circuit. This circuit ensures consistency in the product quantity before and after division, so that the sum of the $q$ values in the new tokens equals the $q$ value in the original \gls{aat}.
+
+
+\section{Cryptographic Primitives and Parameters}
+In this section, we present the instantiation of each building block  of the Zupply framework, considering a 128-bit security level. 
+
+\subsection{Blockchain platform }
+Ethereum provides the highest level of security among all ethereum virtual machine (\gls{evm}) compatible blockchains, such as Arbitrum and Avalanche \cite{Neiheiser2023PracticalLimitations, Kalodner2018Arbitrum, Avalanche}. Therefore, we have selected Ethereum as the blockchain platform upon which Zupply is built. If Zupply remains practical with respect to the costs incurred when calling the smart contract $\mathcal{C}_Z$, then its feasibility extends to other \gls{evm}-compatible blockchains as well. To realize the proof-of-inclusion ($\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt})$), Ethereum employes Merkle Patricia tree (trie) \cite{PatriciaTree, ethereum} and provides $\texttt{eth\_getProof}$ API which is elaborated in EIP-1186 \cite{Jentzsch2018}. 
+
+
+\subsection{Decentralized Cloud Storage (DCS)}
+
+Zupply utilizes the 
+InterPlanetary File System
+(\gls{ipfs}) network \cite{ipfs} for file storage, offering flexibility in data management based on the preferences of the supply chain entities. For instance, entities can opt to share their data records directly from their computers via a Tor hidden service \cite{Loshin2013PracticalAnonymity} to obscure their IP address, or they can entrust storage to major stakeholders within the supply chain. These stakeholders then anonymously publish the data records to the \gls{ipfs} network, ensuring availability. Furthermore, Zupply guarantees the authenticity and integrity of data records, which are independently verified by auditors, thus eliminating reliance on \gls{dcs} for this verification. 
+% Moreover, integrity is maintained as any data alteration causes the \textsf{Audit} algorithm to return a 0, effectively detecting tampering. 
+
+
+%as detailed in Definition \ref{def:informal-Authenticity}, 
+
+
+% Filecoin \cite{filecoin}, a decentralized storage network based on IPFS \cite{ipfs}, is considered a potential candidate for DCS. 
+ 
+% Therefore, we can employ different kinds of instantiations. 
+
+
+
+\subsection{Collision-resistance Hash Function}
+
+The collision resistance hash function $\mathcal{H}$ is a 512-bit input to a 256-bit output mapping; namely, $\mathcal{H}:\{0,1\}^{512} \rightarrow \{0,1\}^{256}$. It can be implemented by either SHA-256 or SHA3-256. For SHA-256, it has 512 bit input and 256 output, so there is no padding bits needed. For SHA3-256, the input size is 1088 bits  and outputs 256 bits. So, in this case, padding is needed. In our implementation, we selected SHA-256 for its simplicity and wide adoption.  
+
+\subsection{Statistically-hiding Commitment}
+We instantiate the commitment scheme \textsf{COMM} via $\mathcal{H}$. Such that 
+% for computing the commitment to $\Tilde{T} := (q, \text{PKsig}, \rho)$, 
+$\texttt{cm}:=\mathsf{COMM}_\rho(\Tilde{T}) = \mathcal{H}(q||\text{PKsig}||[\rho]_{224})$
+Where, $q \in \{0, 1\}^{32}$, $\text{PKsig} \in \{0, 1\}^{256}$, and $\rho \in \{0, 1\}^{512}$. Moreover, $[\rho]_{224}$ denotes that the $512$-bit $\rho$ is truncated to $224$ bits by dropping most significant bits. Both $\text{PKsig}$ and $\rho$ 
+% (which is the output of a cryptographically strong random number generator (RNG) \cite{NISTPRNG}) 
+can serve as randomness for the commitment. 
+% Operator $\xleftarrow{R}$ is a cryptographically strong random number generator (RNG) \cite{NISTPRNG}.  The Digital signature algorithm used in the experiment is  the curve Secp256k1 \cite{brown2009standards}.
+
+\subsection{Merkle Hash Tree}
+\textsf{MHT} is constructed based on the collision resistance hash function $\mathcal{H}$ (i.e., SHA-256). Let the number of layers $L$ be equal to 20, then \textsf{MHT} has $2^{20} -1$ nodes, and each node has 256 bits. Consequently, the tree requires 32 MB of storage. Recall that the tree is stored off-chain on entities' $\textsc{Z-Node}$ software, and only the root \texttt{rt} is maintained on the smart contract $\mathcal{C}_Z$.
+
+
+\subsection{Strongly-unforgeable Digital Signature}
+
+The signature scheme algorithm \textsf{Sig} used in the framework is Elliptic Curve Schnorr signatures (EC-Schnorr) \cite{Schnorr1991Signature} over the elliptic curve secp256k1 \cite{sec2_2010} where the size of both PKsig and SKsig are 256 bits and signature has 512 bits. The algorithm uses SHA-256 as the hash function required for the signatures. This algorithm satisfies the \textit{SUF-CMA} security property.
+
+% \subsection{Public-key encryptions}
+% Zupply framework employs Elliptic Curve Integrated Encryption Scheme (ECIES) over secp256k1 \cite{sec2_2010} for $\mathsf{Enc}$. This algorithm enables 256-bit PKenc and SKenc keys and satisfies \textit{IND-CCA} security property \cite{katz2020introduction}.
+
+\subsection{Symmetric-key Encryption}
+For \textsf{SymEnc}, we use 128-bit advanced encryption standard (AES-128) algorithm in cipher block chaining (CBC) mode which satisfies \textit{IND-CPA} security property \cite{rogaway2011evaluation, sibleyras2020Security}.
+
+\section{zkSNARK Instantiations}
+The choice of \gls{zksnark} protocol in the Zupply framework enables a trade-off between computational efficiency and enhanced security properties, such as post-quantum security and a transparent setup.
+
+\subsection{Groth16}
+
+In the first implementation variant of the Zupply framework, we employ Groth16 \cite{Groth2016}, a \gls{zksnark} known for generating succinct proofs and enabling fast verification. This protocol is a pairing-based \gls{zksnark} for \gls{r1cs}. The scheme requires a trusted setup phase that can be done via a secure multi-party computation (\gls{smpc}) \cite{Ben-Sasson2015SecureSampling, Nikolaenko2024PowersofTau}.
+We evaluate the implementation using two elliptic curves: BN254 \cite{BNcurve}, offering the fastest algorithms and the smallest proof sizes and approximately 100-bit security \cite{Barbulescu2019}, and BLS12-381 \cite{BLS_curve2003}, designed for 128-bit security.
+
+
+By using the Groth16 \gls{zksnark} in the Zupply framework, the verification keys ($\text{vk}_\mathbbm{x}$), stored in $\mathcal{C}_Z$, remain small when the number of public inputs ($x_\mathbbm{x}$) is minimal. Additionally, the verification algorithm ($\mathsf{Verify}$) of Groth16 is less complex compared to other \gls{zksnark}s. Due to the high cost of on-chain storage, this efficiency makes Groth16 particularly suitable for public blockchains where execution and storage costs are high.
+In Groth16, the proof size remains constant regardless of the number of constraints in the associated \gls{r1cs}. The proof is denoted as \(\pi \in \mathbb{G}_1^2 \times \mathbb{G}_2\), where \(\mathbb{G}_1\) consists of points on the elliptic curve, and \(\mathbb{G}_2\) comprises points on a twist of the curve.  
+
+The size of the verification key \(\textsf{vk}\) depends on the number of public inputs in each \gls{r1cs} instance within the Zupply framework. The public input of the instances in the Zupply framework are denoted as \(x_\mathsf{Auth}\), \(x_\mathsf{Trans}\), \(x_\mathsf{Merge}\), and \(x_\mathsf{Div}\).
+Let \(|x_\mathbbm{x}|\) represent the number of public inputs for an instance \(\mathbbm{x}\). As described in \cite{Groth2016}, \(\textsf{vk}\) consists of \(|x_\mathbbm{x}| + 2\) elements in \(\mathbb{G}_1\) and three elements in \(\mathbb{G}_2\). It may also include a precomputed element in \(\mathbb{G}_T\) via the bilinear pairing \( e: \mathbb{G}_1 \times \mathbb{G}_2 \to \mathbb{G}_T \) applied to two specific elements in \(\textsf{vk}\), since the verification process requires only their pairing, not those elements themselves. Consequently, one element from each of \(\mathbb{G}_1\) and \(\mathbb{G}_2\) can be omitted from \(\textsf{vk}\) and replaced by an element in \(\mathbb{G}_T\).
+
+In the Zupply framework, every public input is represented as either a 256-bit hash or a 256-bit public key. However, like other scalar elements in \gls{r1cs} instances, these inputs must belong to the scalar prime field of the underlying elliptic curve. Since the scalar field elements of BN254 and BLS12-381 have bit-lengths of 254 and 255 bits, respectively, each 256-bit value is split into two 128-bit public inputs to minimize the public input size. In contrast, the original implementation of the SHA-256 arithmetic circuit in \cite{libsnark} treats each 256-bit hash as 256 distinct public inputs, significantly increasing the size of the verification keys. Based on our construction, the number of public inputs represented as $n(x_\mathbbm{x})$ in Table \ref{tab:zksize} are double the count of public inputs as per the arithmetic circuits presented in Section \ref{sec:Zupply Arithmetic Circuits}. Moreover, the size of the proving key \textsf{pk} is determined by the number of constraints in each instance and the proving keys in the Zupply framework are stored off-chain on the devices of entities. The number of constraints is determined by the size of the circuit implementing \gls{np} statements in Section \ref{sec:Zero-knowledge Proofs}. 
+
+\subsubsection{Over BN254 Curve}
+We initially implement the Groth16 zkSNARK over the BN254 curve. The curve was generally assumed to offer around 128 bits of security \cite{BNcurve}; However, research by Kim et al. \cite{Kim2015Extended} suggests that its actual security level might be lower. In Groth16, the proof size is constant, denoted as \(\pi \in \mathbb{G}_1^2 \times \mathbb{G}_2\), where \(\mathbb{G}_1\) consists of points on the BN254 elliptic curve, and \(\mathbb{G}_2\) comprises points on a twist of the BN254. Consequently, the proof size is 128 bytes, regardless of the size of the number of constraints in the \gls{r1cs} related to the proof.
+Since Ethereum only provides pre-compiled contracts for the BN254 curve \cite{EIP197, Housni2022Families}, we selected this pairing-friendly curve for the on-chain Groth16 verification algorithms implementation. 
+
+\subsubsection{Over BLS12-381 Curve}
+To strengthen the security of our framework, we replace the BN254 curve with BLS12-381, which offers 128-bit security. However, as of the time of writing, Ethereum does not provide precompiled support for operations over this curve \cite{Vlasov2020}. Consequently, we did not implement our smart contract $C_\mathcal{Z}$ using BLS12-381, leaving this for future work. Adopting this curve increases the proof size to 192 bytes regardless of the size of the number of constraints in  \gls{r1cs}. Table \ref{tab:zksize} compares the verification and proving key sizes for each instance in Zupply using both the BN254 and BLS12-381 curves.
+
+\begin{table}
+ \caption[Comparison of the Groth16 key sizes for each NP statement in Zupply]{Comparison of verification and proving key sizes of Groth16 \gls{zksnark} for \gls{np} statements in the Zupply framework for $L=20$. $\nu = n(x_\mathbbm{x})$ is the number of public inputs, $N$ is the number of constraints, $|\mathsf{vk}_\mathbbm{x}|$ is the size of the verification key in Bytes, and  $|\mathsf{pk}_\mathbbm{x}|$ is the size of the proving key in MegaBytes.}
+	\centering
+
+\begin{tabular}{ccccccc}
+		\toprule
+		\multirow{2}{*}{\textbf{$\mathbbm{x}$}} & \multirow{2}{*}{\textbf{$\nu$}} & \multirow{2}{*}{$N$} & \multicolumn{2}{c}{$|\mathsf{vk}_\mathbbm{x}|$ (B)} & \multicolumn{2}{c}{$|\mathsf{pk}_\mathbbm{x}|$ (MB)} \\
+		% \cline{4-7}
+		 &  &  & {\footnotesize BN254} & {\footnotesize BLS12-381} & {\footnotesize BN254} & {\footnotesize BLS12-381} \\
+		\midrule
+        Complexity & - & $O(L)$ & \multicolumn{2}{c}{$O(\nu)$}  & \multicolumn{2}{c}{$O(N)$}\\
+        
+		${\textsf{Auth}}$ & 4  & 588,248  & 768 & 1,152 & 182.5 & 456.3\\
+		
+		${\textsf{Trans}}$ & 6  & 642,876  & 896 & 1,344 & 200 & 246.75\\
+		${\textsf{Merge}}$ & 8 & 1,258,337  & 1,024 & 1,536 & 393.8 & 447.93\\
+		${\textsf{Div}}$ & 8 & 670,091  & 1,024 & 1,536 & 210 & 262.5\\
+		\bottomrule
+	\end{tabular}
+	\label{tab:zksize}
+\end{table}
+
+\subsection{Aurora}
+
+In the first implementation variant of the Zupply framework, we employ Aurora \cite{Aurora2019}. It is a \gls{zksnark} protocol  that offers transparent-setup, which eliminates the necessity for a trusted parties in the setup phase. Aurora is built upon particularly the Interactive Oracle Proofs (\gls{iop}s) \cite{Ben-Sasson2016IOP} for \gls{r1cs} obtained by the Fast Reed-Solomon Interactive Oracle Proof of Proximity (\gls{fri}) protocol for low degree testing \cite{Ben-Sasson2018FRI}. Aurora notably avoids dependence on hard mathematical problems such as discrete logarithms or integer factorization, which makes Aurora plausibly post-quantum secure. Aurora relies on minimal assumptions as it requires only a collision-resistant hash function. This makes it a suitable choice for transitioning the Zupply framework toward enhanced post-quantum security.
+
+
+Since the \gls{r1cs} constraints generated for the Zupply framework in the previous implementation have their elements in the scalar field associated with the chosen elliptic curve, we used the Aurora implementation over the same finite fields and on multiplicative groups. But, Aurora can also be used over binary extension fields and additive groups, which can make its computations faster due to simpler arithmetic operations and reduced computational overhead. We chose the former configuration for compatibility with the first implementation.
+
+
+
+
+\section{Software Implementation}
+
+In this section, we provide a detailed overview of the \CC software implementation\footnote{The implementation is available at \url{https://github.com/mtbadakhshan/zupply-zkp}} for each variant discussed above. Additionally, we introduce a baseline model for comparison, which does not incorporate privacy preservation. 
+
+\subsection{Baseline Model}
+To assess the cost overhead introduced by privacy preservation using \gls{zkp}s in the Zupply framework for a supply chain management (\gls{scm}) application, we propose a non-privacy-preserving baseline model that maintains the same functionality; specifically, (non-anonymous) authentication tokens for off-chain data uploading. In the baseline model's smart contract, a token owned by an entity $e_i$ holds $e_i$'s address ($\text{BPAddr}^{e_i}$) and is only transferable by $e_i$. Furthermore, each token holds a quantity, enabling the merging and dividing of tokens. The token owner $e_i$ can use the private key corresponding to $\text{BPAddr}^{e_i}$ to sign off-chain data records, as explained in ERC-4361 \cite{ERC-4361}, or transfer the token.
+
+\subsection{Groth16 Based Implementation}
+For the Groth16 \gls{zksnark} instantiation, we employed libsnark \cite{libsnark}, a \CC library developed by SCIPR lab \cite{SCIPR}, which offers implementations of the Groth16 \gls{zksnark} scheme for provers and verifiers. This library was instrumental in generating \gls{r1cs} constraints for \gls{np} problems within our framework, achieved by implementing them as arithmetic circuits. Additionally, to integrate the Groth 16 verification algorithm into $\mathcal{C}_Z$, we utilized the ZoKrates \cite{ZoKrates} toolbox. As previously discussed, we only provide the Zupply smart contract implementation using Groth16 over BN254. 
+
+Table \ref{tab:transaction_gas} presents the costs associated with executing transactions in both the Zupply framework and the baseline model on the Ethereum blockchain. 
+At the time of deploying $\mathcal{C}_Z$, some one-time costs should be paid as it uploads the code, a 256-bit \texttt{rt}, and all verification keys except $\mathsf{vk}_\mathsf{Auth}$ to blockchain. $\mathsf{vk}$ sizes are listed in Table \ref{tab:zksize}.  Transactions $\texttt{tx}_\mathsf{Trans}$, $\texttt{tx}_\mathsf{Merge}$, and $\texttt{tx}_\mathsf{Div}$ execute \textsf{VerifyTX} on  $\mathcal{C}_Z$ and contain a 256 bytes $\pi$, one or two $20 \times 256$ bits $\mathsf{path}$ (for $L=20$), new $256$-bit \texttt{rt}s,  $256$-bit \texttt{cm}s, and $256$-bit \texttt{eol}s. 
+While the deployment cost is a one-time expense, entities incur transaction fees each time they transfer products to the next entity. 
+
+We also implemented the zero-knowledge proving and verification algorithms of the Zupply framework using Groth16 over the BLS12-381 curve. Consequently, the elements in the R1CS constraint system are in the scalar prime field associated with the BLS12-381 curve.
+
+\subsection{Aurora Based Implementation}
+\label{sec:aurora-based-Implementation}
+The implementation of the Aurora zkSNARK is provided in libiop \cite{libiop}, which utilizes the libff \cite{libff} library for finite field arithmetic. Similarly, libsnark employs an older version of libff for operations involving both finite fields and elliptic curves. To enable the simultaneous execution of prover and verifier algorithms in both zkSNARKs (i.e., Aurora and Groth16) for the \gls{r1cs} constraint systems generated by the arithmetic circuits, we updated several lines of code in the libsnark library to ensure compatibility with the newer version of the libff library\footnote{The new version of the libsnark library is available at: \url{https://github.com/mtbadakhshan/libsnark}}.
+
+The current implementation of the Aurora \gls{zksnark} in libiop \cite{libiop} requires that the number of constraints in the \gls{r1cs} be a power of two, and that the number of variables and public inputs be one less than a power of two. To meet these requirements, constraints and variables are padded with zeros as necessary. Since the prover time, proof size, and verifier time in the Aurora zkSNARK asymptotically depend on the number of constraints, the computational complexity and proof size for any arithmetic circuit encoded into R1CS effectively correspond to those of an R1CS with a number of constraints equal to the next power of two. 
+
+
+\begin{table}[t] % Gas price 32 Gwei
+	\caption[The cost of transactions in the Zupply framework]{Comparison of the transaction costs for the baseline model and the $\mathcal{C}_Z$ smart contract based on Groth16 over BN254 curve and $L=20$. The costs are in Gas and USD, based on ETH's value of USD 2,030.01 and gas price of 32 Gwei at the time of writing.}
+	\centering
+{
+	\begin{tabular}{ccccc}
+		\toprule
+        & \multicolumn{2}{c}{Zupply} & \multicolumn{2}{c}{Baseline model}\\ %\cline{2-5}
+		{Transaction} & {Gas} & {USD} & {Gas} & {USD}\\
+		\midrule
+		Deployment & 3,088,611 & \$200.63 & 902,355 & \$58.62 \\ % 3058031 * 1.01 = 3088611.31
+        % \hline
+		$\texttt{tx}_{\textsf{Init}}$ & 133,415 & \$8.67 & 96,166 & \$6.25 \\ %132095 * 1.01 = 
+		% \hline
+		$\texttt{tx}_{\textsf{Trans}}$ & 448,013 & \$29.10 & 29,649 & \$1.93\\ % 443578 * 1.01 = 
+		% \hline
+		$\texttt{tx}_{\textsf{Merge}}$ & 455,534 & \$29.59 & 92,382 & \$6.00 \\ %451024 * 1.01 =  455534
+		% \hline
+		$\texttt{tx}_{\textsf{Div}}$ & 518,701 & \$33.69 & 168,740 & \$10.96\\ % 513566 *1.01
+		\bottomrule
+	\end{tabular}
+ }
+	\label{tab:transaction_gas}
+\end{table}
+
+
+\section{Benchmark}
+\label{sec:zupply-benchmark}
+The benchmarks were conducted on a system featuring an Intel\textsuperscript{\textregistered} Core\texttrademark{} i7-4790 CPU at 3.60~GHz, using 4 physical cores and 8 threads. The system was equipped with 32~GB of DDR3–1333 RAM and ran Ubuntu 20.04 LTS. The CPU governor was set to \textit{Performance} to ensure the CPU operated at its maximum clock speed throughout testing, thus minimizing fluctuations caused by power-saving mechanisms. We used the Google Benchmark library~\cite{google_benchmark} to measure the average execution time for each \textsf{MHT} depth \( L \) and prover and verifier algorithms for each circuit.
+
+\begin{figure}
+    \centering
+    \scalebox{.81}{
+    \input{Plots/plot_num_constraints}
+    }
+    \caption[Number of constraints in the R1CS instances in Zupply]{The number of constraints in the \gls{r1cs} instances generated by arithmetic circuits in the Zupply framework for both Aurora \cite{Aurora2019} and Groth16 \cite{Groth2016} zkSNARKs, as the Merkle hash tree depth \(L\) varies from 10 to 25.}
+    \label{fig:num_constraints}
+\end{figure}
+
+We executed the prover and verifier algorithms in Aurora and Groth16 for each circuit in the Zupply framework, using varying numbers of layers in the \textsf{MHT}. Figure \ref{fig:num_constraints} shows the number of constraints generated for each circuit. As previously noted, the Aurora \gls{zksnark} implementation in libiop \cite{libiop} requires the number of constraints to be padded to the next power of two. Consequently, as shown in the figure, the number of constraints for each $L$ in each circuit is increased to the next power of two. This padding introduces significant computational overhead for the prover and verifier algorithms and leads to an increase in proof size.
+
+
+For each $L$ in each circuit, the computation times of the prover algorithms were averaged over multiple executions using different sets of inputs (i.e., public inputs and auxiliary inputs) to generate proofs. These inputs were randomly generated through  separate functions simulating the circuit, ensuring consistency with the \gls{r1cs} of each circuit. Similarly, the computation times of the verifier algorithms were averaged over executions using different valid proofs generated by the prover algorithm given the aforementioned randomly generated inputs. 
+The experiments for the prover and verifier algorithms in Groth16 were conducted using both BN254 and BLS12-381 curves to evaluate the computational overhead introduced by the BLS12-381 curve, which achieves 128 bits of security at the cost of increased execution time for the algorithms. Likewise, the experiments for the prover and verifier algorithms in Aurora were executed over the scalar prime fields associated with the BN254 and BLS12-381 curves, with sizes of 254 and 255 bits, respectively. Figure~\ref{fig:execution_time} shows the execution times of the prover and verifier algorithms for both Groth16 and Aurora \gls{zksnark}s.
+
+\begin{figure}
+    \centering
+    \scalebox{0.81}{
+    \input{Plots/plot_time_size}
+    }
+    \caption[The runtime of the prover and verifier algorithms in Zupply]{Prover and Verifier for Groth16 and Aurora in Zupply. Groth16 is evaluated on BN254 and BLS12-381, while Aurora uses their 254-bit and 255-bit scalar fields. $L$ denotes \textsf{MHT} layers.}
+
+    \label{fig:execution_time}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \scalebox{0.81}{
+    \input{Plots/plot_proof_size}
+    }
+    \caption[The proof sizes in Zupply based on Aurora]{Proof sizes of Aurora. The proof sizes for 255-bit and 254-bit prime fields are identical, as both require 4×64-bit limbs on a 64-bit architecture. $L$ denotes \textsf{MHT} layers.  Groth16 proof sizes are 128 bytes (BN254) and 192 bytes (BLS12-381). }
+    \label{fig:proof_size}
+\end{figure}
+
+
+Figure~\ref{fig:proof_size} illustrates the proof sizes for Aurora. The results are provided for each circuit in the Zupply framework, with the number of \textsf{MHT} layers ranging from $10$ to $25$. Note that the proof size for Groth16 is independent of the circuit; it is 128 bytes for the BN254 curve and 192 bytes for the BLS12-381 curve. As discussed in Section~\ref{sec:aurora-based-Implementation}, the Aurora implementation in Libiop \cite{libiop} increases the prover and verifier computation times and proof sizes to match those of a circuit where the number of constraints, public inputs, and variables are equal to the smallest power of two that exceeds the actual values in the circuit. 
+
+
+Figure ~\ref{fig:execution_time} demonstrates that operating over BLS12-381 significantly increases the execution times of Groth16 algorithms. This disparity arises because Groth16 algorithms rely heavily on bilinear pairings over elliptic curves. Pairing operations on the BLS12-381 curve are more computationally intensive than those on BN254, primarily due to BLS12-381's larger base field size of 381 bits compared to BN254's 254 bits. However, the scalar field sizes of the two curves are nearly identical, with BN254 and BLS12-381 having scalar fields of approximately 254 and 255 bits, respectively. 
+
+
+\newpage
+
+Entities handling product histories must store all proving keys ($\mathsf{pk}_\mathbbm{x}$, see Table \ref{tab:zksize}) and a \textsf{MHT} of 32 MB for $L=20$. This requires significant storage due to numerous constraints, but it is manageable even on smartphones. In contrast, auditors, like final customers, only need to store $\mathsf{vk}_\mathsf{Auth}$ (less than 1 KB) and audit only the relevant records.
+
+
+
+
+\newpage
+
+The reported costs in Table \ref{tab:transaction_gas} underscore the practicality of the Zupply framework.
+
+This is further analyzed in the following section, where we examine the prover and verifier algorithms, as well as the proof size, for the Zupply arithmetic circuits.
+
+Consequently, we are open to employing more secure curves, once their associated pre-compiled contracts become available on Ethereum. 
+
+
+
+
+As other schemes evolve and become more practical for public blockchains, they may supplant Groth16 in our framework. However, Groth16 lacks post-quantum security and relies on a trusted setup.
+
+
+
+
+ Our framework extends beyond Groth16, accommodating other zkSNARK instantiations like Plonk \cite{Gabizon2019PLONK}, Aurora \cite{Aurora}, and Polaris \cite{Polaris} which offer a transparent setup.  Notably, Aurora and Polaris also offer potential post-quantum security.
+
+
+ 
+% |vk| = (\nu + 2) * |G1| + 3*|G2| 
+% BN254:        |G1| = 64 byte and |G2| = 128 byte
+% BLS12-381:    |G1| = 96 byte and |G2| = 192 byte

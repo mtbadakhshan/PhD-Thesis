@@ -1,0 +1,63 @@
+%% Got idea from https://tex.stackexchange.com/questions/599929/how-can-i-create-an-alice-bob-crypto-protocol-diagram-with-arrows
+\documentclass[border=0mm]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,
+                quotes}
+\tikzset{auto,
+                % > = Straight Barb,
+every path/.style = {semithick}
+         }
+\usepackage{tabularray}
+\UseTblrLibrary{amsmath}
+\usepackage{bm}
+
+\begin{document}
+% \Huge
+% \newcommand{\customsize}{\fontsize{50pt}{120pt}\selectfont}
+    \begin{tblr}{hline{1,Z} = {solid, 1pt},
+                 colspec  = { Q[c,$] c Q[c,$] },
+                 % row{1} = {mode=text},
+                 row{1-Z} = {rowsep=0ex}
+                 } 
+% \SetCell[c=3]{l} \text{Public Parameters}: \textsc{pp} \leftarrow \text{Setup} (\lambda)     
+\SetCell [c=3]{l} \text{\textbf{Protocol: Anonymous Authentication Token Ownership Transfer (\gls{aatot})}}\\
+% % \SetCell[c=3]{l} \text{Hash Function}: \mathcal{H} \leftarrow \text{SHA-256}                 \\
+\hline
+\text{Entity} \ \textbf{A}   &               &  \text{Entity} \  \textbf{B}                               \\      
+\begin{gathered}[b] 
+    % \text{A local copy of the latest } \text{MHT}\\
+    T_1^\text{A} = \left((q_1^\text{A}, \text{PKsig}_1^\text{A}, \rho_1^\text{A}), \text{SKsig}_1^\text{A}\right)\\
+\end{gathered}
+    &   \tikz\draw[->]  (0,0) to ["``Req $\text{PKsig}_\text{2}$''"]    (1.5,0);
+                    &    \\
+
+    &   \tikz\draw[<-]  (0,0) to ["$\text{PKsig}_2^\text{B}$"]    (1.5,0);
+                    &   \begin{gathered}[t]
+                        (\text{PKsig}_2^\text{B}, \text{SKsig}_2^\text{B}) \leftarrow B^{\mathcal{K}_\mathsf{sig}} (\textsc{pp}_\mathsf{sig})
+                    \end{gathered}          \\
+\begin{gathered}[b]
+(\texttt{tx}^A_{\textsf{Trans}_1}, \Tilde{T}_2^\text{B}, \texttt{Tag}_1)\leftarrow {A^\textsf{Trans}}( \textsc{pp}, T_1^\text{A}, \text{PKsig}_2^\text{B}) 
+\\
+% \text{s.t. } T^\text{AB} = (q^\text{AB}, \text{PKsig}^\text{AB}, \rho^\text{AB})\\
+% \text{s.t. } \texttt{tx}_\textsf{Trans} = \big(\pi_{\textsf{Trans}}, x_{\textsf{Trans}}, \texttt{rt}^{\prime}, i, \text{Path} \big)\\
+% \text{s.t. } \texttt{Tag}^\text{AB} \leftarrow \text{SKsig}^\text{A} (\text{PKsig}^\text{AB})\\
+\text{Sends } \texttt{tx}^A_{\textsf{Trans}_1}  \text{to} \ \mathcal{C}_Z\\
+\end{gathered}
+    &   \tikz\draw[->]  (0,0) to ["$\Tilde{T}_2^\text{B}$; $\texttt{Tag}_1$"]    (1.5,0);
+                    & 
+    \begin{gathered}[t]
+        T_2^\text{B} \leftarrow (\Tilde{T}_2^\text{B}, \text{SKsig}_2^\text{B})\\
+        (\text{PKsig}_3^\text{B}, \text{SKsig}_3^\text{B})  \leftarrow B^{\mathcal{K}_\mathsf{sig}} (\textsc{pp}_\mathsf{sig})\\
+         (\texttt{tx}^B_{\textsf{Trans}_2}, \Tilde{T}_3^\text{B}, \texttt{Tag}_2) \leftarrow B^\textsf{Trans}( \textsc{pp}, T_2^\text{B}, \text{PKsig}_3^\text{B}) 
+         \\
+        % \text{s.t. } T^\text{B} = (q^\text{B}, \text{PKsig}^\text{B}, \rho^\text{B}), q^\text{B} = q^\text{A}\\
+        % \text{s.t. } \texttt{tx}_\textsf{Trans}^\prime = \big(\pi_{\textsf{Trans}}^\prime, x_{\textsf{Trans}}^\prime, \texttt{rt}^{\prime\prime}, j, \text{Path}^\prime \big)\\
+        % \text{s.t. } \texttt{Tag}^\text{B} \leftarrow \text{SKsig}^\text{AB} (\text{PKsig}^\text{B})\\
+        \text{Sends } \texttt{tx}^B_{\textsf{Trans}_2}  \text{to} \ \mathcal{C}_Z\\
+        % \text{Uses } \texttt{Tag}_1 \text{and } \texttt{Tag}_2 \text{ on the first data record.}
+        \end{gathered} 
+    \\
+
+
+    \end{tblr}
+\end{document}

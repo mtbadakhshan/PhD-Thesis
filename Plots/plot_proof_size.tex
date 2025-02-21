@@ -1,0 +1,64 @@
+% \documentclass{standalone}
+% \usepackage{pgfplots}
+% \pgfplotsset{compat=1.18} % Adjust based on your pgfplots version
+% \usepgfplotslibrary{groupplots} % Load the groupplots library for groupplot functionality
+% \usepackage{siunitx}
+% \pgfplotmarksize=1.5pt
+% \begin{document}
+
+% % \begin{figure}
+% \centering
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={
+        group size=1 by 1,
+        horizontal sep=1cm,
+        vertical sep=2cm,
+    },
+    width=10cm,
+    height=6cm,
+    xlabel=L,
+    % ymode=log,
+    grid=both,
+    major grid style={black!50},  % Style for major grid lines
+    minor grid style={gray!20},   % Style for minor grid lines
+    minor tick num=1,             % Number of minor ticks between major ticks
+    % ymin=5e4, ymax=.6e9,
+    % mark size=1pt,
+    % ylabel near ticks,
+    % xtick={10,12,14,16,18,20,22,24},
+    yticklabel style={/pgf/number format/fixed}%,
+    % legend style={at={(0.25,0.98)}, anchor=north}
+]
+
+%====================
+
+\nextgroupplot[ylabel=Proof Size (Kilobytes), title=Aurora, legend to name=zelda3]
+\addplot table [x=Range, y  expr=\thisrow{bytes}/1024, col sep=comma] {CSVs/csv_files_BN254/LIBIOP-Proof_size_Merge.csv};
+\addlegendentry{$\pi_\textsf{Merge}$};
+\addplot table [x=Range, y expr=\thisrow{bytes}/1024, col sep=comma] {CSVs/csv_files_BN254/LIBIOP-Proof_size_Div.csv};
+\addlegendentry{$\pi_\textsf{Div}$};
+\addplot table [x=Range, y expr=\thisrow{bytes}/1024, col sep=comma] {CSVs/csv_files_BN254/LIBIOP-Proof_size_Trans.csv};
+\addlegendentry{$\pi_\textsf{Trans}$};
+\addplot table [x=Range, y expr=\thisrow{bytes}/1024, col sep=comma] {CSVs/csv_files_BN254/LIBIOP-Proof_size_Auth.csv};
+\addlegendentry{$\pi_\textsf{Auth}$};
+% \coordinate (bot3) at (rel axis cs:1.1,-.55);
+
+%====================
+% \nextgroupplot[ title=Aurora (BLS12-381)]
+% \addplot table [x=Range, y={bytes}, col sep=comma] {CSVs/csv_files_BLS12-381/LIBIOP-Proof_size_Merge.csv};
+% \addplot table [x=Range, y={bytes}, col sep=comma] {CSVs/csv_files_BLS12-381/LIBIOP-Proof_size_Div.csv};
+% \addplot table [x=Range, y={bytes}, col sep=comma] {CSVs/csv_files_BLS12-381/LIBIOP-Proof_size_Trans.csv};
+% \addplot table [x=Range, y={bytes}, col sep=comma] {CSVs/csv_files_BLS12-381/LIBIOP-Proof_size_Auth.csv};
+\coordinate (bot3) at (rel axis cs:1.21,0.5);
+
+
+
+
+% \coordinate (bot2) at (rel axis cs:.5,-.55);
+\end{groupplot}
+\node at(bot3){\pgfplotslegendfromname{zelda3}};
+\end{tikzpicture}
+% \end{figure}
+
+% \end{document}

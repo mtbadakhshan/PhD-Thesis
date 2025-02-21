@@ -1,0 +1,213 @@
+% T I T L E   P A G E
+% -------------------
+% Last updated August 24, 2023, by IST-Client Services
+% The title page is counted as page `i' but we need to suppress the
+% page number. Also, we don't want any headers or footers.
+\pagestyle{empty}
+\pagenumbering{roman}
+
+% The contents of the title page are specified in the "titlepage"
+% environment.
+\begin{titlepage}
+        \begin{center}
+        \vspace*{1.0cm}
+
+        \Huge
+        {\bf Design and Implementation of a Privacy-Preserving Decentralized Framework and Accelerating Post-Quantum Secure zkSNARKs}
+
+        %Privacy Preserving Framework Design and Acceleration of Post-Quantum zkSNARKs
+
+        \vspace*{1.0cm}
+
+        \normalsize
+        by \\
+
+        \vspace*{1.0cm}
+
+        \Large
+        Mohammadtaghi Badakhshan \\
+
+        \vspace*{2.5cm}
+
+        \normalsize
+        A thesis \\
+        presented to the University of Waterloo \\ 
+        in fulfillment of the \\
+        thesis requirement for the degree of \\
+        Doctor of Philosophy \\
+        in \\
+        Electrical and Computer Engineering \\
+
+        \vspace*{1.5cm}
+
+        Waterloo, Ontario, Canada, 2025 \\
+
+        \vspace*{1.0cm}
+
+        \copyright\ Mohammadtaghi Badakhshan 2025 \\
+        \end{center}
+\end{titlepage}
+
+% The rest of the front pages should contain no headers and be numbered using Roman numerals starting with `ii'
+\pagestyle{plain}
+\setcounter{page}{2}
+
+\cleardoublepage % Ends the current page and causes all figures and tables that have so far appeared in the input to be printed.
+% In a two-sided printing style, it also makes the next page a right-hand (odd-numbered) page, producing a blank page if necessary.
+\phantomsection    % allows hyperref to link to the correct page
+ 
+% E X A M I N I N G   C O M M I T T E E (Required for Ph.D. theses only)
+% Remove or comment out the lines below to remove this page
+\addcontentsline{toc}{chapter}{Examining Committee}
+\begin{center}\textbf{Examining Committee Membership}\end{center}
+  \noindent
+The following served on the Examining Committee for this thesis. The decision of the Examining Committee is by majority vote.
+  \bigskip
+  
+  \noindent
+\begin{tabbing}
+Internal-External Member: \=  \kill % using longest text to define tab length
+External Examiner: \>  Rei Safavi-Naini \\ 
+\> Professor, Dept. of Computer Science,\\
+\> University of Calgary \\
+\end{tabbing} 
+  \bigskip
+  
+  \noindent
+\begin{tabbing}
+Internal-External Member: \=  \kill % using longest text to define tab length
+Supervisor: \> Guang Gong \\
+\> Professor, Dept. of Electrical and Computer Engineering,\\
+\> University of Waterloo \\
+
+\end{tabbing}
+  \bigskip
+  
+  \noindent
+  \begin{tabbing}
+Internal-External Member: \=  \kill % using longest text to define tab length
+Internal Member: \> Pamela Python \\
+\> Professor, Dept. of Electrical and Computer Engineering,\\
+\> University of Waterloo \\
+\end{tabbing}
+  \bigskip
+
+  \noindent
+  \begin{tabbing}
+Internal-External Member: \=  \kill % using longest text to define tab length
+Internal Member: \> Pamela Python \\
+\> Professor, Dept. of Electrical and Computer Engineering,\\
+\> University of Waterloo \\
+\end{tabbing}
+  \bigskip
+
+  
+  \noindent
+\begin{tabbing}
+Internal-External Member: \=  \kill % using longest text to define tab length
+Internal-External Member: \>  Douglas Stebila  \\
+\> Professor, Dept. of Combinatorics and Optimization,\\ \> University of Waterloo \\
+\end{tabbing}
+  \bigskip
+  
+
+\cleardoublepage
+\phantomsection    % allows hyperref to link to the correct page
+
+% D E C L A R A T I O N   P A G E
+% -------------------------------
+  % The following is a sample Declaration Page as provided by the GSPA
+  % December 13th, 2006.  It is designed for an electronic thesis.
+ \addcontentsline{toc}{chapter}{Author's Declaration}
+ \begin{center}\textbf{Author's Declaration}\end{center}
+
+ % Author's Declaration Option ONE - line 118:  
+ \noindent
+% This thesis consists of material all of which I authored or co-authored: see Statement of
+% Contributions included in the thesis.  %This is a true copy of the thesis, including any required final revisions, as accepted by my examiners.
+  % Author's Declaration Option TWO - line 121. Updated August 21st, 2023. Use the following declaration text if appropriate by removing the percent character and space at the beginning of line 121, and add a percent symbol and space at line 118 to change Author's Declaration Option ONE to a remark that is not printed.
+ \noindent  
+This thesis consists of material all of which I authored or co-authored: see Statement of Contributions included in the thesis. This is a true copy of the thesis, including any required final revisions, as accepted by my examiners.
+  \bigskip
+  
+  \noindent
+I understand that my thesis may be made electronically available to the public.
+
+\cleardoublepage
+\phantomsection    % allows hyperref to link to the correct page
+
+% STATEMENT OF CONTRIBUTIONS
+% ---------------
+\addcontentsline{toc}{chapter}{Statement of Contributions}
+\begin{center}\textbf{Statement of Contributions}\end{center}
+
+\cleardoublepage
+\phantomsection    % allows hyperref to link to the correct page
+% A B S T R A C T
+% ---------------
+\addcontentsline{toc}{chapter}{Abstract}
+\begin{center}\textbf{Abstract}\end{center}
+
+This is the abstract.
+
+
+
+\cleardoublepage
+\phantomsection    % allows hyperref to link to the correct page
+
+% A C K N O W L E D G E M E N T S
+% -------------------------------
+\addcontentsline{toc}{chapter}{Acknowledgements}
+\begin{center}\textbf{Acknowledgements}\end{center}
+
+I would like to thank all the little people who made this thesis possible.
+\cleardoublepage
+\phantomsection    % allows hyperref to link to the correct page
+
+% D E D I C A T I O N
+% -------------------
+\addcontentsline{toc}{chapter}{Dedication}
+\begin{center}\textbf{Dedication}\end{center}
+
+To my parents.
+\cleardoublepage
+\phantomsection    % allows hyperref to link to the correct page
+
+% T A B L E   O F   C O N T E N T S
+% ---------------------------------
+\renewcommand\contentsname{Table of Contents}
+\tableofcontents
+\cleardoublepage
+\phantomsection    % allows hyperref to link to the correct page
+
+% L I S T   O F   F I G U R E S
+% -----------------------------
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\cleardoublepage
+\phantomsection		% allows hyperref to link to the correct page
+
+% L I S T   O F   T A B L E S
+% ---------------------------
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\cleardoublepage
+\phantomsection		% allows hyperref to link to the correct page
+
+% L I S T   O F   A B B R E V I A T I O N S
+% ---------------------------
+\renewcommand*{\abbreviationsname}{List of Abbreviations}
+\printglossary[type=abbreviations]
+\cleardoublepage
+\phantomsection		% allows hyperref to link to the correct page
+
+% L I S T   O F   S Y M B O L S
+% ---------------------------
+\printglossary[type=symbols]
+\cleardoublepage
+\phantomsection		% allows hyperref to link to the correct page
+
+
+% Change page numbering back to Arabic numerals
+\pagenumbering{arabic}
+

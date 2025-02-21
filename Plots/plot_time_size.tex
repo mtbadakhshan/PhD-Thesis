@@ -1,0 +1,122 @@
+% \documentclass{standalone}
+% \usepackage{pgfplots}
+% \pgfplotsset{compat=1.18} % Adjust based on your pgfplots version
+% \usepgfplotslibrary{groupplots} % Load the groupplots library for groupplot functionality
+% \usepackage{siunitx}
+% \pgfplotmarksize=1.5pt
+% \begin{document}
+
+% % \begin{figure}
+% \centering
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={
+        group size=2 by 2,
+        horizontal sep=1.2cm,
+        vertical sep=2cm,
+    },
+    width=10cm,
+    height=7cm,
+    xlabel=L,
+    ylabel shift=-12pt,
+    ymode=log,
+    grid=both,
+    major grid style={black!50},  % Style for major grid lines
+    minor grid style={gray!20},   % Style for minor grid lines
+    minor tick num=1,             % Number of minor ticks between major ticks
+    % ymin=5e4, ymax=.6e9,
+    % mark size=1pt,
+    % ylabel near ticks,
+    % xtick={10,12,14,16,18,20,22,24},
+    yticklabel style={/pgf/number format/fixed}%,
+    % legend style={at={(0.25,0.98)}, anchor=north}
+]
+
+%====================
+\nextgroupplot[title=\textsf{Auth}, ylabel=Time (\si{\second}),  legend to name=zelda, legend style={
+        legend columns=2, column sep=0.25cm}]
+
+\addplot[mark=oplus, color=blue] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_PROVER_LIBIOP_Auth.csv};
+\addlegendentry{Aurora Prover (255-bit)};
+\addplot[mark=square, color=red] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_PROVER_LIBIOP_Auth.csv};
+\addlegendentry{Aurora Prover (254-bit)};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_VERIFIER_LIBIOP_Auth.csv};
+\addlegendentry{Aurora Verifier (255-bit)};
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_VERIFIER_LIBIOP_Auth.csv};
+\addlegendentry{Aurora Verifier (254-bit)};
+
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_PROVER_LIBSNARK_Auth.csv};
+\addlegendentry{Groth16 Prover (BLS12-381)};
+\addplot[mark=diamond*, color=red] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_PROVER_LIBSNARK_Auth.csv};
+\addlegendentry{Groth16 Prover (BN254)};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_VERIFIER_LIBSNARK_Auth.csv};
+\addlegendentry{Groth16 Verifier (BLS12-381)};
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_VERIFIER_LIBSNARK_Auth.csv};
+\addlegendentry{Groth16 Verifier (BN254)};
+
+
+%====================
+\nextgroupplot[ title=\textsf{Trans}]
+\addplot[mark=oplus, color=blue] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_PROVER_LIBIOP_Trans.csv};
+\addplot[mark=square, color=red]  table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_PROVER_LIBIOP_Trans.csv};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_VERIFIER_LIBIOP_Trans.csv};
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_VERIFIER_LIBIOP_Trans.csv};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_PROVER_LIBSNARK_Trans.csv};
+\addplot[mark=diamond*, color=red] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_PROVER_LIBSNARK_Trans.csv};
+
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_VERIFIER_LIBSNARK_Trans.csv};
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_VERIFIER_LIBSNARK_Trans.csv};
+
+%====================
+\nextgroupplot[ylabel=Time (\si{\second}), title=\textsf{Merge}]
+\addplot[mark=oplus, color=blue] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_PROVER_LIBIOP_Merge.csv};
+\addplot[mark=square, color=red]  table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_PROVER_LIBIOP_Merge.csv};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_VERIFIER_LIBIOP_Merge.csv};
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_VERIFIER_LIBIOP_Merge.csv};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_PROVER_LIBSNARK_Merge.csv};
+\addplot[mark=diamond*, color=red] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_PROVER_LIBSNARK_Merge.csv};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_VERIFIER_LIBSNARK_Merge.csv};
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_VERIFIER_LIBSNARK_Merge.csv};
+
+%====================
+\nextgroupplot[ title=\textsf{Div}]
+\addplot[mark=oplus, color=blue] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_PROVER_LIBIOP_Div.csv};
+\addplot[mark=square, color=red]  table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_PROVER_LIBIOP_Div.csv};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_VERIFIER_LIBIOP_Div.csv};
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_VERIFIER_LIBIOP_Div.csv};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_PROVER_LIBSNARK_Div.csv};
+\addplot[mark=diamond*, color=red] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_PROVER_LIBSNARK_Div.csv};
+
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BLS12-381/BM_VERIFIER_LIBSNARK_Div.csv};
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/csv_files_BN254/BM_VERIFIER_LIBSNARK_Div.csv};
+\coordinate (bot1) at (rel axis cs:-0.07,-.55);
+
+%***********************************
+%***********************************
+% \nextgroupplot[cycle list shift=8, ymode=normal, ylabel=Size (Bytes), title=$\pi_\textsf{Auth}$, legend to name=zelda2]
+
+% \addplot table [x=Range, y={bytes}, col sep=comma] {CSVs/csv_files_BN254/LIBIOP-Proof_size_Auth.csv};
+% \addlegendentry{Aurora Proof Size};
+% \addplot table [x=Range, y={bytes}, col sep=comma] {CSVs/csv_files_BN254/LIBSNARK-Proof_size_Auth.csv};
+% \addlegendentry{Groth16 Proof Size };
+% \coordinate (bot2) at (rel axis cs:.5,-.55);
+
+\end{groupplot}
+
+\node at(bot1){\pgfplotslegendfromname{zelda}};
+% \node at(bot2){\pgfplotslegendfromname{zelda2}};
+\end{tikzpicture}
+% \end{figure}
+
+% \end{document}
