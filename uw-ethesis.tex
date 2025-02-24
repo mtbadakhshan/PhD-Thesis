@@ -83,6 +83,8 @@
 \usepackage[pdftex]{graphicx} % For including graphics N.B. pdftex graphics driver 
 \usepackage{booktabs} 
 \usepackage{tabularray, multirow, array, tabularx}
+\usepackage{makecell}
+
 
 \usepackage{algorithmicx}
 \usepackage{algorithm}
@@ -121,6 +123,30 @@ every path/.style = {semithick}
 \newtheorem{lemma}{Lemma}[chapter]
 
 \def\CC{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\bf ++}\hspace{.2em}}}
+
+
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{darkred}{rgb}{0.55, 0.0, 0.0}
+
+\newcommand{\fullcircle}{\tikz\draw[fill=black] (0,0) circle (.5ex);}
+\newcommand{\halfcircle}{\tikz\draw[fill=black] (0,0) -- (90:.5ex) arc (90:270:.5ex) -- cycle;}
+\newcommand{\emptycircle}{\tikz\draw (0,0) circle (.5ex);}
+
+
+\newcommand{\fullcirclegreen}{\protect\tikz\protect\draw[draw=darkgreen, fill=darkgreen] (0,0) circle (.5ex);}
+\newcommand{\halfcirclegreen}{\protect\tikz\protect\draw[draw=darkgreen, fill=darkgreen] (0,0) -- (90:.5ex) arc (90:270:.5ex) -- cycle;}
+\newcommand{\emptycirclegreen}{\protect\tikz\protect\draw[draw=darkgreen] (0,0) circle (.5ex);}
+
+\newcommand{\fullcirclered}{\protect\tikz\protect\draw[draw=darkred, fill=darkred] (0,0) circle (.5ex);}
+\newcommand{\halfcirclered}{\protect\tikz\protect\draw[draw=darkred, fill=darkred] (0,0) -- (90:.5ex) arc (90:270:.5ex) -- cycle;}
+\newcommand{\emptycirclered}{\protect\tikz\protect\draw[draw=darkred] (0,0) circle (.5ex);}
+
+\newcommand{\fulldiamondred}{\protect\tikz\protect\draw[draw=darkred, fill=darkred] 
+	(0,.5ex) -- (.5ex,0) -- (0,-.5ex) -- (-.5ex,0) -- cycle;}
+\newcommand{\halfdiamondred}{\protect\tikz\protect\draw[draw=darkred, fill=darkred] 
+	(0,.5ex) -- (.5ex,0) -- (0,-.5ex) -- cycle;}
+\newcommand{\emptydiamondred}{\protect\tikz\protect\draw[draw=darkred] 
+	(0,.5ex) -- (.5ex,0) -- (0,-.5ex) -- (-.5ex,0) -- cycle;}
 
 
 % Hyperlinks make it very easy to navigate an electronic document.
@@ -222,8 +248,8 @@ every path/.style = {semithick}
 % \input{chapters/1-chapter-introduction}
 % \input{chapters/2-chapter-preliminaries}
 % \input{chapters/3-chapter-literature-review}
-% \input{chapters/4-chapter-zupply-framework-design}
-% \input{chapters/5-chapter-zupply-framework-security-analysys}
+\input{chapters/4-chapter-zupply-framework-design}
+\input{chapters/5-chapter-zupply-framework-security-analysys}
 \input{chapters/6-chapter-zupply-framework-implementation}
 % \input{chapters/7-chapter-additive-fft-implementation}
 % \input{chapters/8-chapter-accelerating-aurora-through-optimizing-additive-FFT}

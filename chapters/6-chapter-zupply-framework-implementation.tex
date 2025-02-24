@@ -12,7 +12,7 @@ In the previous two chapters, we introduced the design and security analysis of 
 instantiation of core building blocks, and the implementation of the zero-knowledge proving and verification algorithms. Specifically, we describe the arithmetic circuits for the \gls{np} problems associated with \textsf{Auth}, \textsf{Trans}, \textsf{Merge}, and \textsf{Div}. These circuits generate \gls{r1cs} instances in a manner that enables succinct zero-knowledge proofs (\gls{zkp}s) while preserving confidentiality. To optimize on-chain costs (i.e., smart contract execution) we minimize the public inputs to these circuits. 
 We provide two implementation variants of Zupply based on its \gls{zkp} algorithms. The first employs Groth16 \cite{Groth2016} \gls{zksnark} over BN254 \cite{BNcurve} and BLS12-381 \cite{BLS_curve2003} elliptic curves, accommodating different security levels. The second leverages Aurora \cite{Aurora}, a \gls{zksnark} designed for a transparent setup and post-quantum security against quantum-capable malicious provers.
 
-Zupply is implemented in C++ and Solidity, demonstrating both computational and cost efficiency. This development validates the framework's practicality for real-world applications. While directed acyclic graphs (\gls{dag}s) are widely used for maintaining product histories in supply chains, Zupply's utility extends beyond this domain. We show that Zupply provides a practical, cost-efficient, and privacy-preserving solution for decentralized supply chain management (\gls{scm}) systems.
+Zupply is implemented in \CC and Solidity, demonstrating both computational and cost efficiency. This development validates the framework's practicality for real-world applications. While directed acyclic graphs (\gls{dag}s) are widely used for maintaining product histories in supply chains, Zupply's utility extends beyond this domain. We show that Zupply provides a practical, cost-efficient, and privacy-preserving solution for decentralized supply chain management (\gls{scm}) systems.
 
 \section{Zupply Arithmetic Circuits}
 \label{sec:Zupply Arithmetic Circuits}
@@ -208,7 +208,7 @@ In this section, we provide a detailed overview of the \CC software implementati
 To assess the cost overhead introduced by privacy preservation using \gls{zkp}s in the Zupply framework for a supply chain management (\gls{scm}) application, we propose a non-privacy-preserving baseline model that maintains the same functionality; specifically, (non-anonymous) authentication tokens for off-chain data uploading. In the baseline model's smart contract, a token owned by an entity $e_i$ holds $e_i$'s address ($\text{BPAddr}^{e_i}$) and is only transferable by $e_i$. Furthermore, each token holds a quantity, enabling the merging and dividing of tokens. The token owner $e_i$ can use the private key corresponding to $\text{BPAddr}^{e_i}$ to sign off-chain data records, as explained in ERC-4361 \cite{ERC-4361}, or transfer the token.
 
 \subsection{Groth16 Based Implementation}
-For the Groth16 \gls{zksnark} instantiation, we employed libsnark \cite{libsnark}, a \CC library developed by SCIPR lab \cite{SCIPR}, which offers implementations of the Groth16 \gls{zksnark} scheme for provers and verifiers. This library was instrumental in generating \gls{r1cs} constraints for \gls{np} problems within our framework, achieved by implementing them as arithmetic circuits. Additionally, to integrate the Groth 16 verification algorithm into $\mathcal{C}_Z$, we utilized the ZoKrates \cite{ZoKrates} toolbox. As previously discussed, we only provide the Zupply smart contract implementation using Groth16 over BN254. 
+For the Groth16 \gls{zksnark} instantiation, we employed libsnark \cite{libsnark}, a \CC library developed by SCIPR lab \cite{SCIPR}, which offers implementations of the Groth16 \gls{zksnark} scheme for provers and verifiers. This library was instrumental in generating \gls{r1cs} constraints for \gls{np} problems within our framework, achieved by implementing them as arithmetic circuits. Additionally, to integrate the Groth16 verification algorithm into $\mathcal{C}_Z$, we utilized the ZoKrates \cite{ZoKrates} toolbox. As previously discussed, we only provide the Zupply smart contract implementation using Groth16 over BN254. 
 
 Table \ref{tab:transaction_gas} presents the costs associated with executing transactions in both the Zupply framework and the baseline model on the Ethereum blockchain. 
 At the time of deploying $\mathcal{C}_Z$, some one-time costs should be paid as it uploads the code, a 256-bit \texttt{rt}, and all verification keys except $\mathsf{vk}_\mathsf{Auth}$ to blockchain. $\mathsf{vk}$ sizes are listed in Table \ref{tab:zksize}.  Transactions $\texttt{tx}_\mathsf{Trans}$, $\texttt{tx}_\mathsf{Merge}$, and $\texttt{tx}_\mathsf{Div}$ execute \textsf{VerifyTX} on  $\mathcal{C}_Z$ and contain a 256 bytes $\pi$, one or two $20 \times 256$ bits $\mathsf{path}$ (for $L=20$), new $256$-bit \texttt{rt}s,  $256$-bit \texttt{cm}s, and $256$-bit \texttt{eol}s. 
@@ -224,7 +224,7 @@ The current implementation of the Aurora \gls{zksnark} in libiop \cite{libiop} r
 
 
 \begin{table}[t] % Gas price 32 Gwei
-	\caption[The cost of transactions in the Zupply framework]{Comparison of the transaction costs for the baseline model and the $\mathcal{C}_Z$ smart contract based on Groth16 over BN254 curve and $L=20$. The costs are in Gas and USD, based on ETH's value of USD 2,030.01 and gas price of 32 Gwei at the time of writing.}
+	\caption[The Cost of Transactions in the Zupply Framework]{Comparison of the transaction costs for the baseline model and the $\mathcal{C}_Z$ smart contract based on Groth16 over BN254 curve and $L=20$. The costs are in Gas and USD, based on ETH's value of USD 2,030.01 and gas price of 32 Gwei at the time of writing.}
 	\centering
 {
 	\begin{tabular}{ccccc}
@@ -289,34 +289,75 @@ The experiments for the prover and verifier algorithms in Groth16 were conducted
 
 Figure~\ref{fig:proof_size} illustrates the proof sizes for Aurora. The results are provided for each circuit in the Zupply framework, with the number of \textsf{MHT} layers ranging from $10$ to $25$. Note that the proof size for Groth16 is independent of the circuit; it is 128 bytes for the BN254 curve and 192 bytes for the BLS12-381 curve. As discussed in Section~\ref{sec:aurora-based-Implementation}, the Aurora implementation in Libiop \cite{libiop} increases the prover and verifier computation times and proof sizes to match those of a circuit where the number of constraints, public inputs, and variables are equal to the smallest power of two that exceeds the actual values in the circuit. 
 
+\section{Performance Analysis}
 
-Figure ~\ref{fig:execution_time} demonstrates that operating over BLS12-381 significantly increases the execution times of Groth16 algorithms. This disparity arises because Groth16 algorithms rely heavily on bilinear pairings over elliptic curves. Pairing operations on the BLS12-381 curve are more computationally intensive than those on BN254, primarily due to BLS12-381's larger base field size of 381 bits compared to BN254's 254 bits. However, the scalar field sizes of the two curves are nearly identical, with BN254 and BLS12-381 having scalar fields of approximately 254 and 255 bits, respectively. 
 
+Figure ~\ref{fig:execution_time} demonstrates that operating over BLS12-381 significantly increases the execution times of Groth16 algorithms. This disparity arises because Groth16 algorithms rely heavily on bilinear pairings over elliptic curves. Pairing operations on the BLS12-381 curve are more computationally intensive than those on BN254, primarily due to BLS12-381's larger base field size of 381 bits compared to BN254's 254 bits. However, the scalar field sizes of the two curves are nearly identical, with BN254 and BLS12-381 having scalar fields of  254 and 255 bits, respectively. 
 
-\newpage
+The results clearly show that adopting Aurora into the Zupply framework adds a significant overhead to the runtime of the algorithms. This illustrates the importance of both theoretical and implementation optimizations for current post-quantum transparent setup \gls{zksnark}s and the arithmetic circuits of Zupply. Aurora and many other post-quantum transparent setup \gls{zksnark}s, such as STARK \cite{Ben-Sasson2018STARK} and Fractal \cite{Chiesa2020Fractal}, heavily rely on the fast Fourier transform (\gls{fft}). Although there has been a great deal of research aimed at optimizing these algorithms, using special basis elements (e.g., the Cantor special basis) to construct evaluation domains in these \gls{zksnark}s can still significantly reduce the runtime of additive \gls{fft} algorithms. On the other hand, the arithmetic circuits can be optimized by replacing the standard cryptographic hash function we used (i.e., SHA-256) with algebraic hash functions such as Poseidon \cite{Grassi2021Poseidon}, which require fewer \gls{r1cs} constraints.
 
 Entities handling product histories must store all proving keys ($\mathsf{pk}_\mathbbm{x}$, see Table \ref{tab:zksize}) and a \textsf{MHT} of 32 MB for $L=20$. This requires significant storage due to numerous constraints, but it is manageable even on smartphones. In contrast, auditors, like final customers, only need to store $\mathsf{vk}_\mathsf{Auth}$ (less than 1 KB) and audit only the relevant records.
 
+\section{Evaluation}
+Zupply employs off-chain data storage while anonymously authenticating the data, which is a significant advantage considering the high costs associated with on-chain storage\footnote{For example, storing a 1 MB data record on the Ethereum blockchain currently costs over USD 38,000 based on ETH’s value at the time of writing.}. None of the studied related works could provide anonymous authenticated off-chain storage. On-chain storage forces all full nodes in the blockchain platform to maintain a replication of each data record, which is why it is very expensive.
+
+Moreover, the separation of storage and blockchain enhances anonymity, even when an adversary's access to $\mathcal{O}^\mathsf{Attr}$, which is described in Definition \ref{def:Adversary Assumptions}, is assumed. In other words, Zupply employs a more restrictive adversary model in which the underlying blockchain platform (e.g., Ethereum) does not preserve the anonymity of the transaction issuer. Then, if a data record is uploaded to the blockchain platform, the identity of the data uploader will be linked to the data record. However, this adversary's assumption is not considered in any of the previous works. For example, Mesh \cite{altawy2019mesh} and zkLedger \cite{zkLedger2018}, which are deployed over public blockchains, are prone to this attack.
+
+
+To achive unlinkability among entities involved in a token transfer, we proposed an anonymous authentication token ownership transfer algorithm (\gls{aatot}), presented in Section \ref{sec:Ownership Transfer}. zkLedger requires involving the entire set of entities (including non-participating ones) in each transactions, which has a negative impact on its scalability. zkLedger commits to a value of zero for non-participating entities to obscure the link between the entities involved in the transaction. This increases the size of transactions in zkLedger by increasing the number of participants.  In contrast, the size of transactions in Zupply is independent of the number of entities. Mesh requires the first entity in a supply chain to send a list of the accounts of the involved entities in the supply chain to a smart contract, while the list is sorted by the order in which the products are going to be owned. Therefore, it cannot  provide unlinkability. Moreover, since adding a new entity to the supply chain list in the Mesh framework requires a new setup, Mesh cannot provide a good scalability.
+
+DECOUPLES \cite{Maouchi2019DECOUPLES} proposes a layer-1 blockchain where  multilayered linkable spontaneous anonymous group (\gls{mslag}) ring signatures and stealth addresses are used to provide full anonymity and unlinkability.  However, DECOUPLES is not fully decentralized (trustless) because it requires the mass adoption of the protocol among a large number of miners. However, Zupply does not require any changes to the layer-1 blockchain platform and is fully applicable to existing public blockchains. This enables it to facilitate the complete decentralization of current public blockchains. Additionally, although Mesh also operates over decentralized public blockchains, it requires a centralized Mesh server, which makes the protocol not fully trustless.
+
+
+\begin{table}
+	\caption[Comparison of Security Properties and Cost Efficiency in Privacy-Preserving Supply Chain Management Schemes]{Comparison of security properties and costs among Zupply, related works, and baseline model.
+		\fullcirclegreen, \halfcirclegreen, and \emptycirclegreen \ indicate that the framework satisfies, partially satisfies, and does not satisfy a security property, respectively. \fulldiamondred, \halfdiamondred, and \emptydiamondred \ indicate that the framework has high, medium, and low cost, respectively.
+	}
+	\centering
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+		\hline
+		& \multicolumn{6}{c|}{Security Properties} & \multicolumn{5}{c|}{Costs} \\ \cline{2-12} 
+		& \multirow{2}{0.4cm}{\rotatebox[origin=c]{90}{\makebox[3.5cm][l]{Anonymity}}} 
+		& \multirow{2}{0.4cm}{\rotatebox[origin=c]{90}{\makebox[3.5cm][l]{$\text{AATOT}^*$}}} 
+		& \multirow{2}{0.4cm}{\rotatebox[origin=c]{90}{\makebox[3.5cm][l]{Unlinkability}}} 
+		& \multirow{2}{0.4cm}{\rotatebox[origin=c]{90}{\makebox[3.5cm][l]{Integrity}}} 
+		& \multirow{2}{0.4cm}{\rotatebox[origin=c]{90}{\makebox[3.5cm][l]{Decentralization}}} 
+		& \multirow{2}{0.4cm}{\rotatebox[origin=c]{90}{\makebox[3.5cm][l]{{No Central Server}}}} 
+		& \multicolumn{2}{c|}{{Storage}} 
+		& \multirow{2}{0.4cm}{\rotatebox[origin=c]{90}{\makebox[3.5cm][l]{{Transfer (on-chain)}}}} 
+		& \multirow{2}{0.4cm}{\rotatebox[origin=c]{90}{\makebox[3.5cm][l]
+				{{Audit (off-chain)}}}} 
+		& \multirow{2}{0.4cm}{\rotatebox[origin=c]{90}{\makebox[3.5cm][l]{Scalability}}} \\ \cline{8-9}
+		\multirow{-2}{*}{\makecell[bc]{Framework}}& & & & & & & 
+		\makebox[0.4cm][l]{\rotatebox[origin=c]{90}{\makebox[3.2cm][l]{ On-chain}}} 
+		& \makebox[0.4cm][l]{\rotatebox[origin=c]{90}{\makebox[3.2cm][l]{ Entity Software}}} & & & \\ \hline \hline
+		\textbf{Mesh} \cite{altawy2019mesh}                    & \halfcirclegreen & \makebox[0pt][c]{\scalebox{0.7}[1]{N/A}} & \emptycirclegreen & \fullcirclegreen & \halfcirclegreen & \emptycirclegreen & \fulldiamondred & \emptydiamondred & \makebox[0pt][c]{\scalebox{0.7}[1]{N/A}} & \makebox[0pt][c]{\scalebox{0.7}[1]{N/A}} & \fulldiamondred \\ \hline
+		\textbf{DECOUPLES} \cite{Maouchi2019DECOUPLES}            & \fullcirclegreen & \makebox[0pt][c]{\scalebox{0.7}[1]{N/A}} & \fullcirclegreen & \fullcirclegreen & \halfcirclegreen & \fullcirclegreen & \fulldiamondred & \emptydiamondred & \emptydiamondred & \makebox[0pt][c]{\scalebox{0.7}[1]{N/A}} & \emptydiamondred \\ \hline
+		\textbf{zkLedger} \cite{zkLedger2018}     & \halfcirclegreen & \makebox[0pt][c]{\scalebox{0.7}[1]{N/A}} & \fullcirclegreen & \fullcirclegreen & \fullcirclegreen & \fullcirclegreen & \fulldiamondred & \emptydiamondred & \halfdiamondred & \fulldiamondred & \fulldiamondred \\ \hline
+		\textbf{Zupply}     & \fullcirclegreen & \fullcirclegreen & \fullcirclegreen & \fullcirclegreen & \fullcirclegreen & \fullcirclegreen & \emptydiamondred & \halfdiamondred & \emptydiamondred & \emptydiamondred & \emptydiamondred \\ \hline
+		\textbf{Baseline model}          & \emptycirclegreen & \makebox[0pt][c]{\scalebox{0.7}[1]{N/A}} & \emptycirclegreen & \fullcirclegreen & \fullcirclegreen & \fullcirclegreen & \emptydiamondred & \emptydiamondred & \emptydiamondred & \emptydiamondred & \emptydiamondred \\ \hline
+		\multicolumn{12}{l}{{\tiny $*$Anonymous Authentication Token Ownership Transfer}} 
+	\end{tabular}
+	\label{tab:compare}
+\end{table}
 
 
 
-\newpage
+In Zupply, entities who are actively involved in a supply chain (i.e., those who may possess a product and upload product histories ) should retain all proving keys (i.e., $\mathsf{pk}_\mathbbm{x}$) in their local storage, with sizes as reported in Table \ref{tab:zksize}. Additionally, they must maintain \textsf{MHT}, which occupies 32 MB if it contains 20 layers. Accordingly, entities in Zupply need extensive storage due to the \gls{r1cs} relations related to the NP statements of Zupply, which have a large number of constraints. However, providing the required storage is feasible even on smartphones. In contrast, entities auditing the history of data records, such as final customers, only need to maintain $\mathsf{vk}_\mathsf{Auth}$, less than a kilobyte in size, and audit data records relevant to their product. However, within the zkLedger framework, a customer (likely acting as an offline auditor) must verify all transactions, both related and unrelated to the product, to be able to audit the product history. A transaction in zkLedger is analogous to a data record in the Zupply ecosystem. Finally, Table \ref{tab:compare} summarizes the comparison between the frameworks studied in this research.
 
-The reported costs in Table \ref{tab:transaction_gas} underscore the practicality of the Zupply framework.
+\section{Summary}
 
-This is further analyzed in the following section, where we examine the prover and verifier algorithms, as well as the proof size, for the Zupply arithmetic circuits.
+In summary, this chapter presented the designs of four arithmetic circuits, \textsf{Auth}, \textsf{Trans}, \textsf{Merge}, and \textsf{Div}, employed in the Zupply framework. It also introduced two implementations of this framework and compared their performance. The first implementation utilizes Groth16~\cite{Groth2016} over two elliptic curves, the BN254 curve~\cite{BNcurve} that  is computationally efficient but limited to a security level of 100 bits \cite{Barbulescu2019} and the BLS12-381 curve~\cite{BLS_curve2003} that achieves a 128-bit security level, as recommended by NIST even for post-2030 applications in the absence of quantum computers~\cite{NIST-SP-800-57-Part1-Rev5}. Figure \ref{fig:execution_time} shows the computational overhead enforced by using the BLS12-381 curve.  The reported costs in Table \ref{tab:transaction_gas} underscore the practicality of the Zupply framework using Groth16 over BN254.
 
-Consequently, we are open to employing more secure curves, once their associated pre-compiled contracts become available on Ethereum. 
-
-
-
-
-As other schemes evolve and become more practical for public blockchains, they may supplant Groth16 in our framework. However, Groth16 lacks post-quantum security and relies on a trusted setup.
+ Our framework extends beyond Groth16, accommodating other zkSNARK instantiations. Notably, Aurora~\cite{Aurora2019} is transparent setup and offers potential post-quantum security.
+The second implementation replaced the Groth16 zkSNARK protocol with Aurora, which not only is secure against quantum-enabled malicious provers attempting to forge invalid proofs but also enables the framework to operate without a trusted setup, whether at initialization or during updates. Updates may include increasing the number of \textsf{MHT} layers or modifying the structure of anonymous authentication tokens. Figures \ref{fig:execution_time} compares the computation times of the prover and verifier algorithms of Groth16 and Aurora, given the arithmetic circuits, and Figure \ref{fig:proof_size} shows shows the proof sizes in Aurora.  As the results indicate, the Aurora zkSNARK introduces a significant overhead in the runtime of the algorithms within the Zupply framework. This highlights the importance of optimizing algorithms for post-quantum secure zkSNARKs, such as Aurora. Therefore, the next two chapters focus on accelerating post-quantum secure zkSNARKs.
 
 
 
 
- Our framework extends beyond Groth16, accommodating other zkSNARK instantiations like Plonk \cite{Gabizon2019PLONK}, Aurora \cite{Aurora}, and Polaris \cite{Polaris} which offer a transparent setup.  Notably, Aurora and Polaris also offer potential post-quantum security.
+
+
+
 
 
  
