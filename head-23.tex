@@ -1,0 +1,231 @@
+
+
+\usepackage{multicol}
+
+
+
+
+\usepackage{float}
+%\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{multirow,makecell,mathtools,threeparttable}
+%\usepackage{bbold}
+\usepackage{mdframed}
+
+\usepackage{bm}
+\mdfsetup{skipabove=2mm, skipbelow=2mm}
+
+%%%%%%%%%%%%%%
+
+
+
+
+
+\usepackage{amsfonts,euscript,fancybox,color}
+
+\usepackage{graphicx, psfrag,fancyhdr,layout,appendix,subcaption}
+\usepackage{listings}
+\usepackage{amsmath,amssymb, enumerate}
+%%%%%%%%
+
+\usepackage{caption}
+%subcaption}
+
+%\usepackage[colorlinks=false, pdfborder={0 0 0}]{hyperref}
+
+\usepackage{enumitem}
+\setlist[itemize,1]{leftmargin=4mm}
+\setlist[enumerate,1]{leftmargin=4mm}
+
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{lemma}{Lemma}
+%\newtheorem{definition}{Definition}
+%\newtheorem{example}{Example}
+
+\newcounter{protocol}
+\newenvironment{protocol}[1][]
+{\refstepcounter{protocol}\textbf{Protocol \theprotocol.} \textsc{#1}}
+
+\makeatletter
+\newcommand{\subalign}[1]{%
+	\vcenter{%
+		\Let@ \restore@math@cr \default@tag
+		\baselineskip\fontdimen10 \scriptfont\tw@
+		\advance\baselineskip\fontdimen12 \scriptfont\tw@
+		\lineskip\thr@@\fontdimen8 \scriptfont\thr@@
+		\lineskiplimit\lineskip
+		\ialign{\hfil$\m@th\scriptstyle##$&$\m@th\scriptstyle{}##$\hfil\crcr
+			#1\crcr
+		}%
+	}%
+}
+\makeatother
+
+
+\usepackage{nicematrix}
+\NiceMatrixOptions{
+	code-for-first-row = \color{blue},
+	code-for-first-col = \color{blue},
+}
+
+
+
+
+%%%%%%
+
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{pgf}
+\usepackage{wrapfig}
+
+
+\usepackage{drawstack}
+\usetikzlibrary{crypto.symbols}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{shapes,positioning}
+\usetikzlibrary{arrows,positioning} 
+\usetikzlibrary{arrows, decorations.markings}
+  
+
+
+
+\usetikzlibrary{shapes,snakes,automata,backgrounds,petri}
+
+
+\usepackage{verbatim}
+
+\usetikzlibrary{shadows}
+\usetikzlibrary{decorations.pathmorphing}  
+
+
+
+\usepackage{pgfplots}
+
+\usetikzlibrary{calc}
+
+
+%\pgfplotsset{compat=newest}
+
+
+\usepackage{listings}
+
+
+%\usepackage{amsmath}
+%\usepackage{amsthm,amscd,amsfonts}
+%\usepackage{amssymb, upref}
+
+\usepackage{epsfig}
+%\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{color}
+
+\newsavebox{\savepar}
+\newenvironment{boxit}
+
+
+
+\newcommand{\F}{{\mathbb F}}
+\newcommand{\Z}{{\mathbb Z}}
+\newcommand{\N}{{\mathbb N}}
+\newcommand{\Q}{{\mathbb Q}}
+\newcommand{\R}{{\mathbb R}}
+\newcommand{\C}{{\mathbb C}}
+
+\newcommand{\done}{\hfill $\Box$ }
+\newcommand{\rmap}{\stackrel{\rho}{\leftrightarrow}}
+\newcommand{\mys}{\vspace{0.15in}}
+
+\newcommand{\ebu}{{\bf{e}}}
+\newcommand{\Abu}{{\bf{A}}}
+\newcommand{\Bbu}{{\bf{B}}}
+
+\newcommand{\fbu}{{\bf{f}}}
+
+
+\newcommand{\rbu}{{\bf{r}}}
+\newcommand{\abu}{{\bf{a}}}
+\newcommand{\abuj}{{\bf{a_j}}}
+\newcommand{\bbu}{{\bf{b}}}
+\newcommand{\vbu}{{\bf{v}}}
+\newcommand{\ubu}{{\bf{u}}}
+\newcommand{\dbu}{{\bf{d}}}
+\newcommand{\tbu}{{\bf{t}}}
+\newcommand{\cbu}{{\bf{c}}}
+\newcommand{\kbu}{{\bf{k}}}
+\newcommand{\hbu}{{\bf{h}}}
+
+\newcommand{\mbu}{{\bf{m}}}
+\newcommand{\sbu}{{\bf{s}}}
+\newcommand{\wbu}{{\bf{w}}}
+\newcommand{\xbu}{{\bf{x}}}
+\newcommand{\ybu}{{\bf{y}}}
+\newcommand{\zbu}{{\bf{z}}}
+
+
+\newcommand{\corres}{\leftrightarrow}
+
+\newcommand{\zero}{{\bf{0}}}
+\newcommand{\one}{{\bf{1}}}
+\newcommand{\nodiv}{{\, \not| \,}}
+\newcommand{\notequiv}{{\,\not\equiv\, }}
+%\newcommand{\notsim}{{\,\not\sim\, }}
+% \newcommand{\notsim}{{\nsim }}
+
+
+% \usepackage{setspace}
+% \usepackage[compact]{titlesec}
+%\titlespacing{\section}{0pt}{*0}{*0}
+%\titlespacing{\subsection}{0pt}{*0}{*0}
+%\titlespacing{\subsubsection}{0pt}{*0}{*0}
+%\onehalfspacing
+
+   
+\newcommand\pmat[1]{\begin{pmatrix} #1 \end{pmatrix}}
+\newcommand\ket[1]{| #1 \rangle}
+\newcommand\cP{{\mathcal P}}
+\newcommand\cB{{\mathcal B}}
+\newcommand\cA{{\mathcal A}}
+\newcommand\cC{{\mathcal C}}
+\newcommand\Aa{{\mathbf{a}}}
+\newcommand\Jj{{\mathbf{j}}}
+\newcommand\Bb{{\mathbf{b}}}
+\newcommand\Cc{{\mathbf{c}}}
+\newcommand\Dd{{\mathbf{d}}}
+\newcommand\Xx{{\mathbf{x}}}
+
+
+\def\comb#1#2{{#1 \choose #2}}
+\newcommand{\ls}[1]
+    {\dimen0=\fontdimen6\the\font\lineskip=#1\dimen0
+     \advance\lineskip.5\fontdimen5\the\font
+     \advance\lineskip-\dimen0
+     \lineskiplimit=0.9\lineskip
+     \baselineskip=\lineskip
+     \advance\baselineskip\dimen0
+     \normallineskip\lineskip\normallineskiplimit\lineskiplimit
+     \normalbaselineskip\baselineskip
+     \ignorespaces}
+
+\newcommand{\tr}{\mbox{tr}}
+%\input{mypaper.sty}
+\def\stir#1#2{\left\{#1 \atop #2 \right\}}
+\def\dsum#1#2{#1 \atop #2 }
+\def\defn{\stackrel{\triangle}{=}}
+
+
+
+
+ \newcommand{\BL}[1]{\textcolor{blue}{\textbf{#1}}}
+ \newcommand{\RE}[1]{\textcolor{red}{\textbf{#1}}}
+ \newcommand{\GN}[1]{\textcolor{green}{\textbf{#1}}}
+ 
+   \newcommand{\re}[1]{\textcolor{red}{\text{#1}}}
+  \newcommand{\bl}[1]{\textcolor{blue}{\text{#1}}}
+ \newcommand{\gn}[1]{\textcolor{green}{\text{#1}}}
+
+
+
+
+
+
+

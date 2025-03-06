@@ -1,27 +1,776 @@
 %======================================================================
 \chapter{Preliminaries}
 %======================================================================
+In this chapter, we provide definitions and mathematical preliminaries essential to this thesis.
 
 %----------------------------------------------------------------------
-\section{Notation}
+\section{Algebraic Foundations}
 %----------------------------------------------------------------------
 
-\newpage
-\section{Zero-knowledge Proof}
+\subsection{Finite Fields}
+Let $\mathbb{F}$ denote a finite field and $\mathbb{F}_q$ denote the finite field with $q$ elements, where $q=p^k$ for a prime $p$ and a positive integer $k$. The elements of a finite field with characteristic $p$ can be represented as vectors over $\mathbb{F}_p$. In other words, there exists a vector space isomorphism from $\mathbb{F}_{p^k}$ to $\mathbb{F}_p^k$ defined by $$x=(x_0\alpha_0+x_1\alpha_1+ \cdots +x_{k-1}\alpha_{k-1}) \mapsto (x_0,x_1, \ldots,x_{k-1}),$$ where $\{\alpha_{0},\alpha_{1},\ldots,\alpha_{k-1}\}$ is a basis of $\mathbb{F}_{p^k}$ over $\mathbb{F}_p$ \cite{samanta2023thesis}.
 
-\subsection{Succinct Non-Interactive Argument of Knowledge}
+A polynomial of degree $n$ over a finite field $\mathbb{F}_{q}$ is an expression in an indeterminate $x$ of the form
+\[
+f(x) = \sum_{i=0}^{n} c_i x^i,
+\]
+where $c_i \in \mathbb{F}_{q}$ and $c_n \neq 0$. More precisely, $f(x)$ is referred to as a \textit{univariate polynomial}. The set of polynomial over $\mathbb{F}_{q}$ in the variable $x$ is denoted as $\mathbb{F}_{q}[x]$. 
+
+The finite extension $\mathbb{F}_{q^m}$ of the field $\mathbb{F}_{q}$ forms a vector space of dimension $m$ over the field $\mathbb{F}_{q}$. Let $\mathbb{F}_2$ denote the binary field, the  finite field $\mathbb{F}_{2^{256}}$ is defined as
+\begin{equation}\label{eq:F_2_256}
+	\mathbb{F}_{2^{256}} := \mathbb{F}_{2}[X]/(X^{256} + X^{10} + X^5 + X^2 + 1),
+\end{equation}
+and is utilized in our implementation in Chapter \ref{ch:additive-fft}.
+
+The trace function is a mapping from $\mathbb{F}_{q^m}$ to $\mathbb{F}_{q}$ which will turn out to be linear.
+
+\begin{definition}
+	For an element $\beta \in \mathbb{F}_{q^m}$, the trace $\Tr_{\mathbb{F}_{q^m}/\mathbb{F}_{q}}(\beta)$ over $\mathbb{F}_{q}$ is defined by
+	\[
+	\Tr_{\mathbb{F}_{q^m}/\mathbb{F}_{q}}(\beta) = \beta + \beta^q + \cdots + \beta^{q^{m-1}}.
+	\]
+\end{definition}
+
+The trace function satisfies the following properties, which are relevant to our discussions in this thesis:
+
+\begin{enumerate}[label=(\roman*)]
+	\item $\Tr_{\mathbb{F}_{q^m}/\mathbb{F}_{q}}(\beta+\gamma)= \Tr_{\mathbb{F}_{q^m}/\mathbb{F}_{q}}(\beta)+\Tr_{\mathbb{F}_{q^m}/\mathbb{F}_{q}}(\gamma)$ for all $\beta,\gamma \in \mathbb{F}_{q^m}$.
+	
+	\item $\Tr_{\mathbb{F}_{q^m}/\mathbb{F}_{q}}(c\beta)= c\Tr_{\mathbb{F}_{q^m}/\mathbb{F}_{q}}(\beta)$ for all $\beta \in \mathbb{F}_{q^m}$ and $c \in \mathbb{F}_{q}$.
+	
+	\item $\Tr_{\mathbb{F}_{q^m}/\mathbb{F}_{q}}$ takes on each value in $\mathbb{F}_{q}$ equally often, i.e., $q^{m-1}$ times.\label{Trace-Property3}
+\end{enumerate}
+
+
+
+% \begin{definition}
+	
+	% \end{definition}
+\subsection{Affine Subspace}
+% \paragraph{Affine Subspace}
+Let us define the subspace $W_m$ of $\mathbb{F}_{2^k}$ as the linear combinations of $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$. We order the elements of the subspace $W_m$ by $\{\eta_0=0, \eta_1, \eta_2, \dots, \eta_{2^m-1}\}$ where
+\[
+\eta_j = \sum_{i=0}^{m-1} x_i \beta_i \quad \text{and} \quad j=\sum_{i=0}^{m-1} x_i 2^i, x_i\in \F_2.
+\]
+
+Note that for any $0 \leq m < k$, we can decompose the elements of $W_{m+1}$ into two disjoint sets: the subspace $W_m$ and the \textit{affine subspace} $\beta_m + W_m$, where $\beta_m + W_m$ is the set obtained by translating (or shifting) the subspace $W_m$ by the vector $\beta_m$. More formally, this decomposition is given by $W_{m+1} = W_m \cup (\beta_m + W_m)$, where \[\beta_m + W_m = \set{\beta_m + w: w \in W_m} .\]
+
+Furthermore, if $m < k-1$ and $\theta$ is any linear combination of $\{\beta_{m+1}, \beta_{m+2}, \ldots, \beta_{k-1}\}$, then we can decompose the elements of $\theta + W_{m+1}$ into two pairwise disjoint affine subspaces $\theta + W_m$ and $\beta_{m} + \theta + W_m$.
 
 \subsection{Rank-1 Constraint System}
 
+\begin{definition}[rank-1 constraint system (\gls{r1cs})] \label{def:R1CS}
+	Let $d_1$, $d_2$, and $d_3$ be positive integers where denote the number of constraints, the number of variables, and the number of public inputs respectively. The \gls{r1cs} relation consists of matrices $\mathbf{A},\mathbf{B},\mathbf{C} \in \mathbb{F}^{d_1\times (d_2+1)}$ and public inputs $\vec{{v}} \in \mathbb{F}^{d_3}$. A vector $\vec{{w}} \in \mathbb{F}^{d_2-d_3}$, denoting private (auxiliary) inputs, satisfies the system if
+	\(
+	\mathbf{A}\vec{{z}} \circ \mathbf{B}\vec{{z}} = \mathbf{C}\vec{{z}}
+	\), 
+	where $\vec{z}:=(1,\vec{v},\vec{w}) \in \mathbb{F}^{d_2+1}$ and “$\circ$” denotes the Hadamard product.
+\end{definition}
+Let an \gls{r1cs} instance be denoted as 
+\(
+(\mathbb{F}, d_1, d_2, d_3, \mathbf{A}, \mathbf{B}, \mathbf{C}, \vec{v}),
+\)
+and accordingly, define the \gls{r1cs} relation as
+\(
+\mathcal{R}_{\text{R1CS}} = (\mathbb{F}, d_1, d_2, d_3, \mathbf{A}, \mathbf{B}, \mathbf{C}, \vec{v}, \vec{w}).
+\)
+In this thesis, we define a notation for the \gls{r1cs} parameters as 
+\(
+(\mathbb{F}, d_1, d_2, d_3, \mathbf{A}, \mathbf{B}, \mathbf{C}),
+\)
+where the public input \(\vec{v}\) has not been set yet. Therefore, this does not constitute an \gls{r1cs} instance. Instead, it only specifies the constraint system, which may be derived from an arithmetic circuit.
+
+
+
+\subsection{Vanishing Polynomial}
+\begin{definition}
+	The polynomial $\mathbb{Z}_{W_{m}}(x)= \prod_{a\in W_m}^{} (x-a)$ which is a linearized polynomial given by $\mathbb{Z}_{W_{m}}(x) = \sum_{i=0}^{m} c_i x^{2^i}, c_i \in \F_{2^k}$. This polynomial is called the \textit{vanishing polynomial} for the subspace $W_m$.
+\end{definition}
+% \paragraph{Vanishing Polynomial}
+% The polynomial $\mathbb{Z}_{W_{m}}(x)= \prod_{a\in W_m}^{} (x-a)$ which is a linearized polynomial given by $\mathbb{Z}_{W_{m}}(x) = \sum_{i=0}^{m} c_i x^{2^i}, c_i \in \F_{2^k}$. This polynomial is called the \textit{vanishing polynomial} for the subspace $W_m$. 
+
+Observe that the vanishing polynomial of $\epsilon + W_m$ is given by
+\begin{center}
+	$\displaystyle \prod_{a\in \epsilon+ W_m}^{} (x-a)= \prod_{a\in W_m}^{} (x-a-\epsilon)= \mathbb{Z}_{W_{m}}(x-\epsilon)$.
+\end{center}
+
+Now, since $W_{m+1}= W_m \cup (\beta_{m}+W_m)$, we have
+\begin{equation*}
+	\begin{aligned}
+		\mathbb{Z}_{W_{m+1}}(x)
+		&= (\mathbb{Z}_{W_{m}}(x))^2- \mathbb{Z}_{W_{m}}(\beta_{m})\cdot \mathbb{Z}_{W_{m}}(x).
+	\end{aligned}
+\end{equation*}
+% Thus, from above we can conclude the following result regarding the coefficients of the vanishing polynomial.
+
+% \begin{proposition}\label{Th_cond_linearized}
+	%     The coefficients of the vanishing polynomial $\mathbb{Z}_{W_{m+1}}(x)(x)$ will be in $\mathbb{F}_2$ if the coefficients of $\mathbb{Z}_{W_{m}}(x)$ in $\mathbb{F}_2$ and $\mathbb{Z}_{W_{m}}(\beta_{m})=1$.
+	% \end{proposition}
+
+% \begin{theorem}\label{Th_cond_linearized}
+	%     The coefficients of the vanishing polynomial $\mathbb{Z}_{W_{m+1}}(x)(x)$ will be in $\mathbb{F}_2$ if and only if the coefficients of $\mathbb{Z}_{W_{m}}(x)$ in $\mathbb{F}_2$ and $\mathbb{Z}_{W_{m}}(\beta_{m})=1$.
+	% \end{theorem}
+
+\subsection{Univariate Polynomials Vectorial Representation}
+% {\color{blue} Just added:}\\
+For any univariate polynomial $f(x) = \sum_{i=0}^{n-1}c_ix^i, c_i\in \F$, where $\deg(f) < n = 2^m$, the coefficients are represented as a vector of $n$ elements, ordered from the constant term to the highest degree term. Namely, $$\fbu = (c_0, ..., c_{n-1}), c_i \in \mathbb{F}_{2^k}$$ represents the polynomial $f(x)$, where $\deg(f)<n$.
+
+
+\subsection{Additive Discrete Fourier Transform}
+Now we will discuss the evaluation of a univariate polynomial $f(x)$ over the subspace $W_m$.
+
+\begin{definition}
+	The evaluation of $f(x)$ at the points $\eta_0, \eta_1, \ldots, \eta_{2^m-1}$ is given by
+	\begin{equation*}
+		\hat{\fbu} = \left( f(\eta_0), f(\eta_1), \ldots, f(\eta_{2^m-1}) \right).
+	\end{equation*}
+	This set of evaluations is referred to as the additive discrete Fourier transform (\gls{dft}) of $f(x)$ over the subspace $W_m$. We sometimes refer to the vector $\hat{\fbu}$ as the \textit{discrete Fourier transform of length $n=2^m$} for the function $f(x)$, denoted as $\dft(f, W_m)$. The additive fast Fourier transform (\gls{fft}) is an efficient method for computing $\dft(f, W_m)$, which we will denote as $\fft(f, W_m)$.
+\end{definition}
+
+\subsection{Reed-Solomon Code}
+
+\begin{definition}[Reed-Solomon code]\label{RScode} Let $L\subseteq\mathbb{F}$ and $\rho \in [0,1]$ denote the codeword domain and the rate parameter respectively. $\text{\gls{rs}}[L, \rho]$ is the set of all codewords $\hat{\fbu}:L\rightarrow\mathbb{F}$ 
+	that are the evaluation of polynomials over \(L\) with degree \( < \rho|L| \).
+\end{definition}
+
+\section{Cryptographic Primitives}
+\label{sec:prel_Cryptographic Primitives}
+
+Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable security parameter in our scheme. A negligible function $\mathsf{negl}(\boldsymbol{\lambda})$ is a negligible in $\boldsymbol{\lambda}$. Namely, for every polynomial $p$, there exists an $\boldsymbol{\lambda}_0$, such that for   all $\boldsymbol{\lambda} > \boldsymbol{\lambda}_0$ it holds that $\mathsf{negl}(\boldsymbol{\lambda})<\frac{1}{p(\boldsymbol{\lambda})}$. With the security parameter and the negligible function in place, we define the cryptographic primitives:
+
+\begin{definition}[Collision and Preimage Resistance Hash Function]
+	\label{def:Collision-resistance hash function}
+	A hash function $\mathcal{H}: \{0, 1\}^\ast \rightarrow \{0,1\}^{O(\boldsymbol{\lambda})}$ exhibits the following properties:
+	\begin{itemize}
+		\item \textit{Collision Resistance}: It is infeasible for any PPT adversary $\mathcal{A}$ to find two distinct inputs $x$, $y$ such that $\mathcal{H}(x) = \mathcal{H}(y)$  \cite{katz2020introduction}.
+		\item \textit{Preimage Resistance}: It is infeasible for any PPT adversary $\mathcal{A}$ to find any input $x$ given $\mathcal{H}(x)$.
+	\end{itemize} 
+	% is \textit{collision resistance} if for all PPT adversaries $\mathcal{A}$, there is a negligible probability that $\mathcal{A}$ can find two distinct inputs $x$, $y$ such that $\mathcal{H}(x) = \mathcal{H}(y)$ \cite{katz2020introduction}. And it is \textit{preimage resistance} if for all PPT adversaries $\mathcal{A}$, there is a negligible probability that $\mathcal{A}$ can find inputs $x$ given $\mathcal{H}(x)$.
+\end{definition}
+
+\begin{definition}[Statistically-hiding Commitment]
+	\label{def:Statistically-hiding commitment}
+	A statistically-hiding commitment scheme  $\{\mathsf{COMM}_\rho:\{0,1\}^* \rightarrow \{0, 1\}^{O(\boldsymbol{\lambda})} \}_\rho$ \cite{zcash2014} where $\rho$ denotes the commitment trapdoor, should hold the following two properties \cite{katz2020introduction, zcash2014}:
+	\begin{itemize}
+		\item \textit{Statistically Hiding}: The commitment reveals nothing about the committed value for \textit{every} adversary. 
+		\item \textit{Computationally Binding}: It is impossible for all \textit{PPT adversaries} to output commitment that can be opened in two different ways.
+	\end{itemize}
+\end{definition}
+
+\begin{definition}[Strongly-unforgeable Digital Signature]
+	\label{def:Strongly-unforgeable digital signature}
+	
+	A digital signature scheme $\mathsf{Sig}$ is defined as a tuple of algorithms $\mathsf{Sig}=(\mathcal{G}_\mathsf{sig}, \mathcal{K}_\mathsf{sig}, \mathcal{S}_\mathsf{sig}, \mathcal{V}_\mathsf{sig})$ such that:
+	\begin{itemize}
+		\item $\mathcal{G}_\mathsf{sig}(1^{\boldsymbol{\lambda}}) \rightarrow \textsc{pp}_\mathsf{sig}$. Given a security parameter, outputs public parameters $\textsc{pp}_\mathsf{sig}$ for the digital signature scheme.
+		\item $\mathcal{K}_\mathsf{sig}(\textsc{pp}_\mathsf{sig}) \rightarrow (\text{PKsig}, \text{SKsig})$. Given public parameters $\textsc{pp}_\mathsf{sig}$, outputs a public key and a secret key for a single user.
+		\item $\mathcal{S}_\mathsf{sig}(\text{SKsig}, m) \rightarrow \sigma$. Given a secret key $\text{SKsig}$ and a message $m$, signs $m$ and outputs the signature $\sigma$.
+		\item $\mathcal{V}_\mathsf{sig}(\text{PKsig}, m, \sigma) \rightarrow \{0, 1\}$. Given a public key $\text{PKsig}$, message $m$, and a signature $\sigma$, outputs $1$ if the signature $\sigma$ is valid for message $m$. Otherwise, outputs $0$.
+	\end{itemize}
+	The signature scheme $\mathsf{Sig}$ satisfies the following security property:
+	\begin{itemize}
+		\item \textit{Strong Unforgeability under Chosen Message Attack (SUF-CMA)}: The adversary cannot only produce a signature for a message that the key owner has not previously signed, but also cannot create an alternative signature for a message that has already been signed. \cite{Brendel2021TheProvableSecurity}.
+	\end{itemize}
+\end{definition}
+
+% The \textit{one-time} in \textit{one-time strongly unforgable digital signature (SUF-1CMA)} implies that the signing key can only be used once safely.
+
+% \begin{definition}[Public-key encryption]
+	% \label{def:Public-key encryption}
+	%     A public-key encryption scheme $\mathsf{Enc}$ is defined as a tuple of algorithms $\mathsf{Enc}$=$(\mathcal{G}_\mathsf{enc}$, $\mathcal{K}_\mathsf{enc}$, $\mathcal{E}_\mathsf{enc}$, $\mathcal{V}_\mathsf{enc})$, such that:
+	
+	% \begin{itemize}
+		%     \item $\mathcal{G}_\mathsf{enc}(1^\lambda) \rightarrow \textsc{pp}_\mathsf{enc}$ Given a security parameter, outputs public parameters $\textsc{pp}_\mathsf{enc}$ for the public-key encryption scheme.
+		%     \item $\mathcal{K}_\mathsf{enc}(\textsc{pp}_\mathsf{enc}) \rightarrow (\text{PKenc}, \text{SKenc})$. Given public parameters $\textsc{pp}_\mathsf{enc}$, outputs a public key and a secret key for a single user.
+		%     \item $\mathcal{E}_\mathsf{enc}(\text{PKenc}, m) \rightarrow c$. Given a public key $\text{PKenc}$ and a message $m$, encrypts $m$ and outputs the cipher-text $c$.
+		%     \item $\mathcal{D}_\mathsf{enc}(\text{SKenc}, c) \rightarrow m$. Given a secret key $\text{SKenc}$ and a message $m$, decrypts $c$ and outputs the plain-text $m$. $\mathcal{D}$ outputs $\perp$ if decryption fails.
+		% \end{itemize}
+	% The public-key encryption scheme $\mathsf{Enc}$ satisfies the \textit{Indistinguishability under chosen ciphertext attack (IND-CCA)} security property \cite{katz2020introduction, Bellare2001KeyPrivacy}.% and \textit{indistinguishability of keys under chosen-ciphertext attack (IK-CCA)} security properties \cite{katz2020introduction, Bellare2001KeyPrivacy}.
+	
+	% Definitions: IND-CCA: KAtz p. 149
+	% Definitions: IK-CCA: [Bellare et. al 2001] p. 7. The instantiation of that is Cramer-Shoup
+	% \end{definition}
+
+
+\begin{definition}[Symmetric-key Encryption]
+	\label{def:Symmetric-key encryption}
+	A symmetric-key encryption scheme  $\mathsf{SymEnc}$ is defined as a tuple of algorithm \(\mathsf{SymEnc}=(\mathcal{K}_\mathsf{sym}, \mathcal{E}_\mathsf{sym}, \mathcal{D}_\mathsf{sym})\), such that:
+	
+	\begin{itemize}
+		\item \(\mathcal{K}_\mathsf{sym}(1^{\boldsymbol{\lambda}}) \rightarrow \textsc{k}\) Given a security parameter, outputs a symmetric key \(\textsc{k}\) for the encryption scheme.
+		\item \(\mathcal{E}_\mathsf{sym}(\textsc{k}, m) \rightarrow c\). Given a symmetric key \(\textsc{k}\) and a message \(m\), encrypts \(m\) and outputs the cipher-text \(c\).
+		\item \(\mathcal{D}_\mathsf{sym}(\textsc{k}, c) \rightarrow m\). Given a symmetric key \(\textsc{k}\) and a cipher-text \(c\), decrypts \(c\) and outputs the plain-text \(m\). \(\mathcal{D}\) outputs \(\perp\) if decryption fails.
+	\end{itemize}
+	The symmetric-key encryption scheme \(\mathsf{SymEnc}\) satisfies the \textit{Indistinguishability under Chosen Plaintext Attack (IND-CPA)} security property \cite{katz2020introduction}.
+\end{definition}
+
+
+
+
+\section{Zero-Knowledge Proof Systems and Protocols}
+
+The construction of zero-knowledge proof (\gls{zkp}) protocols is based on the interactive proof system (\gls{ip}) introduced in 1985 by Goldwasser, Micali, and Rackoff in~\cite{Goldwasser1985}.  In this section we start by introdusing \gls{ip}, probabilistically checkable proof (\gls{pcp}s), and interactive oracle proof (\gls{iop}), then we continue by presenting various \gls{zkp} protocols that are used in this thesis. 
+
+\subsection{Interactive Proof System}\label{sec:Prel_IP}
+
+ An \gls{ip} consists of  an interactive pair of a computationally unbounded prover ($P$) and a probabilistic polynomial time (\gls{ppt})  verifier ($V$).  Goldwasser et. al.~\cite{Goldwasser1985} modeled each of $P$ and $V$ as an \textit{interactive Turing machines}, which is a Turing machine with a read-only input tape, a read/write work tape, a read-only communication tape, a write-only communication tape, and a read-only random tape, where the random tape contains an infinit sequnce of random bits. $P$  and $V$ share the same input tape denoted as $x$. The write-only communication tape of $P$ is the read-only communication tape of $V$ and vice versa.  $V$ is active first, then $P$ and $V$ take turns in being active. Each machine uses input tape, work tape, communication tapes and random tapes during its $i$th active stage, then it writes its $i$th message on its write-only communication tape and becomes deactive. $V$ may terminate the protocol and either accept or reject the input $x$ in its $k$th active stage. Here we provide a definition of \gls{ip} following its definition in~\cite{Goldwasser1985}:
+ 
+\begin{definition}[Interactive Proof System]\label{def:Interactive Proof System}
+	Let \( L \in \{0,1\}^* \) be a language, and let \( P \) and \( V \) be an interactive pair of Turing machines. We say that \( P \) and \( V \) form an \gls{ip} for \( L \) if \( P \) is computationally unbounded, \( V \) is \gls{ppt}, and a common input \( x \in \{0,1\}^n \), with sufficiently large \( n \), is given to both \( P \) and \( V \). They must satisfy the following properties:
+	\vspace{-0.5\baselineskip} % Reduce spacing before enumerate
+	\begin{enumerate}[leftmargin=2em] % Indent the list
+		\item For each \( k \) and any \( x \in L \), \( V \) halts and accepts with probability at least \( 1 - \frac{1}{n^k} \).
+		\item For each \( k \) and any \( x \notin L \), for any interactive Turing machine \( P^* \), \( V \) halts and accepts with probability at most \( \frac{1}{n^k} \).
+	\end{enumerate}
+	\vspace{-0.5\baselineskip} % Reduce spacing after enumerate
+	Here, the probabilities are taken over \( V \)'s internal randomness.
+\end{definition}
+ 
+ An interactive polynomial-time is a class of languages, denoted as $\mathcal{IP}$, posessing an interactive proof system (\gls{ip}), where the membership of a common input $x\in\{0,1\}^n$ in the language is decided (verified) by a \gls{ppt} verifier through $k$ rounds of message exchange between the prover ($P$) and the verifier ($V$). 
+Since  $V$ is probabilistic, its messages may depend on its internal randomness, often described as the verifier tossing a coin. Additionally, the prover's probabilistic behavior is crucial for achieving the zero-knowledge property~\cite{Goldwasser1985}, which we will discuss later. 
+
+Let $(P,V)$ denote an \gls{ip} which includes a computationally unbounded $P$ and a \gls{ppt} $V$. Let \( \langle P, V(r_V) \rangle (x) \in \{0,1\} \) denote the output of the verifier \( V \) when interacting with a \textit{deterministic} prover \( P \), where \( r_V \) represents the internal randomness of \( V \). 
+
+\begin{definition}\label{def:IP-Completeness-Soundness}
+	An \gls{ip} \( (P, V) \) for a language \( L \), given a public input \( x \in \{0,1\}^n \), is said to have \textit{completeness error} \( \delta_c \) and \textit{soundness error} \( \delta_s \) if it satisfies the following conditions:
+	\vspace{-0.5\baselineskip} % Reduce spacing before enumerate
+	\begin{enumerate}[leftmargin=2em]
+		\item \textbf{Completeness}: For any \( x \in L \), the prover \( P \) convinces \( V \) with probability
+		\[
+		\Pr [\langle P, V(r_V) \rangle (x) = 1] \geq 1 - \delta_c.
+		\]
+		\item \textbf{Soundness}: For any \( x \notin L \), every cheating deterministic prover \( P^* \) convinces \( V \) with probability at most
+		\[
+		\Pr [\langle P^*, V(r_V) \rangle (x) = 1] \leq \delta_s.
+		\]
+	\end{enumerate}
+	\vspace{-0.5\baselineskip} % Reduce spacing after enumerate
+The language \( L \) belongs to the class \( \mathcal{IP} \) if and only if \( \delta_c, \delta_s \leq \frac{1}{3} \).
+
+\end{definition}
+
+\begin{remark}
+Every language in the nondeterministic polynomial-time class (\gls{np}), denoted as \( L \in \mathcal{NP} \), has an interactive proof system (\gls{ip}) in which both the prover and the verifier operate deterministically. Namely, $\mathcal{NP} \subseteq \mathcal{IP}$.
+\end{remark}
+
+\subsubsection{Perfect Completeness}
+As stated in \cite{Thaler2022Proofs}, for any \gls{ip} where \( \delta_c < 0 \), the system satisfies \textit{perfect completeness}, meaning that \( \delta_c = 0 \). In all the \gls{ip} systems discussed in this thesis, we assume \(\delta_c = 0\), i.e.,  \( P \) always convinces \( V \) when \( x \in L \). 
+
+\subsubsection{Argument Systems and Computational Soundness}
+Definition \ref{def:IP-Completeness-Soundness} requires \textit{statistical} (or \textit{information-theoretic}) soundness, meaning that soundness holds against computationally unbounded provers in \gls{ip}. However, \textit{argument systems}, a special case of \gls{ip} introduce in~\cite{BRASSARD1988Minimum}, require \textit{computational} soundness, where soundness is guaranteed only against \gls{ppt} provers~\cite{Ben-Sasson2016IOP}. This implies that an infinitely powerful prover could cheat in an argument system. However, such systems typically assume that a \gls{ppt} prover cannot cheat under a given cryptographic assumption. Through $\Theta(k)$ repetitions of the protocol, the soundness error $\delta_s$ can be reduced to $\delta_s^k$.
+
+\subsection{Zero-knowledge Proof System}
+
+A zero-knowledge proof (\gls{zkp}) system for verifying whether a common input \( x \) belongs to a language \( L \) is an augmented \gls{ip} in which the verifier is convinced of \( x \)'s membership in \( L \) without gaining any additional knowledge beyond \( x \in L \). The prover in \gls{zkp} systems is also prababilistic, meaning that we assume a read-only random tape, denoted as $r_P$ for the prover machine. 
+
+\subsubsection{Auxilary Input Tapes}
+Before defining \gls{zkp} systems, we introduce a secret tape for each interactive Turing machine described in Section~\ref{sec:Prel_IP}, called the \textit{read-only auxiliary input tape}. These tapes represent prior information available to \( P \) and \( V \) and may depend on the common input \( x \), whose membership in \( L \) is to be verified by \( V \) through the \gls{ip} protocol~\cite{Goldreich2001Book}. Let \( w \) denote the auxiliary input for \( P \) and \( z \) denote the auxiliary input for \( V \). The input \( w \) may contain information that helps the prover efficiently perform its tasks. For example, for a language \( L \in \mathcal{NP} \), \( w \) may be the witness for \( x \in L \). 
+On the other hand, \( z \) represents additional information about \( x \) that may be used by a dishonest verifier \( V^* \) to extract knowledge (e.g., beyond the mere fact that \( x \in L \)) through interaction with \( P \). A \gls{zkp} system must guarantee that whatever knowledge \( V^* \) can extract from \( x \), \( z \), and interaction with \( P \), can also be extracted from \( x \) and \( z \) alone, without any interaction with \( P \).  
+
+\subsubsection{Simulation Paradigm and Computational Indistinguishability}  
+The required property of \gls{zkp} systems is defined through the \textit{simulation paradigm}. Let the view of any verifier $V^*$ during its interaction with the prover $P$ be denoted as  
+\(
+\textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x).
+\)
+This view consists of the verifier's random tape ($r_V$), auxiliary input tape ($z$), and the messages exchanged between the prover and verifier over the $k$ interactions of the \gls{ip} protocol. The verifier's view is often referred to as the \textit{transcript} of the interactions in \gls{ip} and is formally defined as  
+\[
+\textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x) := (r_V, z, p_1, \dots, p_k).
+\]  
+
+Let $\{X_i\}_{i \in I}$ denote a sequence of random variables, also known as an \textit{ensemble}, indexed by $I$, where each $X_i$ is a random variable \cite{Goldreich2001Book}. Now, suppose there exists a \gls{ppt} simulator $S^*$, which, given the common input $x$ and the verifier's auxiliary input $z$, produces an output $S^*(x, z)$ such that the ensembles  
+\[
+\{\textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x)\}_{x\in L, z \in \{0,1\}^*} \text{ and } \{S^*(x, z)\}_{x\in L, z \in \{0,1\}^*}
+\]  
+for any arbitrary $y$ that satisfies the completeness condition of $x\in L$, are \textit{computationally indistinguishable}, as defined in Definition \ref{def:polytime_ind}. Since the same transcript can be generated by $S^*$ without any interaction with $P$, the existence of such a simulator implies that $V^*$ does not gain any additional knowledge from interacting with $P$.
+
+Let present the definition of computational indistinguishability, following \cite{Goldreich2001Book}.
+\begin{definition}[Computational Indistinguishability]\label{def:polytime_ind}	
+Two ensembles $\{X_s\}_{s\in S}$ and $\{Y_s\}_{s\in S}$ are  computationally indistinguishable if for any \gls{ppt} distinguisher algorithm $D$, and all suffucuently long $s \in S$,
+\[
+\abs{\Pr[D(X_s, s) = 1] - \Pr[D(Y_s, s) = 1]} < \mathsf{negl}(s).
+\]
+\end{definition}
+
+
+\subsubsection{Zero-Knowledge Proof}
+Now, we provide the definition of an \gls{ip} that is zero-knowledge following~\cite{Goldreich2001Book}.
+\begin{definition}[Zero-Knowledge Proof Property]\label{def:zk-proerty}	Assume an \gls{ip} $(P, V)$ for a language $L$, as defined in Definition \ref{def:Interactive Proof System}. Let $w$ and $z$ denote the auxiliary input tapes of $P$ and $V$, respectively, where $w \in W_L(x)$. Here, $W_L(x)$ denotes the set of auxiliary inputs that may be used to satisfy the completeness condition for $x \in L$.  The \gls{ip} $(P, V)$  is zero-knowledge if for any \gls{ppt} machine $V^*$, there exist a  \gls{ppt} algorithm $S^*$, such that the following 
+	
+	
+	is \textbf{zero-knowledge} 
+\end{definition}
+
+\subsubsection{Zero-Knowledge Proof for a NP Language }
+page 241 foundation.
+
+
+dishonest verifier and auxiliary-input zero-knowledge
+
+\begin{definition}[Zero-knowledge Proof]
+	\label{def:Zero-knowledge Proof}	
+	A zero-knowledge proof is a protocol consists of prover $P$, verifier $V$, and a NP-statement $\mathbbm{x}$. $P$ \textit{knows} an instance (public input) $x$, and a witness (private or auxilary input) $w$ for $\mathbbm{x}$ such that $(x, w) \in \mathcal{R}_\mathbbm{x}$ where $\mathcal{R}_\mathbbm{x}$ is a polynomial time decidable binary relationship between the instances and the witness. $\mathcal{R}_\mathbbm{x}$ is associated with an NP language $\mathcal{L}_\mathbbm{x}$. The prover tries to prove $x \in \mathcal{L}_\mathbbm{x}$ without revealing any information about $w$.
+	
+\end{definition}
+
+
+\subsection{Non-Interactive	Proof System}
+Any \gls{ip} defined in Definition~\ref{def:Interactive Proof System} can be transformed into a non-interactive proof system using the Fiat-Shamir transformation~\cite{Fiat1987}. Before discussing this transformation, we first introduce the concepts of private-coin versus public-coin \gls{ip} protocols and the random oracle model.
+
+\subsubsection{Private Coin versus Public Coin}
+In the \gls{ip} proposed by Goldwasser et al.~\cite{Goldwasser1985}, the verifier \( V \) does not reveal the random bits from its random tape to the prover \( P \); that is, \( V \)'s random tape remains private. Instead, \( V \) transmits only the results of computations performed on these random bits to \( P \). This model is commonly referred to as a \textit{private-coin} \gls{ip}.  
+In contrast, the \gls{ip} introduced by Babai~\cite{Babai85}, known as the Arthur-Merlin proof system, allows \( P \) full access to \( V \)'s random bits, leading to what is referred to as a \textit{public-coin} \gls{ip}. In this protocol, $V$ does not perform any computations on the random bits but instead transmits them directly. Any subsequent deterministic computations that $V$ would typically perform can instead be carried out by $P$.
+Goldwasser and Sipser later proved in~\cite{Goldwasser1986Private_vs_Public} that these two models are equivalent, demonstrating that any private-coin \gls{ip} can be efficiently simulated by a public-coin \gls{ip}. Representing an \gls{ip} as a public-coin protocol enables the technique of the Fiat-Shamir transformation~\cite{Fiat1987}, allowing the \gls{ip} to be converted into a non-interactive proof.
+
+
+\subsubsection{Random Oracle Model}
+Let \( R: \{0,1\}^* \rightarrow \{0,1\}^\kappa \) be a function that maps a binary string input to a sufficiently large, uniformly distributed random string. \( R \) represents a random oracle, accessible to both \( P \) and \( V \). For each query \( q \in \{0,1\}^* \) made by either \( P \) or \( V \), the oracle responds with \( R(q) \), which is independently and uniformly sampled from \( \{0,1\}^\kappa \). The oracle maintains a record of its responses to ensure that if \( q \) is queried again, it returns the same value as before~\cite{Thaler2022Proofs}.
+
+
+
+\subsubsection{Fiat-Shamir Transformation}
+As mentioned earlier, any private-coin \gls{ip} can be transformed into a public-coin \gls{ip}, where \( V \) only sends public random bit strings. The Fiat-Shamir transformation replaces \( V \)'s random bits with values derived from the random oracle \( R \). Given that \( x \) is the common public input to the \gls{ip}, the \( i \)th random value, denoted as \( r_i \), which would have been sent by \( V \), is instead computed as 
+\(
+r_i = R(q_i),
+\)
+where 
+\[
+q_i = (x, i, r_i, p_1, \dots, p_{i-1}) 
+\]
+is the query to the random oracle \( R \), where $p_i$ is the $P$'s $i$th message in the interaction with $V$. This eliminates any interaction with \( V \). Consequently, \( P \) can provide the transcript of the entire protocol, replacing the verifier's random bits with the corresponding outputs from \( R \). As a result, this transcript is also \textit{publicly verifiable}, meaning that anyone who sees the transcript can verify whether \( x \) belongs to \( L \).
+
+Since the instantiation of the ideal random oracle \( R \) is impractical in real-world scenarios, it is replaced with hash functions in practice. This substitution enables a \textit{publicly verifiable, non-interactive argument system} \cite{Thaler2022Proofs}.
+
+\subsection{Succinct Non-Interactive Argument}
+
+\subsection{Probabilistically Checkable Proof}
+
+\subsection{Interactive Oracle Proof}
+
+
+
+
+
 \subsection{Sumchek Protocol}
+
+\subsubsection{Multivariate Sumchek Protocol}
+
+\subsubsection{Univariate Sumchek Protocol}
+
 
 \subsection{GKR Protocol}
 
+
+GKR \cite{GKR2008} is a public coin interactive proof protocol for any language computable by a log-space uniform layered (fan-in 2) arithmetic circuit $\mathcal{C}$, in which a prover $\mathcal{P}$ can run the computation and interactively prove the correctness of the result (output gate(s)) to a verifier $\mathcal{V}$. Consider a circuit with depth denoted by $d$ and size represented by $S$, where the size is defined as the total number of gates. For any layer $\ell$ within the circuit, $S_\ell$ indicates the number of gates at that layer. Specifically, $\ell=0$ corresponds to the output layer, while $\ell=d$ represents the input layer. Additionally, $\nu$ is the size of the input to  the circuit $\mathcal{C}$. The communication cost is $O(S_0 + d\log(S))$, the cost of $\mathcal{V}$  is $O(\nu + d\log(S))$, and the runtime of the $\mathcal{P}$ is bounded by $O(S^3)$. In the following, we briefly describe the GKR protocol following Thaler's presentation of the protocol in \cite{Thaler2022}.\\
+
+
+\noindent\textbf{Circuit Encoding.} At each layer $\ell$, the gates are numerically labeled in binary from $0$ to $S_\ell - 1$, assuming $S_\ell$ is a power of two (expressed as $S_\ell = 2^{k_\ell}$). The functions $\mathsf{in1}_\ell$ and $\mathsf{in2}_\ell$, each defined as $\mathsf{in1}_\ell, \mathsf{in2}_\ell: \{0, 1\}^{k_\ell} \rightarrow \{0, 1\}^{k_{\ell+1}}$, map a binary gate label at layer $\ell$ to its input gates at layer $\ell+1$. This mapping explicitly encodes the wiring—how outputs from gates at layer $\ell+1$ serve as inputs to a gate at layer $\ell$. Accordingly, the functions $\mathsf{add}_\ell$ and $\mathsf{mult}_\ell$, representing addition and multiplication gates at layer $\ell$, are defined as 
+\begin{equation*}
+	\mathsf{add}_\ell, \mathsf{mult}_\ell: \{0, 1\}^{k_\ell} \times \{0, 1\}^{k_{\ell+1}} \times \{0, 1\}^{k_{\ell+1}} \rightarrow \{0, 1\}.
+	% \label{eq:gkr_add_mult}
+\end{equation*}
+For a gate labeled $a$ at layer $\ell$, these functions take as input the labels of three gates $(a, b, c)$, and return 1 if and only if  $(b, c) = \left(\mathsf{in1}_\ell(a), \mathsf{in2}_\ell(a)\right)$. $\widetilde{\mathsf{add}}_\ell$ and $\widetilde{\mathsf{mult}}_\ell$ denote the Multilinear Extension (MLE) of $\mathsf{add}_\ell$ and $\mathsf{mult}_\ell$. Additionally, the function $W_\ell : \{0, 1\}^{k_\ell} \rightarrow \mathbb{F}$, maps gate at layer $\ell$ to the outputted value of the gate. Accordingly, $\widetilde{W}_\ell$ denote the MLE of $W_\ell$. The following equation describes how $\widetilde{W}_\ell$ can be derived form $\widetilde{W}_{\ell+1}$, $\widetilde{\mathsf{add}}_\ell$, and $\widetilde{\mathsf{mult}}_\ell$:
+
+\begin{align*}
+	\widetilde{W}_\ell(z) = \sum_{b,c \in \{0, 1\}^{k_{\ell+1}}} \biggl( & \widetilde{\mathsf{add}}_\ell(z, b, c) \left( \widetilde{W}_{\ell+1}(b) + \widetilde{W}_{\ell+1}(c) \right)  \\ 
+	& + \widetilde{\mathsf{mult}}_\ell(z, b, c) \left( \widetilde{W}_{\ell+1}(b) \cdot \widetilde{W}_{\ell+1}(c) \right) \biggr).
+\end{align*}
+
+\noindent\textbf{Multivariate Sum-check.}
+The GKR protocol consists of an iteration for each layer. In the iteration corresponding to layer $\ell<d$ of the circuit,  $\mathcal{P}$ claims a specific value for $\widetilde{W}_\ell(r_\ell)$, with $r_\ell \in \mathbb{F}^{k_\ell}$ being a randomly selected point. Note that $r_\ell$ may have non-Boolean entries. In order to check the claim, $\mathcal{P}$ and $\mathcal{V}$ cooperate in a multivariate sum-check protocol \cite{Lund1992Sumcheck} to the polynomial $f_{r_\ell}^{(\ell)}$ defined as
+\begin{align*}
+	f_{r_\ell}^{(\ell)}(b,c) =  & \widetilde{\mathsf{add}}_\ell(r_\ell, b, c) \left( \widetilde{W}_{\ell+1}(b) + \widetilde{W}_{\ell+1}(c) \right) \\ & + \widetilde{\mathsf{mult}}_\ell(r_\ell, b, c) \left( \widetilde{W}_{\ell+1}(b) \cdot \widetilde{W}_{\ell+1}(c) \right).
+\end{align*}
+Given that $\mathcal{V}$ does not know the polynomial $f_{r_\ell}^{(\ell)}$, to evaluate $f_{r_\ell}^{(\ell)}(b^*, c^*)$ in the final round of the sum-check protocol at a randomly chosen point $(b^*, c^*) \in \mathbb{F}^{k_{\ell+1}} \times \mathbb{F}^{k_{\ell+1}}$,  $\mathcal{V}$ asks $\mathcal{P}$ to provide $z_1 = \widetilde{W}_{\ell+1}(b^*)$ and $z_2 = \widetilde{W}_{\ell+1}(c^*)$, which are then verified in the subsequent iteration ($i+1$) through the \textit{round consistency check} process. However,  $\mathcal{V}$ can independently evaluate $\widetilde{\mathsf{add}}_\ell(r_\ell, b^*, c^*)$ and $\widetilde{\mathsf{mult}}_\ell(r_\ell, b^*, c^*)$, according to the circuit's structure.\\
+
+
+\noindent\textbf{Round Consistency Check.}
+To verify $z_1$ and $z_2$, $\mathcal{V}$ aims to \textit{reduce} these verifications into a single task: validating the $\mathcal{P}$'s  claim of $\widetilde{W}_{\ell+1}(r_{\ell+1})$. This claim represents the summation outcome at the next layer denoted as
+\begin{equation*}
+	\widetilde{W}_{\ell+1}(r_{\ell+1}) = \sum_{b,c \in \{0, 1\}^{k_{\ell+2}}} f_{r_{\ell+1}}^{(\ell+1)}(b,c).
+\end{equation*}
+To do so, let define the unique line  $\lambda: \mathbb{F} \rightarrow \mathbb{F}^{k_{\ell+1}}$, such that $\lambda(0) = b^*$ and $\lambda(1) = c^*$. $\mathcal{P}$ then sends the polynomial $q=\widetilde{W}_{\ell+1} \big|_\lambda$ to $\mathcal{V}$, representing the restriction of $\widetilde{W}_{\ell+1}$ to the line $\lambda$. Upon receiving the polynomial, $\mathcal{V}$ first verifies that $q(0) = z_1$ and $q(1) = z_2$. Subsequently, $\mathcal{V}$ selects a random $r^* \in \mathbb{F}$ and sets $r_{\ell+1} = \lambda(r^*)$, then checks if $q(r^*) = \widetilde{W}_{\ell+1}(r_{\ell+1})$, which is the claim made by $\mathcal{P}$ for the next round.\\
+
+\noindent\textbf{Final Round Check.}
+In the final round, $\mathcal{V}$ independently checks $ \widetilde{W}_{d}(r_{d})$.
+
+
+
+% $\mathcal{V}$ then checks $q(0) = z_1$ and $q(0) = z_2$. Finally, $\mathcal{V}$ chooses $r_{\ell+1}$ for the next round such that, $r_{\ell+1} = \lambda(r^*)$ for a randomly chosen  $r^* \in \mathbb{F}$. Then, checks if $q(r^*) = \widetilde{W}_{\ell+1}(r_{\ell+1})$ which is the  $\mathcal{P}$'s  claim for the next round.
+
+% a polynomial $q$ that is claimed to be the restriction of $\widetilde{W}_{\ell+1}$ to $\lambda$ denoted as $\widetilde{W}_{\ell+1}$
+
+
+% To verify $z_1$ and $z_2$, $\mathcal{V}$ needs to reduce those verifications to a single verification of $\widetilde{W}_{\ell+1}(r_{\ell+1})$ which $\mathcal{P}$ claims it as the result of the summation in the next round sum-check protocol (i.e., $\sum_{b,c \in \{0, 1\}^{k_{\ell+2}}} f_{r_{\ell+1}}^{(\ell)}(b,c)$).
+
+
+
+% $\ell$ of the circuit, where $\mathcal{P}$ claims a value for $\widetilde{W}_\ell(r_\ell)$, where $r_\ell \in \mathbb{F}$ is a random point.
+
+% the output of randomly selected gate label. For example, for the $\ell$-th layer, $\mathcal{P}$ clams a value for $\widetilde{W}_\ell(r_\ell)$ for $r_\ell \in \mathbb{F}$
+
+
+% Moreover, $\mathsf{in1}_\ell, \mathsf{in2}_\ell: \{0, 1\}^{k_\ell} \rightarrow  \{0, 1\}^{k_\ell+1} $ each maps a gate at layer $\ell$ to a gate at layer $\ell+1$ which provides the input to the gate. This mapping encodes the wires connected from layer $\ell + 1$ to a gate at layer $\ell$.  
+
+
+
 \subsection{FRI Protocol}
+FRI protocol is a low-degree test for polynomials. It is used to determine whether a polynomial $f$ is low-degree with respect to the size of the evaluation domain,  without actually knowing $f$ itself \cite{ben2018fast,habock2022summary}. 
+
+FRI protocol begins with a polynomial $f_0(X)$ and its evaluation domain $L_0$, which is an affine subspace in $\mathbb{F}$.
+The polynomial $f_0(X)$ and domain $L_0$ undergo a stepwise reduction process using a random folding procedure, resulting in a sequence of polynomials
+\begin{equation}
+	f_0(X), f_1(X),\cdots, f_{\mathsf{r}}(X)\in \mathbb{F}[X],
+\end{equation}
+and a sequence of domains
+\begin{equation}
+	L_0 \supseteq L_1 \supseteq \cdots \supseteq L_{\mathsf{r}}.
+\end{equation}
+Suppose $d_k$ is the upper bound of polynomial's degree, i.e., $\deg f_k(X) < d_k$. We assume the degrees decrease with the same ratio as the domains, which means the quotients
+\begin{equation}
+	\frac{d_k}{d_{k+1}} = \frac{|L_k|}{|L_{k+1}|}
+\end{equation}
+are the same, called \textit{reduction factors}, and in this papar we always assume the reduction factors to be 2.
+
+Let $f^{(k)}\ (\ 0\le k \le \mathsf{r})$ be a Reed Solomn codeword defined as follows,
+\begin{equation}
+	\begin{aligned}
+		f^{(k)}:L_k &\rightarrow &\mathbb{F},\\
+		x &\mapsto& f_k(x).
+	\end{aligned}
+\end{equation}
+The notation caveat should be noted here that $f_k(X)$ represents a polynomial, while $f^{(k)}$ is an array of points representing a Reed Solomn codeword. The interpolant of $f^{(k)}$ would construct the polynomial $f_k(x)$. The rate of Reed Solomn codeword is defined as
+\begin{equation}
+	\rho = \frac{d_k }{|L_{k}|}.
+\end{equation}
+
+FRI is an interactive protocol containing a Commit phase and a Query phase,  running for $\mathsf{r}$ rounds.
+\newline
+
+\noindent\textbf{Commit Phase.}
+During the $k$-th round of the Commit phase $(0\le k \le \mathsf{r} - 1)$, the prover commits to $f^{(k)}$ and the verifier has oracle access to  $f^{(k)}$. In this paper, Merkle tree commitment is employed.
+
+During the last round $k = \mathsf{r}$, prover sends the  $f^{(\mathsf{r})}$ to the verifier. By this point, the degree of $f_{\mathsf{r}}(X)$, which is the interpolant of  $f^{(\mathsf{r})}$, should be no more than $\rho\cdot |L_{\mathsf{r}}| -1$.
+\newline
+
+\noindent\textbf{Query Phase.}
+The verifier will validate that the prover adheres to the prescribed procedures.
+
+Specifically, the verifier will randomly select $s^{(0)}$ from $L_0$, and iteratively computes a sequence of points $s^{(0)}, s^{(1)}, \cdots , s^{(\mathsf{r})}$. The verifier will query the value $f_{k+1}(s^{(k+1)})$, and two other points from $f^{(k)}$, and check the round consistency among those three points ($0\le k\le \mathsf{r} -1$). The verifier will repeat this check for $\ell$ times, and accept only when all checks pass.
+
+If verifier accepts, it means that the degree of the original polynomial $f_0(X)$ should be no more than $\rho\cdot |L_{0}| -1$.
+
 
 \subsection{Aurora zkSNARK Protocol}
 
+
+Aurora~\cite{Aurora2019} is a \gls{zksnark} protocol for \gls{r1cs} relations. It encodes an \gls{r1cs} instance into entries of Reed-Solomon (\gls{rs}) codewords and employs an interactive oracle proof (\gls{iop}) framework, which leverages the \gls{fri}~\cite{FRI2018} to perform a sumcheck proof on these entries. \gls{fri} is employed to verify that the given \gls{rs} code is close to a low-degree polynomial, or low degree testing (\gls{ldt}). It progressively reduces the size of the codeword based on a localization parameter $\eta$.
+
+Aurora ensures the zero-knowledge property for its univariate sumcheck protocol and \gls{ldt}, and consequently for the entire protocol, by employing the technique introduced in~\cite{Ben-Sasson2016Zero-Knowledge}.
+
+% Let $\eta$, $\mu+1$, and $\kappa+1$ be powers of two (without loss of generality). 
+\subsubsection{Step 0: Protocol Setup}
+At the beginning of the protocol, the prover $P$ and verifier $V$ establish a finite field \( \mathbb{F} \), a security parameter $\boldsymbol{\lambda}$, a rate $\rho$, an \gls{fri} localization parameter $\eta$, an \gls{r1cs} parameters
+\(
+(\mathbb{F}, d_1, d_2, d_3, \mathbf{A}, \mathbf{B}, \mathbf{C})
+\),
+ and two subspaces \( H_1, H_2 \subset \mathbb{F} \), where \( |H_1| = d_1 \) and \( |H_2| = d_2 + 1 \) such that $H_1 \subseteq H_2$ or $H_2 \subseteq H_1$. We can write $H_1 \cup H_2 = \{h_0, \dots, h_{t-1}\}$, where $t = |H_1 \cup H_2| = \max(d_1, d_2+1)$. 
+
+\subsubsection{Step 1: Polynomial Encoding}
+
+
+\subsubsection{Step 2: Lincheck}
+
+\subsubsection{Step 3: Univariate Sumcheck}
+
+\subsubsection{Step 4: Low-Degree Test}
+
+
+First, the prover computes the low degree extension (LDE) of the unique polynomial of degree $\kappa+1$
+\begin{equation*}
+	f_{(1,\vbu)}(h_i) = \begin{cases}
+		1 & \text{for $i = 0$},\\
+		\vbu_{i-1} &  \text{for $i \in [1,\kappa]$}.
+	\end{cases}
+\end{equation*}
+Accordingly, the prover computes RS codewords listed in Table \ref{tab:codewords}, where $L$ denotes the codeword domain. To achieve zero-knowledge against query bound $\texttt{b}$ malicious verifier, the degree of non-masking polynomials in Table \ref{tab:codewords} is incremented by \texttt{b} to enable sampling the polynomials at random while it evaluates to pre-determined values in $H_1 \cup H_2$. Accordingly, any set of \texttt{b} evaluations of the polynomials outside of $H_1 \cup H_2$ are independently and uniformly distributed in $\mathbb{F}$. Hence, the codeword domain is chosen such that  $L \cap (H_1 \cup H_2) = \emptyset$. 
+
+Aurora consists of $\lambda_i$ rounds of \textit{lincheck} protocol, where in round $\ell \in [1,\lambda_i]$ the verifier sends four random numbers represented as $\alpha_\ell, s^A_\ell, s^B_\ell, s^C_\ell  \in_R \mathbb{F}$, then both prover and verifier compute the polynomials
+\begin{equation}\label{eq:pa}
+	p_{\alpha_\ell}(h_i) = \begin{cases}
+		{\alpha_\ell} ^ {i+1} & \text{for $i \in [0,\eta-1]$}\\
+		0          & \text{for $ i  \in [\eta,  \mu]$}% (if $\mu \geq \eta$ )},
+\end{cases}
+\text{, and }
+p^{ABC}_{\alpha_\ell}(h_j) = 
+\sum_{M\in \{A, B, C\}} s^A_\ell p^{M}_{\alpha_\ell}(h_j),% (if $\eta \geq \mu + 1$ )}.
+\end{equation}
+where
+\begin{equation}\label{eq:paABC}
+p^{M}_{\alpha_\ell}(h_j) =  \begin{cases}
+\sum_{i\in[0,\eta-1]} M_{i,j}{\alpha_\ell} ^ {i+1} & \text{for $j \in [0,\mu]$},\\
+0          & \text{for $ j  \in [\mu+1,  \eta]$}.% (if $\eta \geq \mu + 1$ )}.
+\end{cases}
+\end{equation}
+
+\begin{table}[]
+\centering
+\caption[Codewords Generated by the Aurora Prover Algorithm]{Codewords generated by prover. 
+% given an R1CS instance to prove the knowledge of $\wbu$ which satisfies the instance. 
+% $\hat{\fbu}_\zbu := \hat{\fbu}_\wbu \cdot \mathbb{Z}_{\{h_0,\dots, h_{\kappa}\}} + \hat{\fbu}_{(1,\vbu)}(h_i)$ is a virtual oracle which is not computed explicitly. 
+$\lambda'_i$ denote the number of repetitions of LDT. The mechanism for randomizing polynomials, denoted as $^*$, is omitted here for the sake of simplicity.}
+\label{tab:codewords}
+{ 
+\begin{tabularx}{\linewidth}{>{\hsize=.33\hsize}XX}
+\toprule
+\textbf{Codeword(Oracle)} & \textbf{Description} \\
+%  \midrule
+%  $\hat{\mbu} \in \text{RS}[L, \frac{2t+\texttt{b}-1}{|L|}]$  & 
+% {$\hat{\mbu} := m|_L$, where $m$ is a masking polynomial of degree $2t+\texttt{b}-1$ such that  $m(X) = \mathbb{Z}_{H_1\cup H_2}(X)\cdot h(X) + g(X)$, where $h(X)$ and $g(X)$ are random polynomials of degree }.\\     
+\midrule
+$\hat{\fbu}_\wbu \in \text{RS}[L, \frac{\mu-\kappa+\texttt{b}}{|L|}]$  & 
+{$\hat{\fbu}_\wbu := f^*_\wbu|_L$, where $f^*_\wbu$ is a random polynomial of degree $< \mu - \kappa +\texttt{b}$ such that for $\kappa < i\leq \mu$, \(f_{\wbu}(h_i) = ({\wbu_{i-\kappa-1} - f_{(1,\vbu)}(h_i)})/{\mathbb{Z}_{\{h_0,\dots, h_{\kappa}\}}} \)}.\\     
+\midrule
+$\hat{\fbu}_{\mathbf{Az}} \in \text{RS}[L, \frac{\eta+\texttt{b}}{|L|}]$,\newline
+$\hat{\fbu}_{\mathbf{Bz}} \in \text{RS}[L, \frac{\eta+\texttt{b}}{|L|}]$, \newline
+$\hat{\fbu}_{\mathbf{Cz}} \in \text{RS}[L, \frac{\eta+\texttt{b}}{|L|}]$ & 
+$\hat{\fbu}_{\mathbf{Mz}} := f^*_{\mathbf{Mz}}|_L$ for $\mathbf{M} \in \{\mathbf{A}, \mathbf{B}, \mathbf{C}\}$, where $f^*_{\mathbf{Mz}}$ is a random polynomial of degree $< \eta + \texttt{b}$ such that for $i \in [0,\eta-1]$, \(f_{\mathbf{Mz}}(h_i) = \mathbf{Mz}_i\).
+\\
+\midrule
+
+$\hat{\rbu}_\ell \in_R  \text{RS}[L, \frac{2t+\texttt{b}-1}{|L|}]$ & For $\ell\in [1,\lambda_i]$, $\hat{\rbu}_\ell$ is a random masking codeword for lincheck
+\\
+\midrule
+
+$\hat{\hbu}_\ell \in  \text{RS}[L, \frac{t+\texttt{b}}{|L|}]$ & For $\ell\in [1,\lambda_i]$,  $\hat{\hbu}_\ell := h|_L$, where $h$ is a polynomial of degree $<t+b$ such that it is the quotient of the polynomial division \newline
+\(
+r_\ell(X) + \sum_{\mathbf{M} \in \{\mathbf{A}, \mathbf{B}, \mathbf{C}\}} \left(f_{\mathbf{Mz}}(X)p_{\alpha_\ell}(X) - f_\zbu(X) p^{M}_{\alpha_\ell}(X)\right)
+\) $=$ $g_\ell(X)$
+$ + \frac{\sum_{i\in[0,t-1]}r_\ell(h_i)}{\sum_{i\in[0,t-1]}h_i^{t-1}}\cdot X^{t-1} $
+$+ \mathbb{Z}_{H_1\cup H_2} \cdot h(X)$
+\\
+% \midrule
+% $\hat{\rbu}_\ell \in  \text{RS}[L, \frac{2t+\texttt{b}-1}{|L|}]$&
+% For $\ell\in [1,\lambda_i]$, $\hat{\rbu}_\ell = r_\ell|_L$, such that\newline
+% \(
+% r_\ell(X) + \sum_{\mathbf{M} \in \{\mathbf{A}, \mathbf{B}, \mathbf{C}\}} \left(f_{\mathbf{Mz}}(X)p_{\alpha_\ell}(X) - f_\zbu(X) p^{M}_{\alpha_\ell}(X)\right)
+% \) $=$ $g_\ell(X)$
+% $ + \frac{\sum_{i\in[0,t-1]}r_\ell(h_i)}{\sum_{i\in[0,t-1]}h_i^{t-1}}\cdot X^{t-1} $
+% $+ \mathbb{Z}_{H_1\cup H_2} \cdot h(X)$,\newline
+% where $g_\ell(X)$ is a random polynomial of degree $<t-1$.
+% \\
+\midrule
+$\hat{\rbu}'_\ell \in_R  \text{RS}[L, \frac{2t+2\texttt{b}}{|L|}]$ & For $\ell\in [1,\lambda'_i]$, $\hat{\rbu}_\ell$ is a random masking codeword for LDT
+\\
+\bottomrule
+\end{tabularx}
+}
+\end{table}
+The prover then proceeds to prove the consistency of the known witness with the R1CS instance. This is achieved by reducing the random combination of the codewords to a univariate sumcheck protocol, equivalent to a low-degree testing (LDT) which is realized using the FRI of proximity parameter 
+\begin{equation}\label{eq:proximity_parameter}
+\delta = \min\left( \frac{1-2\rho}{2}, \frac{1-\rho}{3}, 1-\rho \right).
+\end{equation}
+Furthermore, the transformation described in \cite{BCS2016} is employed to compile the described interactive protocol into a zkSNARK. In Section \ref{Sec:FFT_Calls_in_Aurora}, we will discuss the FFT complexity of Aurora which includes the size of the codeword domain $|L|$, and the number of input lengths FFT/IFFT calls. For example, the prover calls FFT and IFFT algorithms to compute the codewords in Table \ref{tab:codewords} and both prover and verifier call  IFFT  to interpolate the polynomials $p_\alpha$ and $p^{ABC}_\alpha$. 
+
+
+
+
 \subsection{Polaris zkSNARK Protocol}
+
+% \textcolor{blue}{
+	% Checklist:
+	% \\
+	% 1. introduce the arithmetisation (R1CS-like encodings) of Polaris, DONE 
+	% \\ 
+	% 2. list the conditions to be checked in Polaris, and the reasons why we need GKR/sumcheck and FRI protocols (Donot have to introduce those protocols in more details). done
+	% \\
+	% 3.why we focus on FRI and GKR. --> needs to be done \\
+	% 4. check citations
+	% } \\
+
+Polaris \cite{Polaris} is a zkSNARK protocol without a trusted setup that has quasi-linear time complexity for the prover and polylogarithmic proof size. Its verification time is relative to the size of the arithmetic circuit representing the statement to be proven. It achieves this efficiency by encoding the R1CS instance as a univariate polynomial in a quadratic arithmetic program (QAP) \cite{gennaro2013quadratic}. The main source of Polaris' efficiency is an arithmetic layered circuit design that allows the verifier to delegate query computations to the prover and verify the results using the GKR protocol \cite{GKR2008}. 
+Polaris combines univariate polynomial encoding described in Section \ref{univariate_pol} with univariate sumcheck protocol in Aurora \cite{aurora}.
+By accomplishing this, the protocol constructs an interactive proof that is complete and sound, and then extends it to incorporate zero-knowledge and non-interativeness using Fiat-Shamir protocol \cite{fiat1986prove}. Figure \ref{fig:polaris-blocks} below shows the building blocks of the Polaris protocol.
+
+\begin{figure}[h]
+	\centering
+	\includestandalone[width=\textwidth]{Figures/polaris_block}
+	\caption{
+		Structure of the Polaris protocol with key sub-protocols. }
+	\label{fig:polaris-blocks}
+\end{figure}
+
+
+\subsubsection{R1CS Instance}%\label{r1cs}
+% Let the language $\mathcal{L} \subset \{0, 1\}^*$ correspond to $\mathcal{R}$. Such that, for each instance $\mathbbm{x} \in \mathcal{L}$,  $\mathcal{R}_\mathbbm{x}=\{w:(\mathbbm{x},w)\in\mathcal{R}\}$. Let $\mathcal{R}_\mathcal{L}$ denote the corresponding language of valid instance-witness pairs, i.e., $\mathcal{R}_\mathcal{L}=\{(\mathbbm{x},w):\mathbbm{x}\in\mathcal{L} \text{ and } w\in\mathcal{R}_\mathbbm{x}\}$. 
+Following Definition \ref{def:R1CS} The R1CS instance can be represented as a tuple $\mathbbm{x} = (\mathbb{F},A,B,C,\vec{v},m,n)$, where $\mathbb{F}$ is the finite field, $A,B$ are input matrices and $C$ is the output matrix of degree $m \times m$ from the R1CS construction. $\vec{v}$ represents the vector containing the instance's public parameter. There are at most $n$ non-zero entries in each matrix. \\
+
+An R1CS relation $\mathcal{R}_{\mathrm{R1CS}}$ is said to be satisfiable if there exists a witness $\vec{w} \in \mathbb{F}^{m - |v| - 1}$ consisting of the circuit's private input and wire values such that
+\begin{equation*}
+	(A\vec{z}) \circ (B\vec{z}) = C\vec{z},
+\end{equation*}
+where $\vec{z} := (1,\vec{w}, \vec{v})$ and “$\circ$” denotes the Hadamard product of the two vectors $A\vec{z}$ and $B\vec{z}$. This relation $\mathcal{R}_{\mathrm{R1CS}}$ represents the input and output vectors of the gates in the arithmetic circuit. \\
+
+%\subsubsection{Interpolating over affine spaces.} 
+% \begin{equation*}
+	%     H= \{ c +x_0 \alpha_0+\cdots + x_{s-1} \alpha_{s-1} \,| \, x_i \in \mathbb{F}_2, c\in \mathbb{F}_2\}
+	% \end{equation*}
+
+% where $\{\alpha_0,  \cdots, \alpha_{s-1}\}$ is a linear independent set of $\mathbb{F}$ over $\mathbb{Z}_2$.  In this case, we also write $H=<\alpha_0,  \cdots, \alpha_{s-1}>$. \\
+
+\subsubsection{Univariate Polynomial Encoding}\label{univariate_pol}
+
+Let $H$ be an $s$-dimensional affine space of $\mathbb{F}$ such that $|H|=m$. The vector $\textbf{z}=(1,\textbf{v},\textbf{w}) \in \mathbb{F}^H$ is interpreted as a univariate function $Z: H\rightarrow\mathbb{F}$. This allows the accessing of any element of vector $\textbf{z}$ using an index in $H$.
+The function $F_{\textbf{w}}(\cdot)$ encodes $\textbf{z}$, which contains the private witness $\textbf{w}$, 
+into a polynomial form for use in the protocol. It is defined as
+\begin{align*}
+	F_\textbf{w}(X)= & \left(\sum_{y\in H}A(X,y)\cdot Z(y)\right)\cdot\left(\sum_{y\in H} B(X,y)\cdot Z(y)\right)
+	- \left(\sum_{y\in H}C(X,y)\cdot Z(y)\right).
+\end{align*}
+
+A witness-instance pair $(\mathbbm{x},\textbf{w})$ is deemed valid, i.e., $(\mathbbm{x},\textbf{w})\in\mathcal{R}_{\mathrm{R1CS}}$ if and only if $F_\textbf{w}(x)=0$ for any $x\in H$. Polaris utilises the polynomial extension of $F_\textbf{w}(\cdot)$, for its arithmetisation in the protocol. We assign
+\begin{align*}
+	\bar{A}(X) & =  \sum_{y\in H}A(X,y)\cdot Z(y), \\
+	\bar{B}(X) &=  \sum_{y\in H}B(X,y)\cdot Z(y), \\
+	\bar{C}(X) &=  \sum_{y\in H}C(X,y)\cdot Z(y).
+\end{align*}
+To find the coefficients of the three polynomials, we can compute the vector products $A\mathbf{z}, B\mathbf{z}$ and $C\mathbf{z}$, and then interpolate those vector results over $H$. Given that \(A\), \(B\) and \(C\) are sparse matrices, the prover employs \textit{sparse encoding} approach for efficiently finding the coefficient of each $\bar{A}$, $\bar{B}$, and $\bar{C}$. To do so, we define three functions for each matrix \(M\), where \(M \in \{A, B, C\}\). These functions, $\mathsf{row}, \mathsf{col}:[n]\to H$, and \(\mathsf{val}:[n]\to\mathbb{F}\), respectively map from the set of indices \([n]\) to the row and column indices, and to the value of the non-zero entries within the matrix \(M\). Here $[n]:= \{1,2,\cdots, n\}$. Thus, for every $x\in H$,
+\begin{align*}
+	\bar{M}(x) = \sum_{i\in[n]\;\mathrm{s.t.}\;\mathsf{row}(i)=x} \mathsf{val}(i)\cdot Z(\mathsf{col}(i)).
+\end{align*}
+
+We can represent any sequence of length $N$ over $\mathbb{F}$ as a univariate polynomial by using Lagrange interpolation. For a sequence $\{f_i\}$, applying Lagrange interpolation would result in a polynomial $f$, where $f(\rho(i))=f_i$. Here, $\rho(i)$  = $i_0 \alpha_0+\cdots + i_{s-1}  \alpha_{s-1}$ with $(i_0, \cdots, i_{s-1})$ as the binary representation of $i$. The  points used in the Lagrange interpolation are  
+$(\rho(i), f_i), 0\le i<2^s-1$.
+In other words, we have
+\begin{equation}\label{eq-uni}
+	f(x) = \sum_{i=0}^{2^s-1} f_i \sigma_i(x),
+\end{equation}
+where $\{\sigma_i \,|\, 0\le i<2^s\}$ is the Lagrange basis, given by 
+\begin{equation}\label{eq-Lbasis}
+	\sigma_i(x) = \frac{\prod_{j\ne i} (x-\rho(j))}{\prod_{j\ne i} (\rho(i)-\rho(j))}. 
+\end{equation}
+Since $f(x)$ is a polynomial with coefficients in $\mathbb{F}$, we can naturally extend $f$ from a function mapping $N_{2^s} \rightarrow$  $\mathbb{F}$ to a function over $\mathbb{F}$.
+
+Given the definition of the vanishing polynomial in Equation \eqref{eq:vanishing_poly}, we can further represent $\mathbb{Z}_H(x)$, an affine linearized polynomial of $\mathbb{F}$ with dimension $s$, as below,
+\begin{equation*}\label{eq-defZx2}
+	\mathbb{Z}_H(x)=x^{2^k}+\sum_{i=1}^{s}c_ix^{2^{i-1}}+c_0, c_i\in \mathbb{F}.  
+\end{equation*}
+If $H$ is linear, then $c_0 = 0$. Note that $c_1 \neq 0$, since $\mathbb{Z}_H(x)$ has no repeated roots. This also means that $\mathbb{Z}_H$ has degree $|H|$. 
+To perform univariate encoding, Polaris makes use of the following bivariate polynomial: 
+\begin{equation}\label{eq-Delta}
+	\Delta_H(x,y):=\frac{\mathbb{Z}_H(x)-\mathbb{Z}_H(y)}{x-y},
+\end{equation}
+which is a polynomial of degree $|H|-1$ because $\mathbb{Z}_H(x)-\mathbb{Z}_H(y)$ is divisible by $x-y$. 
+With the above notation,  the Lagrange basis in \ref{eq-Lbasis} is given as 
+\[
+\sigma_i(x) = \frac{\Delta_H(x,\rho(i))}{c_1} = \frac{1}{c_1} \frac{Z_H(x)}{x-\rho(i)}, 0\le i<2^s,
+\]
+and (\ref{eq-uni}) now becomes
+\begin{equation}\label{eq-uni2}
+	f(x) = \frac{1}{c_1} \sum_{i\in N_{2^s}} f_i \Delta_H(x,\rho(i)) = \frac{1}{c_1} \sum_{i\in N_{2^s}} f_i  \frac{Z_H(x)}{x-\rho(i)}.
+\end{equation}
+Equation \eqref{eq-uni2} represents a univariate polynomial leveraged from bivariate interpolation.
+% \noindent\textbf{Sparse Encoding.} 
+
+%Given that $A$, $B$, and $C$ are sparse matrices, we define $\mathsf{row}$, $\mathsf{col}:[n]\to H$ and $\mathsf{val}:[n]\to\mathbb{F}$ respectively represent the row index, column index, and value of the non-zero entries of each matrix $M$ such that $M\in\{A,B,C\}$.
+
+
+
+
+
+
+\paragraph{Quadratic and Linear Checks}\label{linquad}
+
+In the Polaris protocol, the prover $\mathcal{P}$ wants to convince the verifier $\mathcal{V}$ that $(\mathbbm{x},\textbf{w})\in\mathcal{R}_{\mathrm{R1CS}}$ which is true if and only if the univariate  $\mathbb{F}_\textbf{w}(x) = 0$ at all points within the affine subspace $H$ of $\mathbb{F}$. According to the factor theorem (Theorem 1 in \cite{fu2022polaris}), this verification is the same as determining if there's a polynomial $G(X)$ where $\text{deg}(F_\textbf{w}) - |H| \leq |H| - 2$, such that 
+\begin{equation}
+	F_\textbf{w}(X) = \mathbb{Z}_H(X) \cdot G(X).
+	\label{eq:qad_lin_check}
+\end{equation}
+This is verified through two distinct checks, namely, the Quad-Check and the Lin-Check, as presented in the following sections.
+
+
+
+\paragraph{Quad-Check.}\label{quad}
+
+In the Quad-Check protocol, $\mathcal{V}$ conducts a probabilistic check of Equation \eqref{eq:qad_lin_check} at a randomly selected point. To realize this, $\mathcal{P}$ commits to the polynomial $G(X)$ using FRI univariate polynomial commitment and sends the commitment to $\mathcal{V}$. Section \ref{sec:FRI_instantiation} presents the instantiation of the FRI commitment scheme in our protocol. Then, $\mathcal{V}$ sends the randomly selected point $r_x \in F \setminus H$ to $\mathcal{P}$. Then, the prover evaluates $\eta = G (r_x)$ and sends the result to $\mathcal{V}$. Finally, $\mathcal{V}$ query the commitment to verify the evaluation. 
+
+To verify $F_w(r_x) = \mathbb{Z}_H(r_x) \cdot G(r_x)$, the verifier also needs to compute $F_w(r_x)$.
+Recall that 
+\begin{equation*}
+	F_w(r_x) = \bar{A}(r_x) \cdot \bar{B}(r_x) - \bar{C}(r_x).
+\end{equation*}
+The prover makes three separate claims to $\mathcal{V}$, say that $\bar{A}(r_x)=v_A$, $\bar{B}(r_x)=v_B$, and $\bar{C}(r_x)=v_C$. Then the verifier $\mathcal{V}$ can check if
+\[
+v_A\cdot v_B - v_C=G(r_x)\cdot \mathbb{Z}_{H}(r_x).
+\]
+This equation is represents the quadratic-check of the R1CS instance, or \emph{quad-check}, owing to it checking the R1CS verifiability in $\rho(i)$, where $i$ is within the range of the matrix degree $m$. 
+But the verifier must now additionally verify three new claims from the prover $\mathcal{P}$:
+\begin{equation}
+	\bar{A}(r_x) = v_A, \bar{B}(r_x) = v_B, \mbox{ and } \bar{C}(r_x) = v_C.
+	\label{eq:three-claims}
+\end{equation}
+To do so, $\mathcal{P}$ and $\mathcal{V}$ engage in the Lin-check protocol.
+
+\paragraph{Lin-Check.}\label{lin} 
+In the Lin-Check protocol, the three claims presented in Equation \eqref{eq:three-claims} are combined into one to be evaluated in a single claim. Accordingly, the verifier chooses $r_A$, $r_B$, $r_C\in\mathbb{F}$ uniformly at random and sends them to the prover, which can test if
+\begin{equation}\label{eq-c}
+	c = r_A\cdot\bar{A}(r_x)+r_B\cdot\bar{B}(r_x)+r_C\cdot\bar{C}(r_x).
+\end{equation}
+We can rewrite $c$ as follows.
+{\small
+	\begin{align*}
+		c & = r_A\cdot \sum_{y\in H}A(r_x,y)\cdot Z(y)+r_B\cdot \sum_{y\in H}B(r_x,y)\cdot Z(y) + r_C\cdot \sum_{y\in H}C(r_x,y)\cdot Z(y) \\
+		& = \sum_{y\in H}\big(r_A\cdot A(r_x,y)+r_B\cdot B(r_x,y)+r_C\cdot C(r_x,y)\big)\cdot Z(y).
+\end{align*}}
+where $y \in H$.
+We denote
+\begin{multline}\label{Qy}
+	Q_{r_x}(Y):= 
+	\big(r_A\cdot A(r_x,Y)+r_B\cdot B(r_x,Y)+r_C\cdot C(r_x,Y)\big)\cdot Z(Y).
+\end{multline}
+Consequently, to verify $c=\sum_{y\in H} Q_{r_x}(y)$, $\mathcal{P}$ and $\mathcal{V}$ engage in the univariate sumcheck protocol realized by the FRI low degree test (LDT).  Section \ref{sec:FRI_instantiation} presents our instantiation of the FRI LDT protocol. 
+At the end of the FRI protocol, $\mathcal{V}$ needs oracle access to the evaluations of $Q_{r_x}(\cdot)$ at $\kappa$ points $r_y \in L$, where $L$ is an affine subspace $L\subseteq\mathbb{F}$ such that $|L|>2|H|$ and $L\cap H=\varnothing$.
+
+% To reduce the cost of the verifier, $\mathcal{P}$ and $\mathcal{V}$ invoke a GKR protocol to validate the result of the evaluations of  $M(r_x,r_y)$ . 
+We denote the evaluations of $A(r_x,r_y)$, $B(r_x,r_y)$, and $C(r_x,r_y)$ in $Q_{r_x}(r_y)$ as $M(r_x,r_y)$  where $M\in\{A, B, C\}$ using $\mathsf{row}(i)$, $\mathsf{col}(i)$, and $\mathsf{val}(i)$ functions as the following equation: 
+%\newpage
+\begin{equation}\label{eq:M_rx_ry}
+	M(r_x, r_y) = \frac{\mathbb{Z}_H(r_x)\cdot\mathbb{Z}_H(r_y)}{c_1^2} \cdot \sum_{i\in[n]} \frac{\mathsf{val}(i)}{\left(r_x - \mathsf{row}(i)\right)\left(r_y - \mathsf{col}(i)\right)}, 
+\end{equation}
+
+where we denote the second part as $C_M(r_x, r_y)$, such that
+\begin{equation}
+	C_M(r_x, r_y) := \sum_{i\in[n]} \frac{\mathsf{val}(i)}{\left(r_x - \mathsf{row}(i)\right)\left(r_y - \mathsf{col}(i)\right)}.
+	\label{eq:C_M}
+\end{equation}
+
+
+Given that $\mathsf{row}(i), \mathsf{col}(i) \in H$, $r_x \in \mathbb{F} \setminus   H$ and $r_y \in L$, such that $L\cap H=\varnothing$, the denominators in $C_M(r_x, r_y)$ are non-zero. To reduce the computational burden on the verifier, the task of evaluating $C_M(r_x, r_y)$ at $\kappa$ points $r_y \in L$ is not performed locally. Instead, this computation is outsourced to the prover. The verifier then uses the GKR protocol to validate the results provided by the prover. In Section \ref{sec:GKR-implementation}, we explain how we utilized the GKR protocol and designed the corresponding circuit for $C_M(r_x, r_y)$.
+
+\subsubsection{Adding Zero-Knowledge}\label{zkpolaris}
+The interactive protocol reveals information about the witness $\textbf{w}$ when $\mathcal{P}$ sends evaluations of $G(r_x), \bar{A}(r_x), \bar{B}(r_x), \bar{C}(r_x)$ and $Z(\cdot)$, and invokes the low degree test on related polynomials of $((Q_{r_x}(Y))$. To prevent these ``leakages'' and achieve zero-knowledge, three main modifications are employed:
+\begin{enumerate}
+	\item \textbf{Eliminating leakage of queries on $Z(\cdot)$.} The prover chooses a random polynomial $R_Z(\cdot)$ of degree $\kappa$ and computes a $\widetilde{Z}(Y):= Z(Y)+\mathbb{Z}_{H}(Y)\cdot R_Z(Y)$. Even though $\widetilde{Z}(y)=Z(y)$ for $y\in H$, $\widetilde{Z}(\cdot)$ polynomial evaluations outside $H$ preserve zero knowledge as $R_Z(\cdot)$ masks the information of polynomial $Z(\cdot)$. 
+	\item \textbf{Modifications to the evaluations of $\bar{A}(\cdot), \bar{B}(\cdot), \bar{C}(\cdot)$.} The prover $\mathcal{P}$ samples some random polynomials $R_A(\cdot)$, $R_B(\cdot)$, $R_C(\cdot)$ of degree $|H|-1$ and provides that
+	$$\widetilde{A}(X)  := \sum_{y\in H}A(X,y)\cdot\widetilde{Z}(y)+\mathbb{Z}_{H}(X)\cdot\sum_{y\in H}R_A(y),$$
+	$$\widetilde{B}(X)  := \sum_{y\in H}B(X,y)\cdot\widetilde{Z}(y)+\mathbb{Z}_{H}(X)\cdot\sum_{y\in H}R_B(y),$$
+	$$\widetilde{C}(X)  := \sum_{y\in H}C(X,y)\cdot\widetilde{Z}(y)+\mathbb{Z}_{H}(X)\cdot\sum_{y\in H}R_C(y).$$
+	As the $R(\cdot)$ are random, revealing the evaluations of $\widetilde{A}(\cdot), \widetilde{B}(\cdot), \widetilde{C}(\cdot)$ outside $H$ does not leak information about the values in the witness $w$.
+	\item \textbf{Modifications to the polynomial $Q(r_x)(\cdot)$.}
+	To uphold the zero-knowledge property of the $Q_{r_x}(\cdot)$ polynomial from Equation \eqref{Qy} in the univariate sumcheck phase, the prover $\mathcal{P}$ picks a random polynomial $S_Q(\cdot)$ of degree $2|H|+\kappa-1$, and sends an $s_1=\sum_{y\in H}S_Q(y)$ to $\mathcal{V}$. To this, $\mathcal{V}$ responds with a random challenge $\alpha_1 \in \mathbb{F}$. $\mathcal{P}$ and $\mathcal{V}$ then run a sumcheck on the following linearised representation:
+	\[
+	\alpha_1\cdot \widetilde{c}+s_1=\sum_{y\in H}(\alpha_1\cdot\widetilde{Q}{r_x}(y)+S_Q(y)).
+	\]
+	where $\widetilde{c}=r_A\cdot\widetilde{A}(r_x)+r_B\cdot\widetilde{B}(r_x)+r_C\cdot\widetilde{C}(r_x)$, referenced from Equation \eqref{eq-c}.  
+	This ensures $\widetilde{c}$ and $s_1$ can be correctly computed due to the random linear combination of the sumcheck, while revealing no information about $\widetilde{Q}{r_x}(\cdot)$ as it is masked by the random polynomial $S_Q(\cdot)$ \cite{aurora}\cite{zhang2020transparent} .
+\end{enumerate}
+
+%The closed-form of $G_1(X)=F_w(X)/\mathbb{Z}_{H}(X)$ now contains random polynomials $R_A,R_B,R_C$. To make the evaluation phase zero-knowledge, the prover $\mathcal{P}$ commits to a random polynomial $S_G(X)$ of degree $|H|$, sends $s_2=S_G(r_x)$ to $\mathcal{V}$, and they run the standard evaluation protocol on the blinded polynomial $\alpha_2\cdot G_1(X)+S_G(X)$, where $\alpha_2$ is $\mathcal{V}$'s random challenge.
+To obtain the full zero-knowledge protocol, we replace relevant components with their zero-knowledge versions, with the additional need for the prover $\mathcal{P}$ to commit to the random polynomials using Merkle tree commitments at the beginning, to be later opened at $\kappa$ points by $\mathcal{V}$. A key advantage is that the GKR protocol remains unchanged, avoiding expensive cryptographic computations.
+
+
+
+
+
 
 %----------------------------------------------------------------------
 \newpage
@@ -29,9 +778,308 @@
 \section{Additive Fast Fourier Transform}
 
 \subsection{Cantor Additive FFT}
+\label{sec: Preliminaries - Cantor Algorithm}
+The evaluation of a polynomial $f(x)$ of degree less than $n = 2^m$ over the subspace $W_m$ using the Cantor algorithm is valid only when $W_m$ is a subspace of the field (or subfield) $\mathbb{F}_{2^k}$, where $k = 2^\ell$. Furthermore, Cantor introduced a special basis to facilitate the efficient evaluation of $f(x)$. In~\cite[Appendix]{Gao2010FFT}, the authors discuss how to easily construct such a basis. In the following, we will provide a more detailed discussion of this approach in a broader context.
 
-\subsection{Von zur Gathen-Gerhard Additive FFT}
+\subsubsection{The Cantor Special Basis}\label{sec:The Cantor special basis}
+Consider the function $S:\mathbb{F}_{2^k} \rightarrow \mathbb{F}_{2^k}$ defined by $S(x)=x^2+x$, and let the following sequence of functions be defined recursively:
+\[S^{0}(x)=x \quad \text{ and } \quad S^{m}(x)=S(S^{m-1}(x)).\]
+
+A nonrecursive formula for $S^m(x)$ can be derived as $S^{m}(x)=\sum_{i=0}^{m} \binom{m}{i} x^{2^i}$, where $\binom{m}{i}$ denotes the binomial coefficient reduced modulo 2. Thus, when $m=2^{t}$ for some $t$, we have $S^{2^{t}}=x^{2^{t}}+x$.
+
+Now, for $1<m\leq k$, assume that there exists $\beta_{m-1} \in \mathbb{F}_{2^k}$ such that $S^{m-1}(\beta_{m-1})=1$. We will now show that there exists a basis $\set{\beta_{0},\beta_{1},\ldots,\beta_{m-1}}$ for the subspace $W_{m}$ such that $S(\beta_{i})=\beta_{i-1}$ for $i=1,\ldots,m-1$ with $\beta_{0}=1$. This basis is referred as the \textit{Cantor special basis} , as mentioned  in~\cite{MateerThesis2008}.
+
+If we set $\beta_{m-2} = \beta_{m-1}^2 + \beta_{m-1}$, then $S(\beta_{m-1}) = \beta_{m-2}$. Similarly, choosing $\beta_{m-3} = \beta_{m-2}^2 + \beta_{m-2}$, and continuing this process, we obtain the following sequence of elements:
+
+% \begin{equation}\label{Eqn_basis_cons}
+	%     \begin{aligned}
+		%         &S(\beta_{m-1})=\beta_{m-2},~S(\beta_{m-2})=\beta_{m-1}, \ldots, S(\beta_{1})=\beta_{0}.
+		%     \end{aligned}
+	% \end{equation}
+\begin{equation}\label{Eqn_basis_cons}
+	\begin{aligned}
+		\beta_{m-2} &= \beta_{m-1}^2+ \beta_{m-1}\text{, i.e.,}~S(\beta_{m-1})=\beta_{m-2}\\
+		\beta_{m-3} &= \beta_{m-2}^2+ \beta_{m-2}\text{, i.e.,}~S(\beta_{m-2})=\beta_{m-1}\\
+		& \vdots \\
+		\beta_{0} &= \beta_{1}^2+ \beta_{1}\text{, i.e.,}~S(\beta_{1})=\beta_{0}.
+	\end{aligned}
+\end{equation}
+Thus, we have $S^{m-1}(\beta_{m-1})=\beta_{0}$, which implies that $\beta_{0}=1$. 
+
+Now, we will demonstrate that the set $\set{\beta_{0}, \beta_{1},\ldots, \beta_{m-1}}$ forms a basis. While a proof of this can be found in~\cite[Appendix]{MateerThesis2008}, we provide a detailed proof below for the sake of completeness.
+
+\begin{theorem}
+	Let $\set{\beta_0,\beta_1,\ldots,\beta_{m-1}}$ be a set of elements in $\mathbb{F}_{2^k}$ such that 
+	\[\beta_0=1~\text{and}~ S(\beta_i)=\beta_i^2+\beta=\beta_{i-1}~\text{for}~i=1,\ldots,m-1. \]
+	Then, the set $\set{\beta_0,\beta_1,\ldots,\beta_{m-1}}$ is linearly independent over $\mathbb{F}_{2}$.
+\end{theorem}
+
+\begin{proof}
+	We will use the mathematical induction to prove this. If $c_1\cdot \beta_1=0$, then we must have $c_1=0$. This implies that the result is true for $i=1$. 
+	
+	Now suppose that the result is true for $i=\ell$, i.e., $\beta_{0}, \beta_{1},\ldots, \beta_{\ell}$ are linearly independent over $\mathbb{F}_2$. We need to show that $\beta_{0}, \beta_{1},\ldots, \beta_{\ell}, \beta_{\ell+1}$ are also linearly independent over $\mathbb{F}_2$. 
+	
+	If possible, let $\beta_{0}, \beta_{1},\ldots, \beta_{\ell}, \beta_{\ell+1}$ are linearly dependent over $\mathbb{F}_2$. So there exists some scalars $c_i$, not all zero, such that 
+	
+	\begin{equation*}
+		\begin{aligned}
+			& c_0\cdot \beta_{0} + c_1\cdot \beta_{1}+ \cdots + c_{\ell}\cdot \beta_{\ell}+ c_{\ell+1}\cdot \beta_{\ell+1}=0\\
+			\implies & S(c_0\cdot \beta_{0} + c_1\cdot \beta_{1}+ \cdots + c_{\ell}\cdot \beta_{\ell}+ c_{\ell+1}\cdot \beta_{\ell+1})=0\\
+			\implies & c_{0}\cdot S(\beta_{0}) + c_{1}\cdot S(\beta_{1})+ \cdots + c_{\ell}\cdot S(\beta_{\ell})+ c_{\ell +1}\cdot S(\beta_{\ell+1})=0\\
+			\implies & c_1\cdot \beta_{0}+ \cdots + c_{\ell}\cdot \beta_{\ell-1}+ c_{\ell+1}\cdot \beta_{\ell}=0\\
+			\implies & \beta_{0}=1, \beta_{1},\ldots, \beta_{\ell}~\text{are linearly dependent}
+		\end{aligned}
+	\end{equation*}
+	
+	Therefore, $\beta_{0}=1, \beta_{1},\ldots, \beta_{m-1}$ are linearly independent.
+\end{proof}
+
+
+
+% \noindent It is easy to check that here we only need to find $\beta_{k}$ and rest of the basis elements are obtained recursively from $\beta_k$.
+% \vspace*{2em}
+Therefore, we have a basis $\set{\beta_{0}=1, \beta_{1},\ldots, \beta_{m-1}}$ for $W_m$ such that $S({\beta_{i}})=\beta_{i-1}$ for $i=1,2,\ldots,m-1$. Also, from the set of Equations~\ref{Eqn_basis_cons}, we can also check that $S^{i}(\beta_{i})=1$ for $i=0,1,\ldots,m-1$. Since $\mathbb{Z}_{W_{1}}=x^2+x=S(x)$, we have
+\begin{equation*}
+	\begin{aligned}
+		\mathbb{Z}_{W_{2}}(x)&= (S(x))^2+ S(\beta_{1})\cdot S(x)= S^2(x)
+	\end{aligned}
+\end{equation*}
+
+% Since $S_1(x)=S(x)=x^2+x$ has coefficients in $\mathbb{F}_2$, this implies that $S_2(x)$ has coefficients in $\mathbb{F}_2$ as well.
+
+Similarly, we can show that $\mathbb{Z}_{W_{3}}(x)=S^{3}(x)$ and so on. Thus, for the Cantor special basis, we have $\mathbb{Z}_{W_{i}}(x)=S^{i}(x) \text{ for } i=0,1,\ldots,m$.
+
+
+
+ Thus, the coefficients of the vanishing polynomials $\mathbb{Z}_{W_{i}}(x)$ are always equal to $1$. Additionally, from (\ref{Eqn_basis_cons}), we have 
+ \begin{equation}\label{Eqn_basis_eval_beta}
+	 S^{i}(\beta_{i+\ell}) = \beta_{\ell}
+	 \end{equation}
+ for any $i, \ell \geq 0$ with $i + \ell \leq m - 1$. 
+  
+  We know that for the Cantor special basis, $\mathbb{Z}_{W_{i}}(x) = S^{i}(x)$ for $i = 0, 1, \ldots, m$. Thus, the polynomials $S^{i}(x)$ are linearized polynomials with coefficients in $\mathbb{F}_{2}$. Hence, for any $\theta \in \mathbb{F}_{2^k}$, we have the property $S^{i}(x + \theta) = S^{i}(x) + S^{i}(\theta)$, which means that in $S^{i}(x + \theta)$, there may be at most one term that is not equal to $1$. This makes the Cantor algorithm highly efficient when performing polynomial division with the polynomials $S^{i}(x + \theta)$. Now, we are ready to explain the Cantor algorithm.
+ 
+
+%  \begin{equation*}
+%	      \begin{aligned}
+%		          S_{3}(x)&= (S_2(x))^2+ S_2(\beta_{3})\cdot S_2(x)\\
+%		                  &= (S_2(x))^2+ S_2(x)~[\text{since}~S_2(\beta_3)=1]\\
+%		                  &= S^3(x)\\
+%		                  & \hspace*{4em} \vdots \\
+%		          S_{k}(x)&= (S_{k-1}(x))^2+ S_{k-1}(\beta_{k})\cdot S_{k-1}(x)\\
+%		          &= (S_{k-1}(x))^2+ S_{k-1}(x)~[\text{since}~S_{k-1}(\beta_{k})=1]\\
+%		          &= S^{k}(x).
+%		      \end{aligned}
+%	  \end{equation*}
+%
+%  Therefore, each of the polynomials $S_i(x)$ has coefficients in $\mathbb{F}_2$ for $i=1,2,\ldots,k$.
+%  \vspace*{2em}
+
+% \begin{theorem}
+	%     If the polynomial $S^{i}(x)$ has no solution $\beta_{i} \in \mathbb{F}_{2^k}$ such that $S^i(\beta_i) = 1$, then for any $\ell > i$, the polynomial $S^{\ell}(x)$ also has no solution for $S^{\ell}(x) = 1$ in $\mathbb{F}_{2^k}$. In other words, there does not exist a set of Cantor special basis ${\beta_0=1, \beta_1, \ldots, \beta_{\ell}}$ such that $S(\beta_j) = \beta_{j-1}$ for $j=1,\ldots,\ell$.
+	% \end{theorem}
+
+
+% \noindent \textbf{When $m=2^\lambda$ for some $\lambda$:}\\
+\paragraph{When $k=2^\ell$ for some $\ell$:} In this case, we have $k-1= 2^\ell-1$. Choose an element $\beta_{k-1}$ from the field (or subfield) $\mathbb{F}_{2^k}$ such that $\text{Tr}_{\mathbb{F}_{2^k}/\mathbb{F}_{2}}(\beta_{k-1})=1$,  i.e.,
+\begin{equation}\label{Eqn:Trace_Cantorbasis}
+	\begin{aligned}
+		& \beta_{k-1}+ \beta_{k-1}^2+ \beta_{k-1}^{2^2}+\cdots + \beta_{k-1}^{2^{k-1}}=1 \implies S^{k-1}(\beta_{k-1})=1.
+	\end{aligned}
+\end{equation}
+Thus, as described above, we can find a set of Cantor special basis $B=\set{\beta_0,\beta_1,\ldots,\beta_{k-1}}$ of $W_k$. Now for an $m$-dimensional subspace, with $m \leq k$, of $\mathbb{F}_{2^k}$, we will select the first $m$ elements $\beta_0,\beta_1,\ldots,\beta_{m-1}$ from the set $B$. Note that from Property~\ref{Trace-Property3} of trace function, we know that exactly half of the elements have a trace value of 1. Therefore, we can easily find an element $\beta_{k-1}$ such that $\text{Tr}_{\mathbb{F}_{2^k}/\mathbb{F}_{2}}(\beta_{k-1})=1$.
+
+% We know that for the Cantor special basis, $\mathbb{Z}_{W_{i}}(x) = S^{i}(x)$ for $i = 0, 1, \ldots, m$. Thus, the polynomials $S^{i}(x)$ are linearized polynomials with coefficients in $\mathbb{F}_{2}$. Hence, for any $\theta \in \mathbb{F}_{2^k}$, we have the property $S^{i}(x + \theta) = S^{i}(x) + S^{i}(\theta)$, which means that in $S^{i}(x + \theta)$, there may be at most one term that is not equal to $1$. This makes the Cantor algorithm highly efficient when performing polynomial division with the polynomials $S^{i}(x + \theta)$. Now, we are ready to explain the Cantor algorithm.
+
+\subsubsection{Cantor FFT Algorithm}
+Let $f(x) \in \mathbb{F}_{2^k}$ be a polynomial of degree less than $n=2^m$ and we want to evaluate $f(x)$ over the affine subspace $\theta+W_m=\theta+\langle \beta_0,\beta_1,\ldots,\beta_{m-1} \rangle$, where $\set{\beta_0=1,\beta_1,\ldots,\beta_{m-1}}$ is a Cantor special basis. The evaluation of $f(x)$ using the Cantor algorithm proceeds as follows: First, compute two polynomials $f_0(x)$ and $f_1(x)$ such that $f_0(x)=f(x)$ for all $x\in \theta+W_{m-1}$ and $f_1(x)=f(x)$ for all $x\in \theta+\beta_{m-1}+W_{m-1}$. Since the affine subspaces $\theta + W_{m-1}$ and $\theta + \beta_{m-1} + W_{m-1}$ correspond to the roots of the polynomials 
+$\mathbb{Z}_{W_{m-1}}(x + \theta) = S^{m-1}(x + \theta)$ and $\mathbb{Z}_{W_{m-1}}(x + \theta + \beta_{m-1}) = S^{m-1}(x + \theta + \beta_{m-1})$, 
+respectively, the polynomials $f_0(x)$ and $f_1(x)$ can be obtained by taking the remainders of $f(x)$ when divided by these polynomials. Specifically, we have
+\begin{equation*}
+	\begin{aligned}
+		f_0(x) &= f(x) \mod S^{m-1}(x + \theta)\quad \text{and} \quad f_1(x) = f(x) \mod S^{m-1}(x + \theta + \beta_{m-1}).
+	\end{aligned}
+\end{equation*}
+
+Each polynomial $f_0(x)$ and $f_1(x)$ has degree less than $2^{m-1}$. We then proceed by recursively evaluating $f_0(x)$ and $f_1(x)$ over the affine subspaces $\theta + W_{m-1}$ and $\theta + \beta_{m-1} + W_{m-1}$, respectively. The recursion continues until all the resulting polynomials $f_0(x)$ and $f_1(x)$ are constants. This is summarized in Algorithm~\ref{Algo:Cantor}.
+
+
+\begin{algorithm}[h]
+	\caption{Cantor additive FFT of length $n = 2^m$}
+	\label{Algo:Cantor}
+	\begin{algorithmic}[1]
+		\Require $f(x) \in \mathbb{F}_{2^k}[x]$ of degree $< n = 2^m$, where $k=2^{\ell}$, and the affine subspace $\theta+W_m=\theta+ \langle \beta_0,\beta_1,\ldots,\beta_{m-1} \rangle$, where $\{\beta_0=1,\beta_1,\ldots,\beta_{m-1}\}$ is a Cantor special basis.
+		\Ensure $\fft(f, \theta+W_m)$.
+		
+		\If{$m = 0$}
+		\State \Return $f(\theta)$
+		\EndIf
+		
+		\State Compute:
+		\[
+		\begin{aligned}
+			f_0(x) &= f(x) \mod S^{m-1}(x + \theta), \\
+			f_1(x) &= f(x) \mod S^{m-1}(x + \theta + \beta_{m-1}).
+		\end{aligned}
+		\]
+		
+		\State \Return $\fft(f_0,\theta+W_{m-1}) \parallel \fft(f_1, \theta+\beta_{m-1}+ W_{m-1})$
+	\end{algorithmic}
+\end{algorithm}
+
+
+
+
+%\subsection{Von zur Gathen-Gerhard Additive FFT}
 
 \subsection{Gao-Mateer Additive FFT}
+\label{Pre:GaoMateer_Algo}
 
-\subsection{LCH Additive FFT}
+% Suppose $f(x)$ is a polynomial of degree less than $n=2^m$. We want to find $\fft(f,W_m)$. This algorithm shows how to reduce this problem of size $n$ to two problems of size $\ell=\frac{n}{2}=2^{m-1}$. The algorithm for the evaluation of a polynomial proposed by Gao and Mateer in~\cite{Gao2010FFT} was for a subspace $W_m$
+
+In~\cite{Gao2010FFT}, Gao and Mateer propose two algorithms for computing the additive \gls{fft} using Taylor expansion. In this section, we will focus on the first algorithm, which applies to lengths $n=2^m$ for any arbitrary $m$. It is also important to note that this algorithm is originally formulated for a subspace $W_m = \langle \beta_0, \beta_1, \ldots, \beta_{m-1} \rangle$, but here we will discuss its application over an affine subspace $\theta + W_m$.
+
+
+Consider the subspace $G = \langle \gamma_0, \gamma_1, \ldots, \gamma_{m-2} \rangle$, where $\gamma_i = \beta_i \cdot \beta_{m-1}^{-1}$ for $i = 0, 1, \ldots, m-2$, and $D = \langle \delta_0, \delta_1, \ldots, \delta_{m-2} \rangle$, where $\delta_i = \gamma_i^2 + \gamma_i$. Since $\beta_0, \beta_1, \ldots, \beta_{m-1}$ are linearly independent, we will now show that the set $\set{\gamma_0, \gamma_1, \ldots, \gamma_{m-2}, 1}$ and $\set{\delta_0, \delta_1, \ldots, \delta_{m-2}}$ also form a basis.
+% Thus, both $G$ and $D$ are subspaces of dimension $m-1$.
+
+\begin{theorem}\label{Th:Gao-Mateer-basis}
+	Let $\beta_0,\beta_1,\ldots,\beta_{m-1} \in \mathbb{F}_{2^m}$ are linearly independent over $\mathbb{F}_2$. Then, for any non-zero element $\alpha \in \mathbb{F}_{2^m}$, the elements $\beta_0\cdot \alpha^{-1},\beta_1 \cdot \alpha^{-1},\ldots,\beta_{m-1} \cdot \alpha^{-1}$ are also linearly independent.
+\end{theorem}
+
+\begin{proof}
+	Suppose for any scalars $c_0,c_1,\ldots,c_{m-1}$, we have
+	\begin{equation*}
+		\begin{aligned}
+			&c_0 \beta_0 \alpha^{-1}+ c_1 \beta_1 \alpha^{-1}+ \cdots + c_{m-1} \beta_{m-1} \alpha^{-1}=0\\
+			\iff & c_0 \beta_0+ c_1 \beta_1 + \cdots + c_{m-1} \beta_{m-1} =0.
+		\end{aligned}
+	\end{equation*}
+	Thus, $\beta_0,\beta_1,\ldots,\beta_{m-1}$ are linearly independent if and only if $\beta_0 \alpha^{-1},\beta_1 \alpha^{-1},\ldots,\beta_{m-1} \alpha^{-1}$ are also linearly independent.
+\end{proof}
+
+\begin{corollary}
+	$G$ is a subspace of dimension $m-1$.
+\end{corollary}
+
+\begin{proof}
+	We have $G= \langle \gamma_0, \gamma_1, \ldots, \gamma_{m-2} \rangle$, where $\gamma_i= \beta_i\cdot \beta_{m-1}^{-1}$ for $i=0,1,\ldots,m-1$. Now, since $\beta_0,\beta_1,\ldots,\beta_{m-1}$ are linearly independent and $\beta_{m-1} \neq 0$, by Theorem~\ref{Th:Gao-Mateer-basis}, $\gamma_0,\gamma_1,\ldots,\gamma_{m-2}$ are also linearly independent. Therefore, $G$ is a subspace of dimension $m-1$.
+\end{proof}
+
+\begin{theorem}
+	$D$ is a subspace of dimension $m-1$.
+\end{theorem}
+
+\begin{proof}
+	We have $D = \langle \delta_0, \delta_1, \ldots, \delta_{m-2} \rangle$, where $\delta_i = \gamma_i^2 + \gamma_i$. We will show that $\delta_0,\delta_1,\ldots,\delta_{m-2}$ are also linearly independent. Suppose, for the sake of contradiction, that $\delta_0,\delta_1,\ldots,\delta_{m-2}$ are linearly dependent. So there exists some scalars $c_0,c_1,\ldots,c_{m-2}$ such that some $c_i\neq 0$ and
+	\begin{equation*}
+		\begin{aligned}
+			&c_0 \delta_0+ c_1 \delta_1+ \cdots + c_{m-2} \delta_{m-2}=0\\
+			\implies & c_0 (\gamma_0^2+\gamma_0)+ c_1 (\gamma_1^2+\gamma_1) + \cdots + c_{m-2} (\gamma_{m-2}^2+\gamma_{m-2}) =0\\
+			\implies & c_0\cdot S(\gamma_0)+ c_1\cdot S(\gamma_1)+ \cdots+c_{m-2}\cdot S(\gamma_{m-2})=0\\
+			\implies & S(c_0 \gamma_0+c_1\gamma_1+\cdots+c_{m-2}\gamma_{m-2})=0~~[\text{since}~S~\text{is linearized over } \mathbb{F}_{2}]\\
+			\implies & c_0 \gamma_0+c_1\gamma_1+\cdots+c_{m-2}\gamma_{m-2} \in \set{0,1}
+		\end{aligned}
+	\end{equation*}
+	Now, $c_0 \gamma_0+c_1\gamma_1+\cdots+c_{m-2}\gamma_{m-2}=0$ implies $\gamma_0,\gamma_1,\ldots,\gamma_{m-2}$ are linearly dependent which is a contradiction. Again, $c_0 \gamma_0+c_1\gamma_1+\cdots+c_{m-2}\gamma_{m-2}=1$ implies that $\gamma_0,\gamma_1,\ldots,\gamma_{m-2},1$ are linearly dependent which is again a contradiction. Thus, $\delta_0,\delta_1,\ldots,\delta_{m-2}$ are linearly independent over $\mathbb{F}_{2}$. Therefore, $D$ is a subspace of dimension $m-1$.
+\end{proof}
+
+% Now, consider the elements $\delta_i=\gamma_i^2+\gamma_i$ for $i=0,1,\ldots,m-2$. We will show that $\delta_0,\delta_1,\ldots,\delta_{m-2}$ are also linearly independent.
+
+
+
+\noindent Now, we are ready to discuss the Gao-Mateer algorithm. Consider the function $g(x)=f(\beta_{m-1}x)$. Therefore, the evaluation of $f(x)$ over $\theta+W_m$ is equivalent to the evaluation of $g(x)$ over
+
+\begin{equation*}
+	\begin{aligned}
+		\beta_{m-1}^{-1}(\theta+W_m)
+		&=\beta_{m-1}^{-1} \theta+ \beta_{m-1}^{-1}\cdot W_m\\
+		&=(\theta_0+G) \cup (1+\theta_0+G),
+	\end{aligned}
+\end{equation*}
+where $\theta_0= \beta_{m-1}^{-1} \theta$. Therefore, we have
+\begin{equation*}
+	\begin{aligned}
+		&\fft(f,\theta+W_m)=\fft(g,\theta_0+G)\parallel \fft(g,1+\theta_0+G).
+	\end{aligned}
+\end{equation*}
+
+For $\beta=\theta_0+\alpha \in \theta_0+G$, let $\beta'=(\theta_0+\alpha)^2+\theta_0+\alpha$ be the corresponding element in $\theta_0^2+\theta_0+D$. Suppose that the Taylor expansion~\footnote{We provide a detailed discussion of the Taylor expansion in Section~\ref{sec:Taylor Expansion}.} of $g(x)$ at $x^2+x$ is
+
+\begin{equation}\label{Eqn:g_Taylor}
+	g(x)=\displaystyle{\sum_{i=0}^{\ell-1}(g_{i0}+g_{i1}x)(x^2+x)^i }, \text{ where } \ell=2^{m-1} \text{ and } g_{ij}\in \mathbb{F}_{2^k}.
+\end{equation}
+% \[g(x)=\displaystyle{\sum_{i=0}^{\ell-1}(g_{i0}+g_{i1}x)(x^2+x)^i },\] where $\ell=2^{m-1}$ and $g_{ij}\in \mathbb{F}_{2^k}.$ 
+Consider the two polynomials $f_{0}(x)= \sum_{i=0}^{\ell-1}g_{i0}x^i \text{ and } f_{1}(x)= \sum_{i=0}^{\ell-1}g_{i1}x^i.$
+% \[g_{0}(x)=\displaystyle{\sum_{i=0}^{\ell-1}g_{i0}x^i}\quad \text{and}\quad  g_{1}(x)=\displaystyle{\sum_{i=0}^{\ell-1}g_{i1}x^i}.\]
+
+Now, for any $\beta=\theta_0+\alpha \in \theta_0+G$ and $b\in \mathbb{F}_{2}$, we have $(b+\beta)^2+b+\beta=\beta^2+\beta=\beta'$. Thus, from (\ref{Eqn:g_Taylor}), we have
+\begin{equation}\label{Eqn:Gao-FFT}
+	\begin{aligned}
+		&g(b+\beta)= f_{0}(\beta')+ \beta \cdot f_1(\beta')+b\cdot f_1(\beta').
+	\end{aligned}
+\end{equation}
+
+Hence, the \gls{fft} of $g(x)$ over $\beta_{m-1}^{-1}(\theta+W_m)$ can be obtained from the FFT of $f_0(x)$ and $f_1(x)$ over $\theta_0^2+\theta_0+D$. Let 
+
+\begin{equation*}
+	\begin{aligned}
+		&\fft(f_0,\theta_0^2+\theta_0+D)=(u_0,\ldots,u_{\ell-1})~\text{ and }\\
+		&\fft(f_1,\theta_0^2+\theta_0+D)=(v_0,\ldots,v_{\ell-1}).
+	\end{aligned}
+\end{equation*}
+
+Thus, from (\ref{Eqn:Gao-FFT}), we have
+
+\begin{equation*}
+	\begin{aligned}
+		&\fft(g,\theta_0+G)=(u_0+\eta_{0}v_{0},\ldots,u_{\ell-1}+\eta_{\ell-1} v_{\ell-1}) \quad \text{ and}\\
+		&\fft(g,1+\theta_0+G)=((u_0+\eta_{0}v_{0})+v_0,\ldots,(u_{\ell-1}+\eta_{\ell-1} v_{\ell-1})+v_{\ell-1}),
+	\end{aligned}
+\end{equation*}
+
+where $\eta_{i}$ denotes the $i$-th element of $\theta_0+G$.
+
+By applying this reduction step again to $\fft(f_0,\theta_0^2+\theta_0+D)$ and $\fft(f_1,\theta_0^2+\theta_0+D)$, we continue until $D$ has a dimension of 1. This is summarized in Algorithm~\ref{Algo:Gao}.
+
+\begin{algorithm}[h]
+	\caption{Gao-Mateer additive FFT of length $n=2^m$}
+	\label{Algo:Gao}
+	\begin{algorithmic}[1]
+		\Require $f(x) \in \mathbb{F}_{2^k}[x]$ of degree $< n = 2^m$ and the affine subspace $\theta+W_m=\theta+ \langle \beta_0,\beta_1,\ldots,\beta_{m-1} \rangle$.
+		\Ensure $\fft(f,\theta+W_m)$.
+		
+		\If{$m = 1$}
+		\State \Return $(f(\theta), f(\theta+\beta_0))$ \label{line:gao-last_step_evaluation}
+		\EndIf
+		\State Compute $g(x) = f(\beta_{m-1} x)$ \label{STEP:GaoAlgo-g(x)}
+		\State Compute the Taylor expansion of $g(x)$ at $x^2+x$ to get $f_0(x)$ and $f_1(x)$.
+		\State Compute $\gamma_i = \beta_i \cdot \beta_{m-1}^{-1}$ and $\delta_i = \gamma_i^2 + \gamma_i$ for $0 \leq i \leq m - 2$.
+		
+		\State Let $\theta_0 = \beta_{m-1}^{-1} \theta$. Consider the affine subspaces:
+		\[
+		\theta_0+G=\theta_0+\langle \gamma_0, \ldots, \gamma_{m-2} \rangle, 
+		\]
+		\[
+		\theta_0^2+\theta_0+D=\theta_0^2+\theta_0+\langle \delta_0, \ldots, \delta_{m-2} \rangle
+		\]
+		
+		\State Let $\ell = 2^{m-1}$ and compute:
+		\[
+		\fft(f_0, \theta_0^2+\theta_0+D) = (u_0, \ldots, u_{\ell-1}),
+		\]
+		\[
+		\fft(f_1, \theta_0^2+\theta_0+D) = (v_0, \ldots, v_{\ell-1})
+		\]
+		
+		\For{$i = 0$ to $\ell - 1$}
+		\State $\omega_i \gets u_i + \eta_i \cdot v_i$
+		\State $\omega_{\ell+i} \gets \omega_i + v_i$ \label{STEP:GaoAlgo-wi}
+		\EndFor
+		
+		\State \Return $(\omega_0, \ldots, \omega_{n-1})$
+		
+	\end{algorithmic}
+\end{algorithm}
+
+%\subsection{LCH Additive FFT}

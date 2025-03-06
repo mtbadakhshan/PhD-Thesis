@@ -1,0 +1,44 @@
+\documentclass[tikz,border=10pt]{standalone}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, fit}
+
+\begin{document}
+	
+	\begin{tikzpicture}[
+		node distance=1.5cm,
+		block/.style={rectangle, draw, text width=2.5cm, align=center, minimum height=1cm, font=\footnotesize},
+		line/.style={-{Triangle[length=2.5mm,width=2.5mm]}, thick},
+		bigblock/.style={rectangle, draw, dashed}
+		]
+		
+		% Nodes
+		\node [block] (r1cs) {R1CS Instance};
+		\node [block, right=2cm] (univar) {Univariate Polynomial Encoding};
+		\node [block, right=1cm and 1cm of univar] (quadcheck) {Quad-check};
+		\node [block, right=1cm of quadcheck] (lincheck) {Lin-check};
+		\node [block, below=0.5cm of quadcheck] (FRI) {Polynomial Commitment};
+		\node [block, below=0.5cm of lincheck] (sumcheck) {Low-Degree Test (LDT) };
+		\node [block, above=0.5cm of lincheck] (GKR) {GKR Protocol};
+		%\node [block, above=1cm of FRI, text width=3.5cm] (zk) {Zero-Knowledge};
+		
+		
+		
+		% Lines
+		\draw [line] (r1cs) -- (univar);
+		\draw [line] (univar) -- (quadcheck);
+		\draw [line] (quadcheck) -- (lincheck);
+		\draw [line] (FRI) -- (quadcheck);
+		\draw [line] (sumcheck) -- (lincheck);
+		\draw [line] (GKR) -- (lincheck);
+		
+		% Big block
+		\begin{scope}[on background layer]
+			\node [bigblock, fit=(quadcheck) (lincheck), label=above:] {};
+		\end{scope}
+		% % Big block
+		% \begin{scope}[on background layer]
+			%     \node [bigblock, fit=(FRI) (GKR) (sumcheck), label=above:] {};
+			% \end{scope}
+		
+	\end{tikzpicture}
+	
+\end{document}
