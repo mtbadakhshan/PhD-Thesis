@@ -59,6 +59,8 @@ Furthermore, if $m < k-1$ and $\theta$ is any linear combination of $\{\beta_{m+
 
 \subsection{Rank-1 Constraint System}
 
+Zero-knowledge proof (\gls{zkp}) system toolchains, such as \cite{Groth2016, Aurora2019, Chiesa2020Fractal, Ames2017Ligero} that generate arithmetic or boolean circuits from high-level programming languages, usually use rank-1 constraint systems (\gls{r1cs}s), which is so straightforward that it can be used to create efficient argument systems. \gls{r1cs} has also proven to be reliable in real-world applications, such as Zcash \cite{zcash2014}. We provide the definition of \gls{r1cs} in the following:
+
 \begin{definition}[rank-1 constraint system (\gls{r1cs})] \label{def:R1CS}
 	Let $d_1$, $d_2$, and $d_3$ be positive integers where denote the number of constraints, the number of variables, and the number of public inputs respectively. The \gls{r1cs} relation consists of matrices $\mathbf{A},\mathbf{B},\mathbf{C} \in \mathbb{F}^{d_1\times (d_2+1)}$ and public inputs $\vec{{v}} \in \mathbb{F}^{d_3}$. A vector $\vec{{w}} \in \mathbb{F}^{d_2-d_3}$, denoting private (auxiliary) inputs, satisfies the system if
 	\(
@@ -78,7 +80,33 @@ In this thesis, we define a notation for the \gls{r1cs} parameters as
 \(
 (\mathbb{F}, d_1, d_2, d_3, \mathbf{A}, \mathbf{B}, \mathbf{C}),
 \)
-where the public input \(\vec{v}\) has not been set yet. Therefore, this does not constitute an \gls{r1cs} instance. Instead, it only specifies the constraint system, which may be derived from an arithmetic circuit.
+where the public input \(\vec{v}\) has not been set yet. Therefore, this does not constitute an \gls{r1cs} instance. Instead, it only specifies the constraint system, which may be derived from an arithmetic or Boolean circuit. In the following, we will explain arithmetic and Boolean citcuits and how an they can be compiled to \gls{r1cs} instances.
+
+
+\subsubsection{Arithmetic and Boolean Circuits}
+Any computer program can be compiled into either an arithmetic or a Boolean circuit~\cite{Parno2016Pinocchio}. As described by Gong~\cite{Gong2024}, arithmetic circuits consist of \texttt{ADD} and \texttt{MULTIPLY} gates, each with a fan-in of two. For any gate $g$ in a circuit $C$, let $g_l$, $g_r$, and $g_o$ denote its left input, right input, and output, respectively. If $g$ is an \texttt{ADD} gate, it satisfies the equation 
+\[
+g_l + g_r - g_o = 0.
+\]
+If it is a \texttt{MULTIPLY} gate, then 
+\[
+g_l \times g_r - g_o = 0.
+\]
+Similarly, Boolean circuits comprise \texttt{AND} and \texttt{XOR} gates. If $g$ is an \texttt{AND} gate, it satisfies
+\[
+g_l \wedge g_r \oplus g_o = 0,
+\]
+and if it is an \texttt{XOR} gate, then 
+\[
+g_l \oplus g_r \oplus g_o = 0.
+\]
+
+
+In the conversion of a circuit to an \gls{r1cs} representation, only \texttt{MULTIPLY} gates in arithmetic circuits and \texttt{AND} gates in Boolean circuits are considered, as other gate types can be expressed in terms of these two. The arithmetic (or Boolean) circuit is then compiled into an \gls{r1cs} instance, where $d_1$ denotes the number of \texttt{MULTIPLY} (\texttt{AND}) gates, and $\mathbf{A} \vec{z}$, $\mathbf{B} \vec{z}$, and $\mathbf{C} \vec{z}$ represent the left input, right input, and output of these gates, respectively. Appendix \ref{a_ch:r1cs_from_circuit}, provides an exmaple of converting a Boolean circuit to an \gls{r1cs}  instance.
+
+
+
+
 
 
 
@@ -129,7 +157,10 @@ Now we will discuss the evaluation of a univariate polynomial $f(x)$ over the su
 
 \subsection{Reed-Solomon Code}
 
-\begin{definition}[Reed-Solomon code]\label{RScode} Let $L\subseteq\mathbb{F}$ and $\rho \in [0,1]$ denote the codeword domain and the rate parameter respectively. $\text{\gls{rs}}[L, \rho]$ is the set of all codewords $\hat{\fbu}:L\rightarrow\mathbb{F}$ 
+Reed-Solomon (\gls{rs}) code is proposed in 1960  \cite{rs-code}. It is a block-based error-correcting code that has several applications in digital communications and storage. Let the evaluation domain $L$  be a subset of $\mathbb{F}$. $\text{\gls{rs}}[\mathbb{F}, L, \rho]$ is the set of all codewords $\hat{\fbu}:L\rightarrow \mathbb{F}$ defined as follows: 
+
+
+\begin{definition}[Reed-Solomon code]\label{RScode} Let $L\subseteq\mathbb{F}$ and $\rho \in [0,1]$ denote the codeword domain and the rate parameter respectively. $\text{\gls{rs}}[\mathbb{F}, L, \rho]$ is the set of all codewords $\hat{\fbu}:L\rightarrow\mathbb{F}$ 
 	that are the evaluation of polynomials over \(L\) with degree \( < \rho|L| \).
 \end{definition}
 
@@ -169,7 +200,7 @@ Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable securit
 	\end{itemize}
 	The signature scheme $\mathsf{Sig}$ satisfies the following security property:
 	\begin{itemize}
-		\item \textit{Strong Unforgeability under Chosen Message Attack (SUF-CMA)}: The adversary cannot only produce a signature for a message that the key owner has not previously signed, but also cannot create an alternative signature for a message that has already been signed. \cite{Brendel2021TheProvableSecurity}.
+		\item \textit{Strong Unforgeability under Chosen Message Attack (SUF-CMA)}: The adversary cannot only produce a signature for a message that the key owner has not previously signed, but also cannot create an alternative signature for a message that has already been signed~\cite{Brendel2021TheProvableSecurity}.
 	\end{itemize}
 \end{definition}
 
@@ -209,12 +240,12 @@ Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable securit
 
 \section{Zero-Knowledge Proof Systems and Protocols}
 
-The construction of zero-knowledge proof (\gls{zkp}) protocols is based on the interactive proof system (\gls{ip}) introduced in 1985 by Goldwasser, Micali, and Rackoff in~\cite{Goldwasser1985}.  In this section we start by introdusing \gls{ip}, probabilistically checkable proof (\gls{pcp}s), and interactive oracle proof (\gls{iop}), then we continue by presenting various \gls{zkp} protocols that are used in this thesis. 
+The construction of zero-knowledge proof (\gls{zkp}) protocols is based on the interactive proof system (\gls{ip}) introduced in 1985 by Goldwasser, Micali, and Rackoff in~\cite{Goldwasser1985}.  This section starts by introdusing \gls{ip}, \gls{zkp} property, non-interactive proves, then continues by presenting various  protocols that are used in this thesis. 
 
 \subsection{Interactive Proof System}\label{sec:Prel_IP}
 
- An \gls{ip} consists of  an interactive pair of a computationally unbounded prover ($P$) and a probabilistic polynomial time (\gls{ppt})  verifier ($V$).  Goldwasser et. al.~\cite{Goldwasser1985} modeled each of $P$ and $V$ as an \textit{interactive Turing machines}, which is a Turing machine with a read-only input tape, a read/write work tape, a read-only communication tape, a write-only communication tape, and a read-only random tape, where the random tape contains an infinit sequnce of random bits. $P$  and $V$ share the same input tape denoted as $x$. The write-only communication tape of $P$ is the read-only communication tape of $V$ and vice versa.  $V$ is active first, then $P$ and $V$ take turns in being active. Each machine uses input tape, work tape, communication tapes and random tapes during its $i$th active stage, then it writes its $i$th message on its write-only communication tape and becomes deactive. $V$ may terminate the protocol and either accept or reject the input $x$ in its $k$th active stage. Here we provide a definition of \gls{ip} following its definition in~\cite{Goldwasser1985}:
- 
+ An \gls{ip} consists of  an interactive pair of a computationally unbounded prover ($P$) and a probabilistic polynomial time (\gls{ppt})  verifier ($V$).  Goldwasser et. al.~\cite{Goldwasser1985} modeled each of $P$ and $V$ as an \textit{interactive Turing machines}, which is a Turing machine with a read-only input tape, a read/write work tape, a read-only communication tape, a write-only communication tape, and a read-only random tape, where the random tape contains an infinit sequnce of random bits. $P$  and $V$ share the same input tape denoted as $x$. The write-only communication tape of $P$ is the read-only communication tape of $V$ and vice versa. In the original description of the interactive pair of Turing machines presented in~\cite{Goldwasser1985}, $V$ is initially active, after which $P$ and $V$ alternate their activation. However, in the scenarios discussed later, $P$ initiates the interaction by sharing a commitment to certain values. Each machine uses input tape, work tape, communication tapes and random tapes during its $i$th active stage, then it writes its $i$th message on its write-only communication tape and becomes deactive. $V$ may terminate the protocol and either accept or reject the input $x$ in its $k$th active stage. Here we provide a definition of \gls{ip}:
+  
 \begin{definition}[Interactive Proof System]\label{def:Interactive Proof System}
 	Let \( L \in \{0,1\}^* \) be a language, and let \( P \) and \( V \) be an interactive pair of Turing machines. We say that \( P \) and \( V \) form an \gls{ip} for \( L \) if \( P \) is computationally unbounded, \( V \) is \gls{ppt}, and a common input \( x \in \{0,1\}^n \), with sufficiently large \( n \), is given to both \( P \) and \( V \). They must satisfy the following properties:
 	\vspace{-0.5\baselineskip} % Reduce spacing before enumerate
@@ -233,7 +264,7 @@ Let $(P,V)$ denote an \gls{ip} which includes a computationally unbounded $P$ an
 
 \begin{definition}\label{def:IP-Completeness-Soundness}
 	An \gls{ip} \( (P, V) \) for a language \( L \), given a public input \( x \in \{0,1\}^n \), is said to have \textit{completeness error} \( \delta_c \) and \textit{soundness error} \( \delta_s \) if it satisfies the following conditions:
-	\vspace{-0.5\baselineskip} % Reduce spacing before enumerate
+%	\vspace{-1\baselineskip} % Reduce spacing before enumerate
 	\begin{enumerate}[leftmargin=2em]
 		\item \textbf{Completeness}: For any \( x \in L \), the prover \( P \) convinces \( V \) with probability
 		\[
@@ -244,12 +275,12 @@ Let $(P,V)$ denote an \gls{ip} which includes a computationally unbounded $P$ an
 		\Pr [\langle P^*, V(r_V) \rangle (x) = 1] \leq \delta_s.
 		\]
 	\end{enumerate}
-	\vspace{-0.5\baselineskip} % Reduce spacing after enumerate
+%	\vspace{-0.5\baselineskip} % Reduce spacing after enumerate
 The language \( L \) belongs to the class \( \mathcal{IP} \) if and only if \( \delta_c, \delta_s \leq \frac{1}{3} \).
 
 \end{definition}
 
-\begin{remark}
+\begin{remark}\label{remark:np_in_ip}
 Every language in the nondeterministic polynomial-time class (\gls{np}), denoted as \( L \in \mathcal{NP} \), has an interactive proof system (\gls{ip}) in which both the prover and the verifier operate deterministically. Namely, $\mathcal{NP} \subseteq \mathcal{IP}$.
 \end{remark}
 
@@ -257,9 +288,9 @@ Every language in the nondeterministic polynomial-time class (\gls{np}), denoted
 As stated in \cite{Thaler2022Proofs}, for any \gls{ip} where \( \delta_c < 0 \), the system satisfies \textit{perfect completeness}, meaning that \( \delta_c = 0 \). In all the \gls{ip} systems discussed in this thesis, we assume \(\delta_c = 0\), i.e.,  \( P \) always convinces \( V \) when \( x \in L \). 
 
 \subsubsection{Argument Systems and Computational Soundness}
-Definition \ref{def:IP-Completeness-Soundness} requires \textit{statistical} (or \textit{information-theoretic}) soundness, meaning that soundness holds against computationally unbounded provers in \gls{ip}. However, \textit{argument systems}, a special case of \gls{ip} introduce in~\cite{BRASSARD1988Minimum}, require \textit{computational} soundness, where soundness is guaranteed only against \gls{ppt} provers~\cite{Ben-Sasson2016IOP}. This implies that an infinitely powerful prover could cheat in an argument system. However, such systems typically assume that a \gls{ppt} prover cannot cheat under a given cryptographic assumption. Through $\Theta(k)$ repetitions of the protocol, the soundness error $\delta_s$ can be reduced to $\delta_s^k$.
+Definition \ref{def:IP-Completeness-Soundness} requires \textit{statistical} (or \textit{information-theoretic}) soundness, meaning that soundness holds against computationally unbounded provers in \gls{ip}. However, \textit{argument systems}, a special case of \gls{ip} introduced in~\cite{BRASSARD1988Minimum}, require \textit{computational} soundness, where soundness is guaranteed only against \gls{ppt} provers~\cite{Ben-Sasson2016IOP}. This implies that an infinitely powerful prover could cheat in an argument system. Such systems typically assume that a \gls{ppt} prover cannot cheat under a given cryptographic assumption. Through $\Theta(k)$ repetitions of the protocol, the soundness error $\delta_s$ can be reduced to $\delta_s^k$.
 
-\subsection{Zero-knowledge Proof System}
+\subsection{Zero-knowledge Proof and Proof of Knowledge Systems}
 
 A zero-knowledge proof (\gls{zkp}) system for verifying whether a common input \( x \) belongs to a language \( L \) is an augmented \gls{ip} in which the verifier is convinced of \( x \)'s membership in \( L \) without gaining any additional knowledge beyond \( x \in L \). The prover in \gls{zkp} systems is also prababilistic, meaning that we assume a read-only random tape, denoted as $r_P$ for the prover machine. 
 
@@ -267,53 +298,82 @@ A zero-knowledge proof (\gls{zkp}) system for verifying whether a common input \
 Before defining \gls{zkp} systems, we introduce a secret tape for each interactive Turing machine described in Section~\ref{sec:Prel_IP}, called the \textit{read-only auxiliary input tape}. These tapes represent prior information available to \( P \) and \( V \) and may depend on the common input \( x \), whose membership in \( L \) is to be verified by \( V \) through the \gls{ip} protocol~\cite{Goldreich2001Book}. Let \( w \) denote the auxiliary input for \( P \) and \( z \) denote the auxiliary input for \( V \). The input \( w \) may contain information that helps the prover efficiently perform its tasks. For example, for a language \( L \in \mathcal{NP} \), \( w \) may be the witness for \( x \in L \). 
 On the other hand, \( z \) represents additional information about \( x \) that may be used by a dishonest verifier \( V^* \) to extract knowledge (e.g., beyond the mere fact that \( x \in L \)) through interaction with \( P \). A \gls{zkp} system must guarantee that whatever knowledge \( V^* \) can extract from \( x \), \( z \), and interaction with \( P \), can also be extracted from \( x \) and \( z \) alone, without any interaction with \( P \).  
 
-\subsubsection{Simulation Paradigm and Computational Indistinguishability}  
+\subsubsection{Computational Indistinguishability and Simulation Paradigm}  
 The required property of \gls{zkp} systems is defined through the \textit{simulation paradigm}. Let the view of any verifier $V^*$ during its interaction with the prover $P$ be denoted as  
 \(
 \textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x).
 \)
 This view consists of the verifier's random tape ($r_V$), auxiliary input tape ($z$), and the messages exchanged between the prover and verifier over the $k$ interactions of the \gls{ip} protocol. The verifier's view is often referred to as the \textit{transcript} of the interactions in \gls{ip} and is formally defined as  
 \[
-\textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x) := (r_V, z, p_1, \dots, p_k).
+\textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x) := (r_V, z, p_1, \dots, p_k),
 \]  
+where $p_i$ denotes the prover's $i$th message.
 
-Let $\{X_i\}_{i \in I}$ denote a sequence of random variables, also known as an \textit{ensemble}, indexed by $I$, where each $X_i$ is a random variable \cite{Goldreich2001Book}. Now, suppose there exists a \gls{ppt} simulator $S^*$, which, given the common input $x$ and the verifier's auxiliary input $z$, produces an output $S^*(x, z)$ such that the ensembles  
-\[
-\{\textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x)\}_{x\in L, z \in \{0,1\}^*} \text{ and } \{S^*(x, z)\}_{x\in L, z \in \{0,1\}^*}
-\]  
-for any arbitrary $y$ that satisfies the completeness condition of $x\in L$, are \textit{computationally indistinguishable}, as defined in Definition \ref{def:polytime_ind}. Since the same transcript can be generated by $S^*$ without any interaction with $P$, the existence of such a simulator implies that $V^*$ does not gain any additional knowledge from interacting with $P$.
-
-Let present the definition of computational indistinguishability, following \cite{Goldreich2001Book}.
+Let $\{X_i\}_{i \in I}$ denote a sequence of random variables, also known as an \textit{ensemble}, indexed by $I$, where each $X_i$ is a random variable \cite{Goldreich2001Book}.  Let present the definition of computational indistinguishability, following \cite[Definition 3.2.2]{Goldreich2001Book}:
 \begin{definition}[Computational Indistinguishability]\label{def:polytime_ind}	
-Two ensembles $\{X_s\}_{s\in S}$ and $\{Y_s\}_{s\in S}$ are  computationally indistinguishable if for any \gls{ppt} distinguisher algorithm $D$, and all suffucuently long $s \in S$,
-\[
-\abs{\Pr[D(X_s, s) = 1] - \Pr[D(Y_s, s) = 1]} < \mathsf{negl}(s).
-\]
+	Two ensembles $\{X_s\}_{s\in S}$ and $\{Y_s\}_{s\in S}$ are  computationally indistinguishable if for any \gls{ppt} distinguisher algorithm $D$, and all suffucuently long $s \in S$,
+	\[
+	\abs{\Pr[D(X_s, s) = 1] - \Pr[D(Y_s, s) = 1]} < \mathsf{negl}(s).
+	\]
 \end{definition}
+
+
+
+Now, suppose there exists a \gls{ppt} simulator $S^*$, which, given the common input $x$ and the verifier's auxiliary input $z$, produces an output $S^*(x, z)$ such that the ensembles  
+\[
+\{\textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x)\}_{x\in L, z \in \{0,1\}^*} \text{ and } \{S^*(x, z)\}_{x\in L, z \in \{0,1\}^*},
+\]  
+for any arbitrary $w$ that satisfies the completeness condition of $x\in L$, are \textit{computationally indistinguishable}, as defined in Definition \ref{def:polytime_ind}. Since the same transcript can be generated by $S^*$ without any interaction with $P$, the existence of such a simulator implies that $V^*$ does not gain any additional knowledge from interacting with $P$.
 
 
 \subsubsection{Zero-Knowledge Proof}
-Now, we provide the definition of an \gls{ip} that is zero-knowledge following~\cite{Goldreich2001Book}.
-\begin{definition}[Zero-Knowledge Proof Property]\label{def:zk-proerty}	Assume an \gls{ip} $(P, V)$ for a language $L$, as defined in Definition \ref{def:Interactive Proof System}. Let $w$ and $z$ denote the auxiliary input tapes of $P$ and $V$, respectively, where $w \in W_L(x)$. Here, $W_L(x)$ denotes the set of auxiliary inputs that may be used to satisfy the completeness condition for $x \in L$.  The \gls{ip} $(P, V)$  is zero-knowledge if for any \gls{ppt} machine $V^*$, there exist a  \gls{ppt} algorithm $S^*$, such that the following 
-	
-	
-	is \textbf{zero-knowledge} 
+We now present the definition of the computational zero-knowledge \gls{ip}, following~\cite[Definition 4.3.10]{Goldreich2001Book}.
+
+\begin{definition}[Zero-Knowledge Proof Property]\label{def:zk-proerty}	Assume an \gls{ip} $(P, V)$ for a language $L$, as defined in Definition \ref{def:Interactive Proof System}. Let $w$ and $z$ denote the auxiliary input tapes of $P$ and $V$, respectively, where $w \in W_L(x)$. Here, $W_L(x)$ denotes the set of auxiliary inputs that may be used to satisfy the completeness condition for $x \in L$.  The \gls{ip} $(P, V)$  is zero-knowledge if for any \gls{ppt} machine $V^*$, there exist a  \gls{ppt} algorithm $S^*$, such that the following  two ensembles are computationally indistinguishable, as defined in Definition \ref{def:polytime_ind}:
+\begin{enumerate}
+	\item $\{\textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x)\}_{x\in L, z \in \{0,1\}^*} \text{ for any } w \in  W_L(x)$,
+	\item $\{S^*(x, z)\}_{x\in L, z \in \{0,1\}^*}$.
+\end{enumerate}
+Namely, for all sufficiently long $x \in L$, every $w \in  W_L(x)$, and $z \in \{0,1\}^*$,
+\[
+	\abs{\Pr[D(x, z, \textsf{View}_{V^*(r_V, z)}^{P(r_P, w)}(x)) = 1] - \Pr[D(x, z, S^*(x, z)) = 1]} < \mathsf{negl}(|x|).
+\]
 \end{definition}
 
-\subsubsection{Zero-Knowledge Proof for a NP Language }
-page 241 foundation.
+\subsubsection{Zero-Knowledge Proofs for \texorpdfstring{$\mathcal{NP}$}{NP} Languages}
+Let $R$ be a binary relation for a language $L \in \mathcal{NP}$, where:
+\[
+L = \{x \mid \exists w \text{ such that } (x, w) \in R \}.
+\]
+Moreover, there exists a \gls{ppt} algorithm that decides membership in $R$. Any language $L \in \mathcal{NP}$ is polynomial-time reducible to an $\mathcal{NP}$-complete language, such as the Graph 3-Colorability (\gls{g3c}) problem. Goldreich, Micali, and Wigderson~\cite{Goldreich1991zk-np} presented a zero-knowledge \gls{ip} protocol for \gls{g3c} under the assumption of a secure \textit{bit commitment scheme}, which can be instantiated using any one-way function.  Shortly afterward, Brassard and Crépeau~\cite{Brassard1986ZKBoolean} developed a zero-knowledge \gls{ip} protocol for Boolean circuit satisfiability, another well-known $\mathcal{NP}$-complete problem. Since any language $L \in \mathcal{NP}$ can be reduced to $\mathcal{NP}$-complete, we state the following theorem based on \cite[Theorem 4.4.11]{Goldreich2001Book}:
+
+\begin{theorem}
+	If a commitment scheme exists as defined in Definition~\ref{def:Statistically-hiding commitment}, then every language $L \in \mathcal{NP}$ admits a zero-knowledge \gls{ip} system.
+\end{theorem}
+
+This thesis focuses exclusively on \gls{zkp} protocols for languages in the complexity class~$\mathcal{NP}$. Unless explicitly stated otherwise (e.g., zero-knowledge \glspl{ip}), any reference to \glspl{zkp} throughout this work adheres to the following definition:
 
 
-dishonest verifier and auxiliary-input zero-knowledge
-
-\begin{definition}[Zero-knowledge Proof]
+\begin{definition}[Zero-Knowledge Proof]
 	\label{def:Zero-knowledge Proof}	
-	A zero-knowledge proof is a protocol consists of prover $P$, verifier $V$, and a NP-statement $\mathbbm{x}$. $P$ \textit{knows} an instance (public input) $x$, and a witness (private or auxilary input) $w$ for $\mathbbm{x}$ such that $(x, w) \in \mathcal{R}_\mathbbm{x}$ where $\mathcal{R}_\mathbbm{x}$ is a polynomial time decidable binary relationship between the instances and the witness. $\mathcal{R}_\mathbbm{x}$ is associated with an NP language $\mathcal{L}_\mathbbm{x}$. The prover tries to prove $x \in \mathcal{L}_\mathbbm{x}$ without revealing any information about $w$.
-	
+	A zero-knowledge proof (\gls{zkp}) is a protocol consisting of a prover $P$, a verifier $V$, and an $\mathcal{NP}$ language $\mathcal{L}_\mathbbm{x}$. The prover $P$ possesses an instance (public input) $x$ and a witness (private or auxiliary input) $w$ such that $(x, w) \in \mathcal{R}_\mathbbm{x}$, where $\mathcal{R}_\mathbbm{x}$ is a polynomial-time decidable binary relation associated with $\mathcal{L}_\mathbbm{x}$. The prover aims to convince the verifier that $x \in \mathcal{L}_\mathbbm{x}$ without revealing any information about $w$.
 \end{definition}
 
 
-\subsection{Non-Interactive	Proof System}
+\subsubsection{Proof of Knowledge for \texorpdfstring{$\mathcal{NP}$}{NP} Statements}
+
+Bellare and Goldreich~\cite{Bellare1993ProofsofKnowledge} introduced a formal definition for the notion of proof of knowledge. Here, we summarize their central idea. Let the \textit{prover's knowledge} refer to the auxiliary input (witness) $w$ provided to the prover. Consider a \gls{ppt} oracle machine $\mathcal{E}$, which has oracle access to $\mathcal{O}^{P^*(x, r_P, w)}(\bar{m})$. This oracle outputs messages generated by the prover $P^*(x, r_P, w)$ upon receiving previous message history $\bar{m}$, and it can be viewed as a \textit{rewindable transcript generator}. Let 
+\[
+\Pr \left[ \langle P^*, V \rangle (x) = 1 \right]
+\]
+denote the probability that $P^*$ convinces $V$, and $\delta_k$ denote the probability that $V$ accepts even if $P^*$ did not know a witness $w$.  $\mathcal{E}$ outputs a $w^*$, where $(x, w^*) \in R$ with probability at least 
+\[
+\Pr \left[ \langle P^*, V \rangle (x) = 1 \right] - \delta_k.
+\]
+
+
+
+\subsection{Non-Interactive	Proof System}\label{sec:prel_non_interactive}
 Any \gls{ip} defined in Definition~\ref{def:Interactive Proof System} can be transformed into a non-interactive proof system using the Fiat-Shamir transformation~\cite{Fiat1987}. Before discussing this transformation, we first introduce the concepts of private-coin versus public-coin \gls{ip} protocols and the random oracle model.
 
 \subsubsection{Private Coin versus Public Coin}
@@ -340,27 +400,75 @@ is the query to the random oracle \( R \), where $p_i$ is the $P$'s $i$th messag
 
 Since the instantiation of the ideal random oracle \( R \) is impractical in real-world scenarios, it is replaced with hash functions in practice. This substitution enables a \textit{publicly verifiable, non-interactive argument system} \cite{Thaler2022Proofs}.
 
-\subsection{Succinct Non-Interactive Argument}
+\subsection{Succinct Non-Interactive Argument of Knowledge}
 
-\subsection{Probabilistically Checkable Proof}
+In statistically sound \gls{ip}s of languages in $\mathcal{NP}$, the communications is as much the size of the witness~\cite{Nitulescu2019Lattice}. However, in argument systems that were discussed in Section \ref{sec:Prel_IP}, we can settle for computationally sound proof systems which are sound against computationally bounded (i.e., polynomial-time) provers. In~\cite{Kilian1992} Kilian showed that if we assume collision-resistant hash (\gls{crh}) functions, as defined in Definition \ref{def:Collision-resistance hash function}, existed, we can have \textit{succinct} interactive argument systems in which communication can be cut down and make the verifier run much faster than it would in previous $\mathcal{NP}$ verifications. Namely, the membership of $x \in L$, where $L \in \mathcal{NP}$ can be verified by $V$ in logarithm the time originally is required for  $\mathcal{NP}$ verification. By applying Fiat-Shamir transformation~\cite{Fiat1987}, discussed in Section \ref{sec:prel_non_interactive},  we can have a succinct non-interactive argument (\gls{snarg}) system.
 
-\subsection{Interactive Oracle Proof}
+The prover $P$ in a \gls{snarg} system proves that there exists a witness $w$ for the  ``$x \in L$''  statement (the statement is true), where $L\in \mathcal{NP}$. However, it is not enough in many applications. Usually, $P$ must prove that she knows that witness too (argument of knowledge).  The \gls{snarg}s in which $P$ proves that she knows the witness are called succinct non-interactive argument of knowledge \gls{snark}. 
+
+In \cite{Bitansky2012}, Bitansky et al. proved that if and only if  extractable collision-resistant hash (\gls{ecrh}) functions exist, verifier of \gls{snark}s will exist. Hence we will have computational knowledge soundness in \gls{snark} instead of computationally soundness that was in argument systems (or \gls{snarg}).  \gls{snark}s can be modified so that a verifier does not learn anything about the witness by converting that to a zero-knowlege succinct non-interactive argument of knowledge (\gls{zksnark}).  
+
+Here, we provide a formal definition of \gls{zksnark} algorithms and properties, which will be referenced throughout this thesis:
+
+\begin{definition}[zkSNARK Algorithms]
+	\label{def:Algorithms in a zkSNARK scheme}
+	
+	\gls{zksnark} scheme is a type of non-interactive zero-knowledge (NIZK) proofs that has succinct proof size and the proofs are publicly verifiable. zkSNARK consists of a triple of polynomial-time algorithms which are defined as follows:
+	
+	\begin{itemize}
+		\item $\mathsf{KeyGen}(1^{\lambda}, \mathbbm{x}) \rightarrow (\text{pk}_\mathbbm{x}, \text{vk}_\mathbbm{x})$. Given a security parameter $\lambda$ and an NP statement $\mathbbm{x}$, $\mathsf{KeyGen}$ outputs a proving key $\text{pk}_\mathbbm{x}$ and a verification key $\text{vk}_\mathbbm{x}$. The proving and verifying keys are both published as public parameters. They can be used, any number of times, to prove membership in $\mathcal{L}_\mathbbm{x}$ and verify the proof, respectively.
+		
+		\item $\mathsf{Prove}(\text{pk}_\mathbbm{x}, x, w) \rightarrow \pi$. Given a proving key $\text{pk}_\mathbbm{x}$ and any $(x, w) \in \mathcal{R}_\mathbbm{x}$, the algorithm outputs a non interactive proof $\pi$ for the instance $x\in \mathcal{L}_\mathbbm{x}$.
+		
+		\item $\mathsf{Verify}(\text{vk}_\mathbbm{x}, x, \pi) \rightarrow \{0, 1\}$. Given a verification key $\text{vk}_\mathbbm{x}$, public input $x$, and a proof $\pi$, the algorithm outputs 1 if proof $\pi$ can convince that $x\in \mathcal{L}_\mathbbm{x}$.
+	\end{itemize}
+	
+\end{definition}
+
+\begin{definition}[zkSNARK Properties]
+	\label{def:zkSNARK Properties}
+	
+	The zkSNARK scheme satisfies the following properties.
+	
+	\begin{itemize}
+		\item \textit{Completeness}: A prover $P$ who knows a witness $w$ for $x\in \mathcal{L}_\mathbbm{x}$ can convince a verifier with probablility $1-\mathsf{negl}(\lambda)$ for every $\lambda$, $\mathbbm{x}$, and $(x, w) \in \mathcal{R}_\mathbbm{x}$.
+		
+		\item \textit{Soundness}: If  $x \notin \mathcal{L}_\mathbbm{x}$, a dishonest PPT prover $P^*$ can convince a verifier with probability $\mathsf{negl}(\lambda)$ .
+		
+		% Reference: https://www.cs.princeton.edu/courses/archive/fall07/cos433/lec15.pdf
+		% https://crypto.stanford.edu/cs355/19sp/lec5.pdf
+		\item \textit{Knowledge Soundness (proof of knowledge) with error $\delta$}: For every dishonest PPT prover $P^*$ and every problem statement $\mathbbm{x}$ and $x$, if there exist a PPT extractor $\mathcal{E}_\mathbbm{x}$ algorithm, the probability of $\mathcal{E}_\mathbbm{x}$ extracting the witness $w$ given oracle access to $P^*$, must be at least as high as the success probability of $P^*$ in convincing the verifier.
+		
+		\begin{align*}
+			\Pr\left[(x, w) \in \mathcal{R}_\mathbbm{x}: w \leftarrow \mathcal{E}_\mathbbm{x}^{P^*}(x)\right] \geq \\
+			\Pr \left[ \langle P^*, V \rangle (x) = 1 \right] - \delta
+		\end{align*}
+		
+		Where the oracle access to $P^*$ is denoted as $\mathcal{E}_\mathbbm{x}^{P^*}$ \cite{Bellare1993ProofsofKnowledge}.
+		
+		\item \textit{Succinctness}: The size of a honestly-generated proof $\pi$ is constant ($O_\lambda(1)$) and the verification algorithm $\mathsf{Verify}(\text{vk}_\mathbbm{x}, x, \pi)$ run-time is linear in the size of the instance $x$ ($O_\lambda(|x|)$).
+		
+		\item \textit{Statistical Zero-knowledge}: For a polynomial-time simulator \textsf{Sim} that can produce a proof $\pi^*$, and for all stateful disinguishers $\mathcal{D}$, the probability  that $\mathcal{D}(\pi)=1$ on an honest proof is equal to the probability that $\mathcal{D}(\pi^*)=1$ on a simulated proof.    
+	\end{itemize}
+	
+\end{definition}
 
 
+%\subsection{Post Quantum Secure zkSNARK}
 
+%\subsection{Probabilistically Checkable Proof}
+%
+%\subsection{Interactive Oracle Proof}
 
-
-\subsection{Sumchek Protocol}
-
-\subsubsection{Multivariate Sumchek Protocol}
-
-\subsubsection{Univariate Sumchek Protocol}
+%\subsection{Sumchek Protocol}
+%
+%\subsubsection{Multivariate Sumchek Protocol}
+%
+%\subsubsection{Univariate Sumchek Protocol}
 
 
 \subsection{GKR Protocol}
-
-
-GKR \cite{GKR2008} is a public coin interactive proof protocol for any language computable by a log-space uniform layered (fan-in 2) arithmetic circuit $\mathcal{C}$, in which a prover $\mathcal{P}$ can run the computation and interactively prove the correctness of the result (output gate(s)) to a verifier $\mathcal{V}$. Consider a circuit with depth denoted by $d$ and size represented by $S$, where the size is defined as the total number of gates. For any layer $\ell$ within the circuit, $S_\ell$ indicates the number of gates at that layer. Specifically, $\ell=0$ corresponds to the output layer, while $\ell=d$ represents the input layer. Additionally, $\nu$ is the size of the input to  the circuit $\mathcal{C}$. The communication cost is $O(S_0 + d\log(S))$, the cost of $\mathcal{V}$  is $O(\nu + d\log(S))$, and the runtime of the $\mathcal{P}$ is bounded by $O(S^3)$. In the following, we briefly describe the GKR protocol following Thaler's presentation of the protocol in \cite{Thaler2022}.\\
+GKR \cite{GKR2008} is a public coin interactive proof protocol for any language computable by a log-space uniform layered (fan-in 2) arithmetic circuit $\mathcal{C}$, in which a prover $\mathcal{P}$ can run the computation and interactively prove the correctness of the result (output gate(s)) to a verifier $\mathcal{V}$. Consider a circuit with depth denoted by $d$ and size represented by $S$, where the size is defined as the total number of gates. For any layer $\ell$ within the circuit, $S_\ell$ indicates the number of gates at that layer. Specifically, $\ell=0$ corresponds to the output layer, while $\ell=d$ represents the input layer. Additionally, $\nu$ is the size of the input to  the circuit $\mathcal{C}$. The communication cost is $O(S_0 + d\log(S))$, the cost of $\mathcal{V}$  is $O(\nu + d\log(S))$, and the runtime of the $\mathcal{P}$ is bounded by $O(S^3)$. In the following, we briefly describe the GKR protocol following Thaler's presentation of the protocol in \cite{Thaler2022Proofs}.\\
 
 
 \noindent\textbf{Circuit Encoding.} At each layer $\ell$, the gates are numerically labeled in binary from $0$ to $S_\ell - 1$, assuming $S_\ell$ is a power of two (expressed as $S_\ell = 2^{k_\ell}$). The functions $\mathsf{in1}_\ell$ and $\mathsf{in2}_\ell$, each defined as $\mathsf{in1}_\ell, \mathsf{in2}_\ell: \{0, 1\}^{k_\ell} \rightarrow \{0, 1\}^{k_{\ell+1}}$, map a binary gate label at layer $\ell$ to its input gates at layer $\ell+1$. This mapping explicitly encodes the wiring—how outputs from gates at layer $\ell+1$ serve as inputs to a gate at layer $\ell$. Accordingly, the functions $\mathsf{add}_\ell$ and $\mathsf{mult}_\ell$, representing addition and multiplication gates at layer $\ell$, are defined as 
@@ -414,9 +522,9 @@ In the final round, $\mathcal{V}$ independently checks $ \widetilde{W}_{d}(r_{d}
 
 
 \subsection{FRI Protocol}
-FRI protocol is a low-degree test for polynomials. It is used to determine whether a polynomial $f$ is low-degree with respect to the size of the evaluation domain,  without actually knowing $f$ itself \cite{ben2018fast,habock2022summary}. 
+Fast Reed-Solomon interactive oracle proof of proximity (\gls{fri}) protocol is a low-degree test for polynomials. It is used to determine whether a polynomial $f$ is low-degree with respect to the size of the evaluation domain,  without actually knowing $f$ itself \cite{FRI2018}. 
 
-FRI protocol begins with a polynomial $f_0(X)$ and its evaluation domain $L_0$, which is an affine subspace in $\mathbb{F}$.
+The \gls{fri} protocol begins with a polynomial $f_0(X)$ and its evaluation domain $L_0$, which is an affine subspace in $\mathbb{F}$.
 The polynomial $f_0(X)$ and domain $L_0$ undergo a stepwise reduction process using a random folding procedure, resulting in a sequence of polynomials
 \begin{equation}
 	f_0(X), f_1(X),\cdots, f_{\mathsf{r}}(X)\in \mathbb{F}[X],
@@ -431,19 +539,19 @@ Suppose $d_k$ is the upper bound of polynomial's degree, i.e., $\deg f_k(X) < d_
 \end{equation}
 are the same, called \textit{reduction factors}, and in this papar we always assume the reduction factors to be 2.
 
-Let $f^{(k)}\ (\ 0\le k \le \mathsf{r})$ be a Reed Solomn codeword defined as follows,
+Let $f^{(k)}\ (\ 0\le k \le \mathsf{r})$ be a Reed Solomn (\gls{rs}) codeword defined as follows,
 \begin{equation}
 	\begin{aligned}
 		f^{(k)}:L_k &\rightarrow &\mathbb{F},\\
 		x &\mapsto& f_k(x).
 	\end{aligned}
 \end{equation}
-The notation caveat should be noted here that $f_k(X)$ represents a polynomial, while $f^{(k)}$ is an array of points representing a Reed Solomn codeword. The interpolant of $f^{(k)}$ would construct the polynomial $f_k(x)$. The rate of Reed Solomn codeword is defined as
+The notation caveat should be noted here that $f_k(X)$ represents a polynomial, while $f^{(k)}$ is an array of points representing a \gls{rs} codeword. The interpolant of $f^{(k)}$ would construct the polynomial $f_k(x)$. The rate of the \gls{rs} codeword is defined as
 \begin{equation}
 	\rho = \frac{d_k }{|L_{k}|}.
 \end{equation}
 
-FRI is an interactive protocol containing a Commit phase and a Query phase,  running for $\mathsf{r}$ rounds.
+\gls{fri} is an \gls{ip} containing a Commit phase and a Query phase,  running for $\mathsf{r}$ rounds.
 \newline
 
 \noindent\textbf{Commit Phase.}
@@ -773,7 +881,7 @@ To obtain the full zero-knowledge protocol, we replace relevant components with 
 
 
 %----------------------------------------------------------------------
-\newpage
+
 
 \section{Additive Fast Fourier Transform}
 

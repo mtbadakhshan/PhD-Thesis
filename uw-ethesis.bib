@@ -693,27 +693,6 @@ isbn="978-3-642-38348-9"
 	
 }
 
-
-
-@InProceedings{Aurora,
-author="Ben-Sasson, Eli
-and Chiesa, Alessandro
-and Riabzev, Michael
-and Spooner, Nicholas
-and Virza, Madars
-and Ward, Nicholas P.",
-editor="Ishai, Yuval
-and Rijmen, Vincent",
-title="Aurora: Transparent Succinct Arguments for {R1CS}",
-booktitle="Advances in Cryptology -- EUROCRYPT 2019",
-year="2019",
-doi="10.1007/978-3-030-17653-2_4",
-publisher="Springer International Publishing",
-address="Cham",
-pages="103--128",
-doi = {10.1007/978-3-030-17653-2_4}
-}
-
 @article{Polaris,
    author = {Shihui Fu and Guang Gong},
    doi = {10.2478/POPETS-2022-0027},
@@ -723,7 +702,7 @@ doi = {10.1007/978-3-030-17653-2_4}
    keywords = {polynomial commitment,verifiable computation,zero-knowledge proof,zkSNARK},
    pages = {544-564},
    publisher = {Privacy Enhancing Technologies Symposium Advisory Board},
-   title = {Polaris: Transparent Succinct Zero-Knowledge Arguments for R1CS with Efficient Verifier},
+   title = {Polaris: Transparent Succinct Zero-Knowledge Arguments for {R1CS} with Efficient Verifier},
    volume = {2022},
    year = {2022},
 }
@@ -748,19 +727,18 @@ doi = {10.1007/978-3-030-17653-2_4}
 
 @article{rs-code,
  ISSN = {03684245},
- URL = {http://www.jstor.org/stable/2098968},
- author = {I. S. Reed and G. Solomon},
+ doi = {10.1137/0108018},
+ author = {Irving Stoy Reed and Gustave Solomon},
  journal = {Journal of the Society for Industrial and Applied Mathematics},
  number = {2},
  pages = {300--304},
  publisher = {Society for Industrial and Applied Mathematics},
  title = {Polynomial Codes Over Certain Finite Fields},
- urldate = {2023-01-09},
  volume = {8},
  year = {1960}
 }
 
-@article{Pinocchio,
+@article{Parno2016Pinocchio,
 author = {Parno, Bryan and Howell, Jon and Gentry, Craig and Raykova, Mariana},
 title = {Pinocchio: Nearly Practical Verifiable Computation},
 year = {2016},
@@ -788,26 +766,6 @@ numpages = {10},
       url = {https://eprint.iacr.org/2019/550},
       lastaccessed = {November 28, 2023},
 }
-
-@InProceedings{FIR,
-  author =	{Eli Ben-Sasson and Iddo Bentov and Yinon Horesh and Michael Riabzev},
-  title =	{{Fast Reed-Solomon Interactive Oracle Proofs of Proximity}},
-  booktitle =	{45th International Colloquium on Automata, Languages, and  Programming (ICALP 2018)},
-  pages =	{14:1--14:17},
-  series =	{Leibniz International Proceedings in Informatics (LIPIcs)},
-  ISBN =	{978-3-95977-076-7},
-  ISSN =	{1868-8969},
-  year =	{2018},
-  volume =	{107},
-  editor =	{Ioannis Chatzigiannakis and Christos Kaklamanis and D{\'a}niel Marx and Donald Sannella},
-  publisher =	{Schloss Dagstuhl--Leibniz-Zentrum fuer Informatik},
-  address =	{Dagstuhl, Germany},
-  URL =		{http://drops.dagstuhl.de/opus/volltexte/2018/9018},
-  URN =		{urn:nbn:de:0030-drops-90183},
-  doi =		{10.4230/LIPIcs.ICALP.2018.14},
-  annote =	{Keywords: Interactive proofs, low degree testing, Reed Solomon codes, proximity testing}
-}
-
 
 
 @book{goossens.book,
@@ -860,13 +818,16 @@ numpages = {14},
 
 
 
-@article{zcash2014,
-   author = {Eli Ben-Sasson and Alessandro Chiesa and Christina Garman and Matthew Green and Ian Miers and Eran Tromer and Madars Virza},
-   keywords = {Bitcoin,decentralized electronic cash,eli@cstechnionacil,zero-knowledge proofs * Technion},
-   title = {Zerocash: Decentralized Anonymous Payments from Bitcoin (extended version)},
-   url = {http://zerocash-project.org/media/pdf/zerocash-extended-20140518.pdf},
-   year = {2014},
-   urldate = {2023-01-08},
+@INPROCEEDINGS{zcash2014,
+  author={Ben Sasson, Eli and Chiesa, Alessandro and Garman, Christina and Green, Matthew and Miers, Ian and Tromer, Eran and Virza, Madars},
+booktitle={2014 IEEE Symposium on Security and Privacy}, 
+title={Zerocash: Decentralized Anonymous Payments from Bitcoin}, 
+year={2014},
+volume={},
+number={},
+pages={459-474},
+keywords={Online banking;Privacy;Public key;Protocols;Logic gates;Bitcoin;decentralized electronic cash;zero knowledge},
+doi={10.1109/SP.2014.36}
 }
 
 @online{BIP0137,
@@ -1180,11 +1141,15 @@ series = {CCS '06}
 }
 
 
+
+
 @book{katz2020introduction,
-  title={Introduction to modern cryptography},
-  author={Katz, Jonathan and Lindell, Yehuda},
-  year={2020},
-  publisher={CRC press}
+	author = {Katz, Jonathan and Lindell, Yehuda},
+	title = {Introduction to Modern Cryptography, Second Edition},
+	year = {2014},
+	isbn = {1466570261},
+	publisher = {Chapman \& Hall/CRC},
+	edition = {2nd},
 }
 
 
@@ -1203,7 +1168,7 @@ month = apr,
 @INPROCEEDINGS{Brendel2021TheProvableSecurity,
   author={Brendel, Jacqueline and Cremers, Cas and Jackson, Dennis and Zhao, Mang},
   booktitle={2021 IEEE Symposium on Security and Privacy (SP)}, 
-  title={The Provable Security of Ed25519: Theory and Practice}, 
+  title={The Provable Security of {E}d25519: Theory and Practice}, 
   year={2021},
   volume={},
   number={},
@@ -1217,11 +1182,13 @@ and Goldreich, Oded",
 editor="Brickell, Ernest F.",
 title="On Defining Proofs of Knowledge",
 booktitle="Advances in Cryptology --- CRYPTO' 92",
-year="1993",
+year="1992",
 publisher="Springer Berlin Heidelberg",
 address="Berlin, Heidelberg",
+volume="740",
 pages="390--420",
-isbn="978-3-540-48071-6"
+isbn="978-3-540-48071-6",
+doi="10.1007/3-540-48071-4_28"
 }
 
 
@@ -2488,15 +2455,14 @@ isbn="978-3-662-53644-5"
 
 @article{Gong2024,
 	author = {Guang Gong},
-	title = {Uni/multi variate polynomial embeddings for zkSNARKs},
+	title = {Uni/multi variate polynomial embeddings for {zkSNARKs}},
 	journal = {Cryptography and Communications},
 	year = {2024},
-	volume = {},
-	number = {},
-	pages = {},
+	volume = {16},
+	number = {6},
+	pages = {1257--1288},
 	doi = {10.1007/s12095-024-00723-0},
 	url = {https://doi.org/10.1007/s12095-024-00723-0},
-	doi = {10.1007/s12095-024-00723-0},
 	issn = {1936-2455}
 }
 
@@ -2639,6 +2605,23 @@ isbn="978-3-662-53644-5"
 	series = {STOC '85}
 }
 
+@article{Goldreich1991zk-np,
+	author = {Goldreich, Oded and Micali, Silvio and Wigderson, Avi},
+	title = {Proofs that yield nothing but their validity or all languages in NP have zero-knowledge proof systems},
+	year = {1991},
+	issue_date = {July 1991},
+	publisher = {Association for Computing Machinery},
+	address = {New York, NY, USA},
+	volume = {38},
+	number = {3},
+	issn = {0004-5411},
+	doi = {10.1145/116825.116852},
+	journal = {J. ACM},
+	month = jul,
+	pages = {690–728},
+	numpages = {39},
+}
+
 
 @book{Goldreich2001Book,
 	author = {Goldreich, Oded},
@@ -2650,3 +2633,51 @@ isbn="978-3-662-53644-5"
 	place={Cambridge},
 	address = {USA}
 }
+
+@inproceedings{GKR2008,
+	author = {Goldwasser, Shafi and Kalai, Yael Tauman and Rothblum, Guy N.},
+	title = {Delegating computation: interactive proofs for muggles},
+	year = {2008},
+	isbn = {9781605580470},
+	publisher = {Association for Computing Machinery},
+	address = {New York, NY, USA},
+	doi = {10.1145/1374376.1374396},
+	booktitle = {Proceedings of the Fortieth Annual ACM Symposium on Theory of Computing},
+	pages = {113–122},
+	numpages = {10},
+	keywords = {delegation, interactive proofs, muggles},
+	location = {Victoria, British Columbia, Canada},
+	series = {STOC '08}
+}
+
+@InProceedings{Nitulescu2019Lattice,
+	author="Nitulescu, Anca",
+	editor="Schwabe, Peter
+	and Th{\'e}riault, Nicolas",
+	title="Lattice-Based Zero-Knowledge SNARGs for Arithmetic Circuits",
+	booktitle="Progress in Cryptology -- LATINCRYPT 2019",
+	year="2019",
+	publisher="Springer International Publishing",
+	address="Cham",
+	pages="217--236",
+	doi="10.1007/978-3-030-30530-7_11",
+	isbn="978-3-030-30530-7"
+}
+
+@InProceedings{Brassard1986ZKBoolean,
+	author="Brassard, Gilles
+	and Claude Crépeau",
+	editor="Odlyzko, Andrew M.",
+	title="Zero-Knowledge Simulation of Boolean Circuits",
+	booktitle="Advances in Cryptology --- CRYPTO' 86",
+	year="1986",
+	publisher="Springer Berlin Heidelberg",
+	volume="263",
+	address="Berlin, Heidelberg",
+	pages="223--233",
+	isbn="978-3-540-47721-1",
+	doi="10.1007/3-540-47721-7_16"
+}
+
+
+
