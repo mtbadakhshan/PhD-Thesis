@@ -1,5 +1,183 @@
 %======================================================================
-\chapter{The GKR Circuit Design for Polaris}
+\chapter{The Optimizations for Polaris}
 %======================================================================
 
+\section{Introduction}
+The efficient implementation of the  post-quantum secure \gls{zksnark} protocols is crucial for enabling practical deployment in real-world applications. To address concerns regarding efficiency, this chapter proposes the fast implementation of Polaris by emphasizing on the optimization of GKR and FRI protocols.  In this chapter, we present an instantiation of the FRI protocol. This instantiation eliminates the field inversion operations in both the Commit phase and Query phase, expecting to show  better efficiency. Also, we present an instantiation of the GKR circuit tailored for the Polaris implementation. By designing the circuit as a  satisfiability circuit, we ensure the verifiable computation of values essential for the Polaris protocol while minimizing the number of gates. This would reduce the communication overhead, and the verifier and the prover complexities.
 
+\section{FRI Instantiation}
+\label{sec:FRI_instantiation}
+
+In the FRI protocol, let $\mathsf{r}$ be the number of rounds, let $\{\beta_0 = 1, \beta_1, \beta_2,\cdots, \beta_{191}\}$ be one of the $\mathbb{F}_2$-basis of $\mathbb{F}_{2^{192}}$ defined in Section \ref{algebraic_def}.
+\newline
+
+\noindent\textbf{Evaluation Domains.} We assume that the verifier and prover have agreed upon the evaluation domains $L_k\ (0\le k \le \mathsf{r})$, whose sizes are the powers of 2,  and $m = \log_2(|L_0|)$. Those affine subspaces are adopted in Preon \cite{chen2023preon}.  The evaluation domains are recursively defined as follows. First,
+\begin{equation}
+	L_0 = <\beta_{0},\beta_{1},\cdots, \beta_{m-1}> + \beta_{m}.
+\end{equation}
+For an integer $i\ (0\le i \le 2^{m} - 1)$, its binary expression is 
+\[i = (i_{m-1}i_{m-2}\cdots i_1i_0)_2 = i_0 + i_1\cdot 2 + \cdots + i_{m-1}\cdot 2^{m-1}, i_j \in \{0,1\}.\]
+Then we can define the $i$-th element in $L_0$ as
+\begin{equation}
+	L_0[i] = (i_0\cdot\beta_0 + i_1\cdot\beta_1+ \cdots + i_{m-1}\cdot\beta_{m-1}) + \beta_{m},\ 0\le i < 2^m.
+\end{equation}
+Let us define the polynomial
+\begin{equation}
+	q_0(X) = X(X - \beta_0)
+\end{equation}
+and \[\beta_j^{(1)} = q_{0}(\beta_{j+1}),\ 0\le j \le m-1,\]
+then $L_1$ is defined as
+\begin{equation}
+	L_1 = q_0(L_0) = <\beta_0^{(1)}, \beta_1^{(1)}, \cdots, \beta_{m-2}^{(1)} > + \beta_{m-1}^{(1)},
+\end{equation}
+and the $i$-th element in $L_1$ is 
+\[L_1[i] =(i_0\cdot\beta_0^{(1)} + i_1\cdot\beta_1^{(1)}+ \cdots + i_{m-2 }\cdot\beta_{m-2}^{(1)}) + \beta_{m-1}^{(1)},\ 0\le i < 2^{m-1}. \]
+We can thus recursively define that, { for } $1\le k \le m-1$, 
+\begin{equation}
+	\begin{aligned}
+		q_k(X) &= X(X - \beta_0^{(k)}),\\
+		\beta_j^{(k+1)} &= q_{k}(\beta_{j+1}^{(k)}), \text{ for } 0\le j \le m-k-1,\\
+		L_{k+1} &= q_k(L_k) = <\beta_0^{(k+1)}, \beta_1^{(k+1)}, \cdots, \beta_{m-k-2}^{(k+1)} > + \beta_{m-k-1}^{(k+1)},
+	\end{aligned}
+\end{equation}
+and for $ 0\le i < 2^{m-k-1}$, the $i$-th element of $L_{k+1}$ is defined as
+\begin{equation*}
+	L_{k+1}[i] =(i_0\cdot\beta_0^{(k+1)} + i_1\cdot\beta_1^{(k+1)}+ \cdots + i_{m-1}\cdot\beta_{m-k-2}^{(k+1)}) + \beta_{m-k-1}^{(k+1)}. 
+\end{equation*}
+\newline
+\noindent\textbf{FRI Commit Phase.}
+
+Prover's input: 
+$f^{(0)}: L_{0} \rightarrow \mathbb{F}$, a purported Reed Solomn codeword corresponding to polynomial $f_{0}(X)$,  with rate $\rho$.
+\newline
+
+Loop for $0\le k \le \mathsf{r} - 1$:
+\begin{enumerate}
+	\item Prover commits to all codewords.
+	
+	\begin{itemize}
+		\item $f^{(k)}: L_{k} \rightarrow \mathbb{F}$ is recursively defined in Step 3.
+		\item Prover computes a Merkle commitment to $f^{(k)}$ and sends out the Merkle root.
+	\end{itemize}
+	
+	\item Verifier sends a uniformly random $\alpha^{(k)}\in \mathbb{F}.$
+	\item Prover defines the codeword $f^{(k+1)}$ with domain $L_{k+1}$, such that for each $0\le i< |L_{k+1}|$, 
+	\begin{itemize}
+		\item It is easy to check that 
+		\[q_k(L_{k}[2i]) = q_k(L_{k}[2i + 1]) = L_{k+1}[i].\]
+		\item The values in codeword  $f^{(k+1)}$ is derived from the previous codeword,
+		\begin{equation*}
+			f_{k+1}(L_{k+1}[i]) =\frac{f_{k}(L_{k}[2i]) - f_{k}(L_{k}[2i+1])}{L_{k}[2i] - L_{k}[2i+1]} (\alpha^{(k)} - L_{k}[2i]) + f_{k}(L_{k}[2i]).
+		\end{equation*}
+		Here the denominator ${L_{k}[2i] - L_{k}[2i+1]} = \beta_0^{(k)} $, whose inverse can be precomputed.
+	\end{itemize}
+\end{enumerate}
+
+For $k = \mathsf{r}$:
+
+\begin{itemize}
+	\item $f^{(\mathsf{r})}: L_{\mathsf{r}} \rightarrow \mathbb{F}$ is defined in Step 2.
+	% \item let the polynomial $P^{(\mathsf{r})}(X)$ be the interpolant of points $\{ (x, f^{(\mathsf{r})}(x))\ |\ x\in L_{\mathsf{r}}\}.$
+	\item prover sends out the last codeword $f^{(\mathsf{r})}$.
+\end{itemize}
+
+
+\noindent\textbf{FRI Query Phase.}
+\begin{enumerate}
+	\item Verifier extracts all Merkle roots, all challenges $\alpha^{(0)}, \alpha^{(1)}, \cdots ,\alpha^{(\mathsf{r} -1)}$, and the last codeword $f^{(\mathsf{r})}$. Verifier has oracle access to $f^{(0)},f^{(1)}, \cdots, f^{(\mathsf{r} -1)} $.
+	
+	\item Verifier computes the interpolant $f_{\mathsf{r}}(X)$ from points $f^{(\mathsf{r})}$, then check if the degree of $f_{\mathsf{r}}(X)$ is no more than $\rho\cdot |L^{(\mathsf{r})}| -1$. If not, reject.
+	
+	\item Verifier does the consistency check between two neighboring codewords.
+	
+	Repeat $\ell$ times:
+	\begin{itemize}
+		\item Sample random index $s^{(0)} = i$ from $0\le i < |L_0| $, and for $0\le k \le\mathsf{r} - 1$, compute $s^{(k+1)} = \lfloor s^{(k)}/ 2 \rfloor$. 
+		\item If $s^{(\mathsf{r})}$ is repeated, resample $s^{(0)}$.
+		
+		\item \textbf{Round consistency check}:
+		
+		Denote
+		\[x_1^{(k)} = L_{k}[2s^{(k+1)}],\ x_2^{(k)} = L_{k}[2s^{(k+1)}+1],\] 
+		the verifier first queries
+		\[f_{k+1}(L_{k+1}[s^{(k+1)}]), f_{k}(x_1^{(k)}), f_{k}(x_2^{(k)}),\]
+		and checks the Merkle commit paths for those three points, then 
+		checks that for every $k\in \{0,1,2,\cdots, \mathsf{r} - 1\}$,
+		\begin{equation}
+			f_{k+1}(L_{k+1}[s^{(k+1)}]) =\frac{f_{k}(x_1^{(k)}) - f_{k}(x_2^{(k)})}{x_1^{(k)} - x_2^{(k)}} (\alpha^{(k)} - x_1^{(k)}) + f_{k}(x_1^{(k)}).
+		\end{equation}
+		If any one equation of the consistency check fails, reject.
+		
+		Notice that $x_1^{(k)} - x_2^{(k)} = \beta_0^{(k)}$, whose inverse can be precomputed.
+	\end{itemize}
+	\item Accept if all checks pass. This implies that the degree of the original polynomial $f_0(X)$ is no more than $\rho\cdot |L_0| - 1$.
+\end{enumerate}
+
+\section{GKR Circuit}
+\label{sec:GKR-implementation}
+
+% \subsubsection{Circuit Design}
+In this section we are going to present the circuit $\mathfrak{C}$ to provide a verifiable computation for $C_M(r_x, r_y)$.  By considering that the arithmetic circuit can only include addition and multiplication operations, computing the multiplicative inverse is expensive. Therefore, we turn the straightline computation, in which we should compute the multiplicative inverse, into an \textit{satisfiability} circuit instance \cite{Thaler2022}. Therefore, the circuit $\mathfrak{C}$ receives a set of inputs that includes $\overline{\mathsf{c}^{(d)}} = \{\mathsf{c}^{(d)}(i) \mid i \in [n]\}$, alongside $r_x$, $r_y$, $\overline{\mathsf{row}} = \{\mathsf{row}(i) \mid i \in [n]\}$, $\overline{\mathsf{col}} = \{\mathsf{col}(i) \mid i \in [n]\}$, and $\overline{\mathsf{val}} = \{\mathsf{val}(i) \mid i \in [n]\}$, where $d$ denotes the depth of the circuit and $\mathsf{c}^{(\ell)}(i)$ is defined as follows:
+
+\begin{equation}
+	\mathsf{c}^{(\ell)}(i) := 
+	\begin{cases}
+		\frac{\mathsf{val}(i)}{\left(r_x - \mathsf{row}(i)\right)\left(r_y - \mathsf{col}(i)\right)}, & \ell = d,  \  i \in [n]\\%1 \leq i \leq n   \\
+		% 0, & \ell = d, \   n \leq i \leq 2^{\lceil \log (n) \rceil}\\
+		% \mathsf{c}^{(\ell + 1)}(2i-1) + \mathsf{c}^{(\ell + 1)}(2i), & 0 \leq \ell < d, 1 \leq i \leq 2^{\lceil \log (n) \rceil + \ell - d}\\
+		\mathsf{c}^{(\ell + 1)}(2i-1) + \mathsf{c}^{(\ell + 1)}(2i), & \ell \in [ 0,  d), i \in  [2^{\ell-d}n]  \\
+		0 & \text{otherwise}.
+	\end{cases}
+	\label{eq:c_i}
+\end{equation}
+
+This definition specifies that $\mathfrak{C}$ encompasses all terms included in the summation outlined in Equation (\ref{eq:C_M}), utilizing these terms as inputs (where $\ell = d$). To enable verifiable computation of this summation, $\mathfrak{C}$ is equipped with a \textit{summation} component structured as a binary tree. Within this structure, for any level $\ell < d$, the function $\mathsf{c}^{(\ell)}(i)$ calculates the sum of two preceding terms from the immediately lower layer (i.e., layer $\ell+1$), using addition gates. In Equation (\ref{eq:c_i}), we simplify our notation by assuming a balanced binary tree structure for ease of definition. This assumption entails that the input layer, denoted by $\mathsf{c}^{(d)}(i)$, comprises a power of two elements. Consequently, the number of layers are $d = \log{n}$. The output layer, serving as the tree's root, is designated by $\mathsf{c}^{(0)}(1) = C_M(r_x, r_y)$. However, this binary structure is not a strict requirement for the actual implementation. In practice, given that each addition gate necessitates two inputs, layers featuring an odd number of elements incorporate a zero as the supplemental input for the subsequent layer. This zero is consistently available at every layer of the circuit.
+
+
+For $\mathfrak{C}$ to qualify as a satisfiability circuit, it must verify that each asserted term $\mathsf{c}^{(d)}(i)$ aligns with the parameters $r_x$, $r_y$, $\mathsf{row}(i)$, $\mathsf{col}(i)$, and $\mathsf{val}(i)$. Consequently, we need to design a \textit{consistency} component embedded to the circuit. The number of layers $d = \log{n}$ is determined by the summation component presented above. 
+
+% \paragraph{}
+\noindent\textbf{Layer  $\ell = d-1$}: (The immediate layer beyond the input layer) $\alpha(i) = r_x - \mathsf{row}(i)$, $\beta(i) = r_y - \mathsf{col}(i)$, where $\overline{\alpha}=\{\alpha(i) \mid i \in [n]\}$ and $\overline{\beta}=\{\beta(i) \mid i \in [n]\}$ are realized by addition gates.
+
+\noindent\textbf{Layer  $\ell = d-2$}: $\gamma(i) = \alpha(i)\beta(i)$ for $i \in [n]$, where $\overline{\gamma}=\{\gamma(i) \mid i \in [n]\}$ is realized by multiplication gates
+
+\noindent\textbf{Layer  $\ell = d-3$}: $\mathsf{val}^\prime(i) = \gamma(i)\mathsf{c}^{(d)}(i)$, where $\mathsf{c}^{(d)}(i)$ is  copied to this layer from the input layer by being added to zero in previous two layers. This zero is consistently available at every layer of the circuit. $\overline{\mathsf{val}^\prime}=\{\mathsf{val}^\prime(i) \mid i \in [n]\}$ is realized by multiplication gates.
+
+\noindent\textbf{Layer  $\ell = d-4$}: $\zeta(i) = \mathsf{val}^\prime(i) + \mathsf{val}(i)$, where $\mathsf{val}(i)$ is also copied from the input layer to this layer by being added to zero. This layer performs an addition of $\mathsf{val}^\prime(i)$ to $\mathsf{val}(i)$, such that, when $\mathsf{val}^\prime(i)$ equals $\mathsf{val}(i)$, $\zeta(i) = 0$, since the addition is equivalent to the XOR operation in this field. This property ensures $\mathsf{val}^\prime(i)$ and $\mathsf{val}(i)$ are equal. $\overline{\zeta}=\{\zeta(i) \mid i \in [n]\}$ is realized by addition gates.
+
+% To do so, it is imperative to 
+
+% in layer $\ell = d-1$ (i.e., )
+
+
+% and  in layer $\ell = d-2$. 
+
+
+% Then, in layer $\ell = d-3$, 
+
+% In the layer $\ell = d-4$, the circuit performs an addition of $\mathsf{val}^\prime(i)$ to $\mathsf{val}(i)$ for each index $i$.  using the same approach. 
+
+% The operation $\zeta(i) = \mathsf{val}^\prime(i) + \mathsf{val}(i)$ is designed 
+
+\noindent\textbf{Layers  $\ell < d-4$}: $\overline{\zeta}$ is copied to the upper layer till the output layer.
+
+% For layers $\ell < d-4$, at each layer,  Where, the size 
+Figure \ref{fig:gkr-circuit} illustrates the GKR circuit used in Polaris. For clarity, only connections from the input layer are shown, as the other connections follow a similar pattern and have been omitted from this visual representation.
+
+
+\begin{figure}
+	\centering
+	\includestandalone[width=\textwidth]{Figures/GKR_Circuit}
+	\caption{
+		The GKR satisfiability circuit for calculating $C_M(r_x, r_y)$ (Equation \eqref{eq:C_M}). Sample connections are shown for clarity.
+		$\forall i, \zeta(i) = 0$, and $\mathsf{c}^{(0)}(1) = C_M(r_x, r_y)$. }
+	\label{fig:gkr-circuit}
+\end{figure}
+
+
+The summation component of the presented GKR circuit consists of $2n-1$ gates, under the assumption that it forms a balanced binary tree (i.e., $n$ is a power of two). If this condition is not met, the circuit will have a number of gates that is close to this figure. The consistency component of the circuit has $(n+1)\log n + 7n + 2$ gates. Consequently the size of the circuit is $S = (n+1)\log n + 9n + 1$ ($2n$ of them are multiplication and the rest are addition gates). The prover only needs to send $\mathsf{c}^{(0)}(1)$ to the verifier as the output of the circuit because the verifier assumes that the other $n+1$ gate values should be zero; therefore, $S_0 = 1$ ($S_0$ is the size of the output layer). Note that the depth of the circuit is $d = \log(n)$. According to Section \ref{gkr}, the communication cost is $O(S_0 + d\log(S))=O(\log(n) \cdot \log((n+1)\log n + 9n))$ which simplifies to $O(\log(n) \cdot \log(n \log n)) = O((\log(n))^2)$. 
+
+The input size to the circuit is $\nu = 4n + 3$. According to Section \ref{gkr}, the verifier's computation cost should be $O(\nu + d\log(S)) = O(n + \log(n) \cdot (n\log(n))) = O(n (\log(n))^2)$. However, in the implementation of the GKR protocol, this computation can be delegated to the prover via verifiable polynomial delegation (VPD) schemes such as Virgo \cite{Zhang2019VirgoZK}. Finally, the prover's computation is $O(S^3)=O((n\log(n))^3)$.
+
+\section{Conclusion}
+In this chapter, we introduced the Polaris protocol and its construction components. We presented an instantiation of the GKR circuit to minimize the number of gates, with the aim to reduce communication overhead, as well as the verifier and prover's complexities. We also explained an instantiation of the FRI protocol that eliminates the field inversion operations in both the Commit phase and Query phase, while would help to achieve better efficiency.  The complete performance benchmark and the expected improvements will be demonstrated in the upcoming full implementation of Polaris.

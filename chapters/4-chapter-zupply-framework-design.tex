@@ -13,7 +13,7 @@ This chapter is based on \cite{Badakhshan2024Zupply}. I am the sole author of th
 The Zupply framework facilitates the authenticated and privacy-preserving, decentralized maintenance of directed acyclic graphs (\gls{dag}s). \gls{dag}s, which are pivotal in representing data flows, find utility in diverse applications. One notable application is in supply chain management (\gls{scm}), where a \gls{dag} is instrumental in tracking a product's progression. In this context, each \gls{dag} node represents a unique stage in the product's lifecycle, facilitating an understanding of the sequence and interdependencies of these stages. \gls{dag} data structure has the flexibility to either extend a sequence, divide it into two, or merge two sequences into one. Beyond \gls{scm}, \gls{dag} structured data (or simply \gls{dag}) is also employed in various other domains, including version control systems (\gls{vcs}) (e.g., Git \cite{gitonline2023} and Mercurial \cite{mercurial}). Proposing a practical, fully decentralized, and trustless scheme for maintaining \gls{dag} that simultaneously preserves the privacy of entities creating data records and ensures the authentication of these records addresses significant challenges in current \gls{scm} solutions.
 
 \gls{scm} brings together numerous entities, from suppliers to consumers, requiring the secure flow of items, information, and funds \cite{wisner2021principles}. Ensuring product quality and origin compliance necessitates transparent traceability \cite{SUN2019658}, but protecting private information and trade secrets is equally vital, especially for smaller enterprises \cite{ Winter2023SMEs}. Existing systems often rely on centralized authorities or permissioned blockchains, which are neither fully trustless nor decentralized. Permissionless (public) blockchains create a trustless environment, but their full transparency and high on-chain storage costs pose challenges \cite{ Zhou2022EthereumGraph}. Although solutions based on 
-interplanetary file system (\gls{ipfs}) \cite{ipfs} can address storage issues, they lack privacy-preserving authentication \cite{Khor2023, Musamih2021}. 
+interplanetary file system (\gls{ipfs}) \cite{Benet2014} can address storage issues, they lack privacy-preserving authentication \cite{Khor2023, Musamih2021}. 
 
 We are proposing a universal \gls{scm} framework that meets various requirements, such as transparency, agility in collaboration, and affordability for micro, small and medium enterprises (\gls{msme}s). To achieve this, we suggest designing an \gls{scm} system that uses public blockchains. This system aims to provide cost-efficient solutions by using off-chain storage for product histories while ensuring data integrity and authenticity. This way, all supply chain participants, including end consumers, can verify a product's history. Since products often comprise materials from various sources, we recommend using \gls{dag} structured data to manage multi-sourced products, enhancing traceability and efficiency. 
 
@@ -68,7 +68,7 @@ The Zupply framework comprises three primary components, as illustrated in Figur
 
     \item \textit{Blockchain Platform (BP)}: Zupply operates on a smart contract-enabled, permissionless blockchain, essential for managing the Zupply smart contract ($\mathcal{C}_Z$) that enables the creation and transfer of \gls{aat}s. 
 
-    \item \textit{Decentralized Cloud Storage (\gls{dcs})}: The \gls{dcs} utilized by Zupply is a secure, manager-less system based on IPFS \cite{ipfs}, storing data records ($d$) addressed by content identifiers (\textsc{cid}). 
+    \item \textit{Decentralized Cloud Storage (\gls{dcs})}: The \gls{dcs} utilized by Zupply is a secure, manager-less system based on IPFS \cite{Benet2014}, storing data records ($d$) addressed by content identifiers (\textsc{cid}). 
     
 \end{enumerate}
 
@@ -179,7 +179,9 @@ $\mathsf{MHT}$ is a data structure that keeps the whole Merkle hash tree nodes a
 $\mathsf{MHT}.\mathsf{Add}()$ and $\mathsf{MHT}.\mathsf{Search}()$ are stateful, having direct access to the \textsf{MHT} data structure. In contrast, $\mathsf{MHT}.\mathsf{Verify}()$ does not. This algorithm is implemented within the smart contract, which does not store the \textsf{MHT}. %Detailed explanation of this algorithm is provided in Section \ref{sec:MerkleTreeStructure}.
 
 \subsubsection{Blockchain Platform Ledger}
-We can model the blockchain as an immutable, public, decentralized ledger, denoted as $\mathbf{L}_\tau$, on which the Zupply smart contract, $\mathcal{C}_Z$, is deployed.  $\mathcal{C}_Z$ maintains $\texttt{rt}_\tau$, and $\mathbf{X}_\tau$. The commitments in $\mathbf{C}_\tau$ are uploaded to the blockchain via transactions that invoke $\mathcal{C}_Z$. Wherever data records are concerned, the protocol employs the \textit{proof-of-inclusion (\gls{pi})} mechanism provided by the blockchain to prove the correctness of the value $\texttt{rt}_\tau$ used in off-chain proofs. The PI of $\texttt{rt}_\tau$ in ledger $\mathbf{L}_\tau$ at time $\tau$ is represented as $\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt})$. This proof ensures that the auditors can  verify  $\texttt{rt}$ employed for off-chain authentication.  
+We can model the blockchain as an immutable, public, decentralized ledger, denoted as $\mathbf{L}_\tau$, on which the Zupply smart contract, $\mathcal{C}_Z$, is deployed.  $\mathcal{C}_Z$ maintains $\texttt{rt}_\tau$, and $\mathbf{X}_\tau$. The commitments in $\mathbf{C}_\tau$ are uploaded to the blockchain via transactions that invoke $\mathcal{C}_Z$. Consequently, $\mathbf{L}_\tau$ records all transactions associated with the Zupply framework (discussed below), along with other unrelated transactions on the blockchain platform.
+
+Wherever data records are concerned, the protocol employs the \textit{proof-of-inclusion (\gls{pi})} mechanism provided by the blockchain to prove the correctness of the value $\texttt{rt}_\tau$ used in off-chain proofs. The PI of $\texttt{rt}_\tau$ in ledger $\mathbf{L}_\tau$ at time $\tau$ is represented as $\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt})$. This proof ensures that the auditors can  verify  $\texttt{rt}$ employed for off-chain authentication.  
 
 \subsubsection{Transactions}
 Each transaction  $\texttt{tx}$ $\in$ $\{ \texttt{tx}_\textsf{Init},$ $\texttt{tx}_\textsf{Trans},$ $\texttt{tx}_\textsf{Merge},$ $\texttt{tx}_\textsf{Div} \}$ invokes a specific function in $\mathcal{C}_Z$. Each $\texttt{tx}$ contains one or two \texttt{cm}s, and whenever it finalizes on the blockchain,  its corresponding \texttt{cm}s are added to \textsf{MHT} locally and updates $\texttt{rt}_\tau$  on the blockchain. For a transactions that transfers the ownership of \gls{aat}(s), $\texttt{tx} \in \{$$\texttt{tx}_\textsf{Trans}$, $\texttt{tx}_\textsf{Merge}$, $\texttt{tx}_\textsf{Div}$ $\}$, the transaction contains the \gls{eol} of expired \gls{aat}(s) whose commitment(s) are stored on $\mathsf{MHT}$, and a \gls{zkp} of owning them. These proofs are denoted as $\pi_\mathbbm{x} \in \{\pi_\textsf{Trans}, \pi_\textsf{Merge}, \pi_\textsf{Div} \}$. 
@@ -206,11 +208,12 @@ $\mathsf{DCS}(\textsc{cid}_n) \rightarrow d_n$ denotes a query to the \gls{dcs} 
 % Each data record $d_n$ is linked to two predecessor data records $d_p$ and $d_q$, where $p,q < n$. 
 Each data record $d_n$ contains references to its predecessor, $d_p$ and $d_q$, where $p,q < n$, in the array $d_n.\mathsf{pred}$ if applicable. Specifically, $d_n.\mathsf{pred}[b] \in \mathbf{CID}_\tau$ for ${b = 0, 1}$; although one or both entries of the array may be $\emptyset$.
 A data record $d_n$ contains public data $d_{n, \mathsf{pub}}$ which is stored as plain-text, and private data $d_{n, \mathsf{pri}}$ which is stored as cipher-text $c_n = \mathcal{E}_\mathsf{sym}(\textsc{k}_n, d_{n, \mathsf{pri}})$. Zupply may incorporate the forward secrecy scheme outlined in Mesh \cite{altawy2019mesh} to determine $\textsc{k}_n$ (Appendix \ref{app:Data Encryption}). $d_n$ also includes a \gls{zkp} $\pi_\textsf{Auth}$ of owning $T_i$ such that its corresponding $\texttt{cm}_i$ is in \textsf{MHT}.  The public input to this proof is denoted as $x_\texttt{Auth}$. Each $T_i$, can be used more than once to prove authenticity.
-Also, the data record $d_n$ includes $\sigma_n = \mathcal{S}_\mathsf{sig}(\text{SKsig}_i, d_n)$, where $\text{SKsig}_i$ is the secret key associated with $\text{PKsig}_{i}$ in $T_i$. Consequently, $d_n$ is denoted as the following tuple and illustrated in Figure \ref{fig:zupply-datachain} (\textsf{tags} are explained in the following):
+Also, the data record $d_n$ includes $\sigma_n = \mathcal{S}_\mathsf{sig}(\text{SKsig}_i, d_n)$, where $\text{SKsig}_i$ is the secret key associated with $\text{PKsig}_{i}$ in $T_i$. Consequently, $d_n$ is denoted as the following tuple and illustrated in Figure \ref{fig:zupply-datachain}:
 \begin{align*}
     d_n  := & \left( d_{n, \mathsf{pub}}, c_n, \mathsf{pred}=\{\textsc{cid}_p, \textsc{cid}_q\}, \mathsf{tags}=\{\texttt{Tag}_p, \texttt{Tag}_q\}, \right. \\ 
-    & \left. \pi_\textsf{Auth}, x_\textsf{Auth}=\{\texttt{rt}_\tau, \text{PKsig}_{i}\}, \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau) \right), \sigma_n.
+    & \left. \pi_\textsf{Auth}, x_\textsf{Auth}=\{\texttt{rt}_\tau, \text{PKsig}_{i}\}, \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau) \right),
 \end{align*}
+where the digital signature $\sigma_n$  is uploaded together with the data  $d_n$ and the data ownership transfer tags (\textsf{tags}) are explained in the following.
 
 \subsubsection{Data Ownership Transfer Tag} 
 \label{sec:Data ownership transfer tag}
@@ -324,6 +327,7 @@ Zupply framework $\Pi$ Consists of a tuple of polynomial-time algorithms and pro
 
 \subsection{Algorithms} \label{sec:Zupply-Algorithms}%
 % Using security parameter $\lambda$, we define Zupply Scheme. // explain $i$
+All algorithms have read-only access to $\mathbf{TX}_\tau$, $\mathbf{C}_\tau$, and $\mathbf{X}_\tau$, and $\mathbf{D}_\tau$ (via \textsf{DCS} queries). The smart contract and \textsf{DCS} can update these sets when the \textsf{VerifyTX} or \textsf{Audit} algorithms output~1.
 
 \subsubsection{\textsf{Setup} ($1^{\lambda}$) $\rightarrow$ $\textsc{pp}$}
 Given a security parameter $\lambda$, \textsf{Setup} generates a set of global public parameters, denoted as \textsc{pp}. The specific implementation of \textsf{Setup} depends on the zkSNARK algorithm in use: it may require a trusted party, or it may rely on a transparent (public) setup. The resulting \textsc{pp} is made publicly available. The pseudocode for \textsf{Setup} is provided in Algorithm~\ref{alg:Setup}.
@@ -717,6 +721,75 @@ To prove Property \ref{theorem:CorrectLeafPosition}, we first need to present an
     
     If the adversary aims to corrupt the root by passing $\texttt{rt}^{*}$ as an argument to the second \textsf{VerifyPath} execution, where $\texttt{rt}^{*}$ is not computed correctly from adding the new $\texttt{cm}$ to \textsf{MHT}, \textsf{VerifyPath} will return 0. This is because $\textsf{path}_\mathsf{ind}$ is not consistent with $\texttt{rt}^{*}$ and the commitment.
 \end{proof}
+
+\section{Security Analysis}
+
+
+%\subsection{Indistinguishability Experiment}
+In this section, we do not provide security proofs, deferring them to future work. Instead, we present the experimental setup for evaluating ledger indistinguishability. To characterize the ledger indistinguishability of the Zupply framework, we design an \textsf{L-IND} experiment following the similarly named experiment in Zerocash~\cite{zcash2014}.  
+Recall that a ledger $L$ includes a set of transactions $\mathbf{TX}$. From $\mathbf{TX}$, we extract the ordered set $\mathbf{C}$, which stores commitments to \gls{aat}s (\texttt{cm}s), and the set of \gls{eol}s, denoted as $\mathbf{X}$. Each \texttt{cm} in $\mathbf{C}$  can be replaced by a tuple $(\texttt{cm}, \text{TXtype}, e)$, where $\texttt{cm}$ is the commitment added to the ledger by an entity $e$ through a transaction of type TXtype. The transaction type can be either \textsf{Trans} or \textsf{Init}. We call this new $\mathbf{C}$ as its generalized form.  Notably, if $\text{TXtype} = \textsf{Trans}$, the entity $e$ does not \textit{own} the corresponding \gls{aat}; rather, it only adds it to the ledger. The adversary’s capabilities determine whether they can extract the entity $e$ associated with each commitment in the transactions. For simplicity, we first assume that the adversary lacks this capability.
+
+Let $\mathcal{C}$ denote the challenger in the \textsf{L-IND} experiment, which receives queries from the adversary $\mathcal{A}$, performs sanity checks, and forwards them to the Zupply framework oracle, denoted as $\mathcal{O}^\Pi$. In the \textsf{L-IND} experiment, we instantiate two oracles, $\mathcal{O}_0^\Pi$ and $\mathcal{O}_1^\Pi$.  Each oracle $\mathcal{O}^\Pi$ internally stores:  
+\begin{enumerate}
+	\item The set $\mathbf{C}$ in its generalized form.
+	\item A set of entities $\mathbf{E}$.
+	\item A set of \gls{eol}s, denoted as $\mathbf{X}$.
+	\item Sets of \gls{aat}s \textit{owned} by each entity $e \in \mathbf{E}$, denoted as $\mathbf{T}^e$.
+	\item A set of data records, denoted as $\mathbf{D}$.
+\end{enumerate}
+
+The oracle $\mathcal{O}^\Pi$ is initialized by public parameters \textsc{pp} and can receive and answer the following queries:
+
+%% INIT
+\begin{itemize}
+	\item $Q(\textbf{Init}, q, e)$ 
+	\begin{enumerate}
+		\item Compute $\textsf{Init}(\textsc{pp}, q) \rightarrow (\texttt{tx}_\textsf{Init}, T)$, where $\texttt{tx}_\textsf{Init} = \big(\texttt{cm}, \texttt{rt}^{\text{new}}, \mathsf{ind}, \mathsf{path}_{\mathsf{ind}}\big)$,
+		\item  Add $(\texttt{cm}, \textsf{Init}, e)$ to $\mathbf{C}$.
+		\item Add $T$ to $\mathbf{T}^e$
+	\end{enumerate}
+
+
+%% TRANS
+	\item $Q(\textbf{Trans}, \texttt{cm}^\text{old}, e^\text{new})$ 
+	\begin{enumerate}
+		\item Assert $\texttt{cm}^\text{old}$ is in $\mathbf{C}$, otherwise output $\perp$.
+		\item Let $T^{e^\text{old}} \in \mathbf{T}^{e^\text{old}}$ be the \gls{aat} corresponding to $\texttt{cm}^\text{old}$.
+		\item Sample $ (\text{PKsig}^\text{new}, \text{SKsig}^\text{new})  \leftarrow {\mathcal{K}_\mathsf{sig}} (\textsc{pp})$
+		\item \sloppy Compute \textsf{Trans}$\big($\textsc{pp}$, T^{e^\text{old}},  \text{PKsig}^\text{new} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Trans}}, \Tilde{T}^{e^\text{new}}, \texttt{Tag}\big)$, where $\texttt{tx}_{\textsf{Trans}} = \big(\pi_{\textsf{Trans}}, x_{\textsf{Trans}}, \texttt{eol}, \texttt{cm}, \texttt{rt}^{\text{new}}, \mathsf{ind}, \mathsf{path}_{\mathsf{ind}} \big)$
+		\item  Add $(\texttt{cm}, \textsf{Trans}, e^\text{old})$ to $\mathbf{C}$.
+		\item Add $T^{e^\text{new}} = (\Tilde{T}^{e^\text{new}},  \text{PKsig}^\text{new})$ to $\mathbf{T}^{e^{\text{new}}}$
+	\end{enumerate}
+	
+	\item $Q(\textbf{Upload}, \text{IsTransferred}, d^\text{old}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$, where $d_{\text{pub}, \text{pri}}^\text{new}$ represents the public and private part of the new data to be added to $D$, succeeding $d^\text{old}$, which is already in $D$. The Boolean variable $\text{IsTransferred}$ indicates whether the new data has a different $\text{PKsig}$ than $d^\text{old}$; it is set to \texttt{True} if $\text{PKsig}$ differs and \texttt{False} otherwise.\footnote{The query $Q(\textbf{Upload}, \text{False}, \text{Null}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$ initiates a \gls{dag}.}
+	
+	\begin{enumerate}
+		\item Assert $d^\text{old}$ is either Null or is in $D$, otherwise output $\perp$.
+		\item If  $d^\text{old} \neq \text{Null}$, find the $T^\text{old}$ with $\text{PKsig}^\text{old}$ in all $\mathbf{T}^e$s and from that determine  $\text{SKsig}^\text{old}$ otherwise do nothing.
+		\item If $\text{IsTransferred} = \texttt{True}$, then commit to $T^\text{old}$ to compute $\texttt{cm}^\text{old}$, and run  $Q(\textbf{Trans}, \texttt{cm}^\text{old}, e^\text{new})$ to produce $T^{e^\text{new}}$. Otherwise, $T^{e^\text{new}} = T^\text{old}$.
+		\item Sample a random \textsc{k} and Compute \textsf{Upload} $\big($\textsc{pp}$, d^\text{old}, T^{e^\text{new}}, d^\text{new}_{\mathsf{pub}, \mathsf{pri}}, \textsc{k}, [\textsf{tags}]  \big)$ $\rightarrow$ $d^\text{new}$.
+		\item Add $d^\text{new}$ to $D$.
+	\end{enumerate}
+	
+	\item $Q(\textbf{Insert}, \texttt{tx})$, where $\texttt{tx}$ is either the type of \textsf{Trans} or  \textsf{Init}.
+	\begin{enumerate}
+		\item If \textsf{VerifyTX} $\big($\textsc{pp}$, \texttt{tx} \big)$  returns 0, return $\perp$.
+		\item Add the $(\texttt{cm}, \text{TXtype}, e^*)$ to  $\mathbf{C}$, where $e^*$ denote the type of entities where the oracle does not hold their $T^{e^*}$.
+		\item If $ \text{TXtype} = \textsf{Trans}$ and the receiver of the \gls{aat} is not of type $e^*$, add   Add $T^{e^\text{new}}$ to $\mathbf{T}^{e^{\text{new}}}$.
+	\end{enumerate}
+\end{itemize}
+
+Now, in the \textsf{L-IND} experiment, the challenger $\mathcal{C}$ instantiate two oracles denoted as  $\mathcal{O}_0^\Pi$ and $\mathcal{O}_1^\Pi$. Then, $\mathcal{C}$ randomly picks $b \in \{0,1\}$ and provides two ledgers $L_\text{Left} = L_b$  and  $L_\text{Right} = L_{1-b}$ to $\mathcal{A}$. A sends two queries of $Q$ and $Q'$ to the challenger where they are publicly consistent, meaning that every public values in those two queries are the same.	 
+The challenger sends $Q$ to $L_0$ and $Q'$ to $L_1$. The adversary's advantage in this experiment is the probability that the adversary can guess $b$.
+
+
+%\begin{enumerate}
+%	\item .
+%	\item 
+%\end{enumerate}
+
+
+%One diffenece between our experiment and the experiment in Zerocash is that in our experiment there exist a data table, denoted as $D$, where the adversary can either induce honest parties to upload data into the table.
 
 
 \section{Discussion}
