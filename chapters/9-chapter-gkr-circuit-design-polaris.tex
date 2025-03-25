@@ -1,5 +1,5 @@
 %======================================================================
-\chapter{The Optimizations for Polaris}
+\chapter{Polaris zkSNARK Optimization}\label{ch:polaris}
 %======================================================================
 
 \section{Introduction}
@@ -8,7 +8,14 @@ The efficient implementation of the  post-quantum secure \gls{zksnark} protocols
 \section{FRI Instantiation}
 \label{sec:FRI_instantiation}
 
-In the FRI protocol, let $\mathsf{r}$ be the number of rounds, let $\{\beta_0 = 1, \beta_1, \beta_2,\cdots, \beta_{191}\}$ be one of the $\mathbb{F}_2$-basis of $\mathbb{F}_{2^{192}}$ defined in Section \ref{algebraic_def}.
+In the FRI protocol, let $\mathsf{r}$ be the number of rounds, let $\{\beta_0 = 1, \beta_1, \beta_2,\cdots, \beta_{191}\}$ be one of the $\mathbb{F}_2$-basis of $\mathbb{F}_{2^{192}}$ defined as:
+\begin{equation}\label{eq_F_2_192}
+	\mathbb{F}_{2^{192}} := \mathbb{F}_{2^{64}}[Y]/(Y^3 + Y + 1),
+\end{equation}
+where
+\begin{equation}\label{eq_F_2_64}
+	\mathbb{F}_{2^{64}} := \mathbb{F}_{2}[X]/(X^{64} + X^4 + X^3 + X + 1).
+\end{equation}
 \newline
 
 \noindent\textbf{Evaluation Domains.} We assume that the verifier and prover have agreed upon the evaluation domains $L_k\ (0\le k \le \mathsf{r})$, whose sizes are the powers of 2,  and $m = \log_2(|L_0|)$. Those affine subspaces are adopted in Preon \cite{chen2023preon}.  The evaluation domains are recursively defined as follows. First,
@@ -117,7 +124,7 @@ For $k = \mathsf{r}$:
 \label{sec:GKR-implementation}
 
 % \subsubsection{Circuit Design}
-In this section we are going to present the circuit $\mathfrak{C}$ to provide a verifiable computation for $C_M(r_x, r_y)$.  By considering that the arithmetic circuit can only include addition and multiplication operations, computing the multiplicative inverse is expensive. Therefore, we turn the straightline computation, in which we should compute the multiplicative inverse, into an \textit{satisfiability} circuit instance \cite{Thaler2022}. Therefore, the circuit $\mathfrak{C}$ receives a set of inputs that includes $\overline{\mathsf{c}^{(d)}} = \{\mathsf{c}^{(d)}(i) \mid i \in [n]\}$, alongside $r_x$, $r_y$, $\overline{\mathsf{row}} = \{\mathsf{row}(i) \mid i \in [n]\}$, $\overline{\mathsf{col}} = \{\mathsf{col}(i) \mid i \in [n]\}$, and $\overline{\mathsf{val}} = \{\mathsf{val}(i) \mid i \in [n]\}$, where $d$ denotes the depth of the circuit and $\mathsf{c}^{(\ell)}(i)$ is defined as follows:
+In this section we are going to present the circuit $\mathfrak{C}$ to provide a verifiable computation for $C_M(r_x, r_y)$.  By considering that the arithmetic circuit can only include addition and multiplication operations, computing the multiplicative inverse is expensive. Therefore, we turn the straightline computation, in which we should compute the multiplicative inverse, into an \textit{satisfiability} circuit instance \cite{Thaler2022Proofs}. Therefore, the circuit $\mathfrak{C}$ receives a set of inputs that includes $\overline{\mathsf{c}^{(d)}} = \{\mathsf{c}^{(d)}(i) \mid i \in [n]\}$, alongside $r_x$, $r_y$, $\overline{\mathsf{row}} = \{\mathsf{row}(i) \mid i \in [n]\}$, $\overline{\mathsf{col}} = \{\mathsf{col}(i) \mid i \in [n]\}$, and $\overline{\mathsf{val}} = \{\mathsf{val}(i) \mid i \in [n]\}$, where $d$ denotes the depth of the circuit and $\mathsf{c}^{(\ell)}(i)$ is defined as follows:
 
 \begin{equation}
 	\mathsf{c}^{(\ell)}(i) := 
@@ -168,7 +175,7 @@ Figure \ref{fig:gkr-circuit} illustrates the GKR circuit used in Polaris. For cl
 \begin{figure}
 	\centering
 	\includestandalone[width=\textwidth]{Figures/GKR_Circuit}
-	\caption{
+	\caption[The GKR Satisfiability Circuit for Polaris]{
 		The GKR satisfiability circuit for calculating $C_M(r_x, r_y)$ (Equation \eqref{eq:C_M}). Sample connections are shown for clarity.
 		$\forall i, \zeta(i) = 0$, and $\mathsf{c}^{(0)}(1) = C_M(r_x, r_y)$. }
 	\label{fig:gkr-circuit}

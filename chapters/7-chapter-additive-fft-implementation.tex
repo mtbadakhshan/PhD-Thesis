@@ -3,7 +3,7 @@
 %======================================================================
 
 \section*{Declaration of Contributions}
-This chapter is based on [?]. I have co-author the paper and my main contributions are as follows:
+This chapter is based on [?]. I have co-authored the paper and my main contributions are as follows:
 \begin{itemize}
 	\item Deriving the exact number of additions and multiplications in the Cantor additive fast Fourier transform (\gls{fft}) \cite{Cantor1989FFT}. 
 	\item The \CC implementation of all the Cantor additive \gls{fft} algorithm with the minimum number of additions.
@@ -14,12 +14,12 @@ This chapter is based on [?]. I have co-author the paper and my main contributio
 
 \section{Introduction}
 
-Optimizing or accelerating the implementation of algorithms in \gls{zksnark}s is an active and popular area of research \cite{ECFFT1_2023,ECFFT_2022,Diamond2023Towers,CHES:LuoFuGong23}. In parallel, optimizing the \gls{fft} over additive groups has been a significant focus of study \cite{Cantor1989FFT,zurGathenFFT,Gao2010FFT,LCH-conv2016,LCH-FFT2016}. The \gls{fft} over additive groups can be utilized in various \gls{zksnark} protocols operating over binary extension fields. Examples of such protocols include Ligero~\cite{Ames2017Ligero}, STARK~\cite{Ben-Sasson2018STARK}, Aurora~\cite{Aurora2019}, Fractal~\cite{Chiesa2020Fractal}, and Polaris~\cite{Polaris}. Among these \gls{zksnark}s, Fractal features the fastest verifier algorithm, Ligero boasts the fastest prover algorithm, and Aurora achieves the smallest proof size. While STARK employs algebraic intermediate representation (\gls{air}), which is designed for converting the execution trace of a program into algebraic representations (e.g., polynomials), the others rely on rank-1 constraint system (R1CS) \cite{Gong2024}, which is suited for arithmetic circuit and is preferred in cryptography related applications, as many privacy-preserving solutions rely on zero-knowledge proofs (\gls{zkp}s) of knowledge of the preimage of a leaf in a Merkle hash tree constructed by the circuit of a hash algorithm (e.g., SHA-256). Furthermore, \gls{zksnark}-based post-quantum digital signature schemes typically involve proving knowledge of the secret key for a symmetric-key encryption algorithm (e.g., AES) represented as an arithmetic circuit.
+The \gls{fft} over additive groups can be utilized in various \gls{zksnark} protocols operating over binary extension fields. Examples of such protocols include Ligero~\cite{Ames2017Ligero}, STARK~\cite{Ben-Sasson2018STARK}, Aurora~\cite{Aurora2019}, Fractal~\cite{Chiesa2020Fractal}, and Polaris~\cite{Polaris}. Among these \gls{zksnark}s, Fractal features the fastest verifier algorithm, Ligero boasts the fastest prover algorithm, and Aurora achieves the smallest proof size. While STARK employs algebraic intermediate representation (\gls{air}), which is designed for converting the execution trace of a program into algebraic representations (e.g., polynomials), the others rely on rank-1 constraint system (R1CS) \cite{Gong2024}, which is suited for arithmetic circuit and is preferred in cryptography related applications, as many privacy-preserving solutions rely on zero-knowledge proofs (\gls{zkp}s) of knowledge of the preimage of a leaf in a Merkle hash tree constructed by the circuit of a hash algorithm (e.g., SHA-256). Furthermore, \gls{zksnark}-based post-quantum digital signature schemes typically involve proving knowledge of the secret key for a symmetric-key encryption algorithm (e.g., AES) represented as an arithmetic circuit.
 
-For this study, we select Aurora~\cite{Aurora2019} to demonstrate the performance improvements achieved by optimizing the \gls{fft} algorithm using the Cantor special basis \cite{Cantor1989FFT}. While our optimization is applicable to all the aforementioned \gls{zksnark}s, Aurora was chosen due to its small proof size, which makes it a strong candidate for post-quantum secure digital signature schemes. Accordingly, Aurora serves as the foundation of Preon~\cite{Preon2023}, a post-quantum digital signature scheme that was a first-round candidate in NIST’s post-quantum cryptography (\gls{pqc}) standardization process~\cite{nist_pqc_round1_signatures}.
+For this study, we select Aurora~\cite{Aurora2019} to demonstrate the performance improvements achieved by optimizing the \gls{fft} algorithm using the Cantor special basis \cite{Cantor1989FFT}. While our optimization is applicable to all the aforementioned \gls{zksnark}s, Aurora was chosen due to its small proof size, which makes it a strong candidate for post-quantum secure digital signature schemes. Accordingly, Aurora serves as the foundation of Preon~\cite{Preon2023}, a post-quantum digital signature scheme that was a first-round candidate in NIST’s post-quantum cryptography standardization process~\cite{nist_pqc_round1_signatures}.
 
 \begin{table}
-	\caption{ Prover and Verifier of the Aurora zkSNARK \cite{Aurora2019} over $\mathbb{F}_{2^{256}}$ based on the number of constraints $N$ and the size of the Reed-Solomon codeword domain $|L|$, using Gao-Mateer and Cantor FFTs, on an AMD Ryzen 9 9950x @ 5.7 GHz (sec).}
+	\caption[Prover and Verifier of the Aurora zkSNARK using Gao-Mateer and Cantor FFT algoritms]{ Prover and Verifier of the Aurora zkSNARK \cite{Aurora2019} over $\mathbb{F}_{2^{256}}$ based on the number of constraints $N$ and the size of the Reed-Solomon codeword domain $|L|$, using Gao-Mateer and Cantor FFTs, on an AMD Ryzen 9 9950x @ 5.7 GHz (sec).}
 	\label{tab:cost_analysis_intorduction}
 	\centering
 	{\small
@@ -70,7 +70,7 @@ For this study, we select Aurora~\cite{Aurora2019} to demonstrate the performanc
 
 
 
- The chapter is structured as follows.  Section~\ref{Sec:Cantor Implementation} presents optimizations for the Cantor algorithm, while Section~\ref{Sec:Gao-implementation} details the Gao-Mateer algorithm and its precomputations. Section~\ref{Sec:FFT_Calls_in_Aurora} analyzes FFT call complexity in Aurora, and Section~\ref{Sec:ComplexityAnalysis} compares the FFT algorithms. Finally, Section~\ref{Sec:Conclusion} summarizes findings.
+ The chapter is structured as follows.  Section~\ref{Sec:Cantor Implementation} presents optimizations for the Cantor algorithm, while Section~\ref{Sec:Gao-implementation} details the Gao-Mateer algorithm and its precomputations. Section~\ref{Sec:FFT_Calls_in_Aurora} analyzes FFT call complexity in Aurora, and Section~\ref{Sec:ComplexityAnalysis} compares the FFT algorithms. Finally, Section~\ref{Sec:Summary} summarizes findings.
 
 
 \section{Cantor Algorithm Building Blocks}\label{Sec:Cantor Implementation}
@@ -82,7 +82,7 @@ In our implementation of the Cantor algorithm, we opted for iteration rather tha
  \end{theorem}
 
 
-Let $0 \leq r \leq m-1$ be the round number. In each round $r$, the algorithm processes $2^r$ polynomials of degree $< 2^{m-r}$, resulting in $2^{r+1}$ polynomials of degree $< 2^{m-r-1}$ at the end of the round. $f(x)$ is represented by $\fbu$, a vector of size $2^m$ that stores the coefficients as described in Section \ref{Sec:Preliminaries}. We use the same vector to store all intermediate polynomials during each round. For example, in round $r$, $\fbu$ stores the concatenation of  the $2^{r+1}$ polynomials. Finally, in round $r = m-1$, the algorithm outputs $2^m$ constant values stored in the vector $\fbu$, representing the evaluations of $f(x)$ over $\theta + W_m$. 
+Let $0 \leq r \leq m-1$ be the round number. In each round $r$, the algorithm processes $2^r$ polynomials of degree $< 2^{m-r}$, resulting in $2^{r+1}$ polynomials of degree $< 2^{m-r-1}$ at the end of the round. $f(x)$ is represented by $\fbu$, a vector of size $2^m$ that stores the coefficients as described in Section \ref{sec:vec_rep}. We use the same vector to store all intermediate polynomials during each round. For example, in round $r$, $\fbu$ stores the concatenation of  the $2^{r+1}$ polynomials. Finally, in round $r = m-1$, the algorithm outputs $2^m$ constant values stored in the vector $\fbu$, representing the evaluations of $f(x)$ over $\theta + W_m$. 
 % Figure \ref{fig:Canopy} illustrates our iterative approach to implementing the Cantor algorithm.
 
 Before presenting the details of our Cantor algorithm implementation, we first explain the selection process of the Cantor basis of length $m$, denoted as $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$. From \cite[Appendix]{Gao2010FFT}, we know that $W_m = \langle \beta_0, \beta_1, \ldots, \beta_{m-1} \rangle$ must be a subspace of the field (or subfield) $\mathbb{F}_{2^{2^\ell}}$. To determine the Cantor special basis for $\mathbb{F}_{2^{2^\ell}}$, we begin by defining a basis $\{\beta_0, \beta_1, \ldots, \beta_{2^\ell-1}\}$ such that $\text{Tr}_{\mathbb{F}_{2^{2^\ell}}/\mathbb{F}_2}(\beta_{2^\ell-1}) = 1$. Then, we recursively determine the remaining basis elements by $\beta_{j-1} = \beta_j^2 + \beta_j$ for $1 \leq j \leq 2^\ell-1$. We then select the first $m$ elements from this basis to construct our Cantor special basis of dimension $m$. In our implementation, we randomly try different values of $\beta_{2^\ell-1}$ and compute its trace. With a probability of $0.5$, this value will have a trace of $1$.
@@ -110,7 +110,7 @@ where
 	The number of integers $j$ not exceeding $i$ for which $\binom{i}{j} \not\equiv 0 \pmod{2}$ is $\prod_{k=0}^{t} (i_k + 1)$.
 \end{theorem}
 
-Thus, by the above theorem we conclude that the number of non-zero coefficients in $\mathbb{Z}_{W_{i}}(x)$ equals to $2^{\text{wt}(i)}$, where $\text{wt}(i)$ denotes the Hamming weight  of $i$, i.e., the number of bits equal to $1$. Since the number of non-zero coefficients in most vanishing polynomials is considerably less than its degree (i.e., $2^{i}$), we avoid using vectorial representation of univariate polynomials described in Section \ref{Sec:Preliminaries} for these polynomials. Otherwise the polynomial division algorithm would require excessive addition operation on zero coefficients.
+Thus, by the above theorem we conclude that the number of non-zero coefficients in $\mathbb{Z}_{W_{i}}(x)$ equals to $2^{\text{wt}(i)}$, where $\text{wt}(i)$ denotes the Hamming weight  of $i$, i.e., the number of bits equal to $1$. Since the number of non-zero coefficients in most vanishing polynomials is considerably less than its degree (i.e., $2^{i}$), we avoid using vectorial representation of univariate polynomials described in Section \ref{sec:vec_rep} for these polynomials. Otherwise the polynomial division algorithm would require excessive addition operation on zero coefficients.
 
 To efficiently represent the vanishing polynomials, we store the index number of the coefficients in the reverse order. Specifically, let $\zbu_i$ represent $\mathbb{Z}_{W_{i}}(x) = \sum_{j=0}^{i} c_j x^{2^j}$ in our implementation. We define
 \[
@@ -159,30 +159,53 @@ In round $r$ of the Cantor algorithm, the $2^r$ polynomials $f_{i,r}(x)$, each o
 \end{align*}
 where $\mathbb{Z}_{W{p-1}}(\beta_{p-1}) = 1$. Since $\deg(f_i(x)) < 2\deg(\mathbb{Z}_{W{p-1}}(x))$, we reduce the two divisions required for each $f_i(x)$ to a single division by $\mathbb{Z}_{W{p-1}}(x)$, and then compute the remainders of the original divisions accordingly.
 
-% \begin{proposition}\label{proposition:polynomial_division}
-	%     Let \( f(x) \) and \( g(x) \) be polynomials such that \( \deg(f) < 2^m \) and \( \deg(g) = 2^{m-1} \). Suppose that dividing \( f(x) \) by \( g(x) \) yields the quotient \( q(x) \) and the remainder \( r(x) \), so that
-	%     $
-	%     f(x) = g(x) q(x) + r(x).
-	%     $
-	%     Let \( c \) be a constant, and let \( q'(x) \) and \( r'(x) \) be the quotient and remainder when dividing \( f(x) \) by \( g(x) + c \). Then,
-	%     $
-	%     q'(x) = q(x), \quad \text{and} \quad r'(x) = r(x) - c\, q(x). 
-	%     $
-	% \end{proposition}
-
+ \begin{proposition}\label{proposition:polynomial_division}
+	     Let \( f(x) \) and \( g(x) \) be polynomials such that \( \deg(f) < 2^m \) and \( \deg(g) = 2^{m-1} \). Suppose that dividing \( f(x) \) by \( g(x) \) yields the quotient \( q(x) \) and the remainder \( r(x) \), so that
+	     $
+	     f(x) = g(x) q(x) + r(x).
+	     $
+	     Let \( c \) be a constant, and let \( q'(x) \) and \( r'(x) \) be the quotient and remainder when dividing \( f(x) \) by \( g(x) + c \). Then,
+	     $
+	     q'(x) = q(x), \quad \text{and} \quad r'(x) = r(x) - c\, q(x). 
+	     $
+	 \end{proposition}
+\begin{proof}
+	We prove this in two steps:
+	\begin{enumerate}
+		\item According to polynomial division algorithm, \(\deg(q) = \deg(q') = deg(f) - deg(g) < 2^{m-1}\),
+		\item Let  $f(x) = (g(x)+c) q'(x) + r'(x)$, then
+		\begin{align*}
+			(g(x)+c) q'(x) + r'(x) &= g(x) q(x) + r(x)\\
+			\implies g(x)(q'(x) - q(x)) &= r(x) - r'(x) - cq'(x).
+		\end{align*}
+	\end{enumerate}     
+	Now, assume the opposite, that is, \( q'(x) \neq q(x) \). This implies \( q'(x) - q(x) \neq 0 \), meaning \( \deg(q'(x) - q(x)) \geq 0 \). Since \( g(x) \) divides \( g(x)(q'(x) - q(x)) \), the degree of the right-hand side \( r(x) - r'(x) - c q'(x) \) must be at least \( \deg(g) \).
+	However, by the polynomial division algorithm, \( \deg(r) < \deg(g) \) and \( \deg(r') < \deg(g) \), and according to step 1, \( \deg(q') < \deg(g) = 2^{m-1} \). Therefore, \( \deg(r(x) - r'(x) - c q'(x)) < \deg(g) \), which is a contradiction.
+	Hence, \( q'(x) = q(x) \), and consequently, \( r'(x) = r(x) - c\, q(x) \).
+\end{proof}
 
 
 Since the coefficients in $\mathbb{Z}_{W_{p-1}}(x)$ are in $\mathbb{F}_2$, division by $\mathbb{Z}_{W_{p-1}}(x)$ requires only additions. In the division algorithm, the dividend polynomial, denoted as $f_{i,r}(x)$, is added to scaled degree-shifts of $\mathbb{Z}_{W_{p-1}}(x)$. However, we eliminate the need for degree shifts by using the reversed index order in $\zbu_i$, which represents the distance of each non-zero coefficient from the highest degree (i.e., $2^p$). 
 
-Dividing \( f_{i,r}(x) \), a polynomial of degree $< 2^p$, by \( \mathbb{Z}_{W_{p-1}}(x) \) yields the quotient \( q_{i,r}(x) \) and the remainder \( r_{i,r}(x) \), each with degree $< 2^{p-1}$. Let $\fbu_{i,r}$ represent the $(i+1)$-th sub-vector of $2^p$ elements in the vector $\fbu$ at the beginning of round $r$. This sub-vector stores the coefficients of \( f_{i,r}(x) \), ordered from the constant term to the highest degree term. Our polynomial division algorithm begins with the coefficient of the highest degree term in $\fbu_{i,r}$ and subtracts that coefficient from the lower-degree coefficients, spaced by distances determined by $\zbu_i$. Since $\zbu_i$ does not include zero, the coefficient of the highest degree term remains unaffected. In the next round of the polynomial division, the algorithm repeats this process with the second highest degree term. After $2^{p-1}$ rounds, the higher-degree (right) half of $\fbu_{i,r}$ stores the coefficients of \( q_{i,r}(x) \), while the lower-degree (left) half stores the coefficients of \( r_{i,r}(x) \). Then, 
-% given Proposition \ref{proposition:polynomial_division}, 
-the algorithm processes inputs to the next round 
+\begin{figure}[tbh]
+	\centering
+	\includegraphics[width=0.75\linewidth]{Figures/Division.jpg}
+	\caption{Computing the polynomials for the next round from the outputs of dividing \( f_{i,r}(x) \) (of degree \( < 8 \)) by \( \mathbb{Z}_{W_{p-1}} \), represented by \( \zbu_{p-1} \). %This figure separates the computation of \( f_{2i,r+1}(x) \) from the division algorithm, despite the actual implementation.
+	}  
+	\label{fig:division}
+\end{figure}
+
+Dividing \( f_{i,r}(x) \), a polynomial of degree $< 2^p$, by \( \mathbb{Z}_{W_{p-1}}(x) \) yields the quotient \( q_{i,r}(x) \) and the remainder \( r_{i,r}(x) \), each with degree $< 2^{p-1}$. Let $\fbu_{i,r}$ represent the $(i+1)$-th sub-vector of $2^p$ elements in the vector $\fbu$ at the beginning of round $r$. This sub-vector stores the coefficients of \( f_{i,r}(x) \), ordered from the constant term to the highest degree term. Our polynomial division algorithm begins with the coefficient of the highest degree term in $\fbu_{i,r}$ and subtracts that coefficient from the lower-degree coefficients, spaced by distances determined by $\zbu_i$. Since $\zbu_i$ does not include zero, the coefficient of the highest degree term remains unaffected. In the next round of the polynomial division, the algorithm repeats this process with the second highest degree term. After $2^{p-1}$ rounds, the higher-degree (right) half of $\fbu_{i,r}$ stores the coefficients of \( q_{i,r}(x) \), while the lower-degree (left) half stores the coefficients of \( r_{i,r}(x) \). 
+Then, given Proposition \ref{proposition:polynomial_division}, the algorithm processes the outputs of the polynomial division, which serve as inputs to the next round, as follows:
 \begin{align*}
 	f_{2i,r+1}(x) &= r_{i,r}(x) - \mathbb{Z}_{W_{p-1}}(\theta_{i,r})\, q_{i,r}(x),\ \text{and}\\
 	f_{2i+1,r+1}(x) &= f_{2i,r+1}(x) - q_{i,r}(x),
 \end{align*}
-where $\mathbb{Z}_{W_{p-1}}(\theta_{i,r})$ denotes the evaluation of the vanishing polynomial at $\theta_{i,r}$. Figure \ref{fig:division} in Appendix~\ref{sec:ap-additional_algorithms} illustrates the computation of the polynomials for the next round from the quotient and remainder in each round. Our polynomial division algorithm implementation integrates the computation of the quotient, remainder, and the polynomials for the next round. 
+where $\mathbb{Z}_{W_{p-1}}(\theta_{i,r})$ denotes the evaluation of the vanishing polynomial at $\theta_{i,r}$. Figure \ref{fig:division} illustrates the computation of the polynomials for the next round from the quotient and remainder in each round. Our polynomial division algorithm implementation integrates the computation of the quotient, remainder, and the polynomials for the next round. 
 % This integration is facilitated by the feasibility of computing the coefficients of \( f_{2i,r+1}(x) \) while determining the coefficients of \( q(x) \) sequentially, from the highest degree term to the constant term. However, the computation of \( f_{2i+1,r+1}(x) \) cannot be integrated into the division algorithm because the coefficients in \( r(x) \) are not computed sequentially; rather, they are updated selectively throughout the rounds of the algorithm. The algorithm is detailed in Algorithm \ref{Algo:Polynomial Division}.
+
+
+
 
 \begin{algorithm}[h]
 	\caption{Polynomial Division ($\fbu_\text{in}$, $\zbu_{p-1}$, $\mathbb{Z}_{W_{p-1}}(\theta_{i,r})$, $p$, $i$)}
@@ -226,14 +249,15 @@ The Canopy module, described in the next section, is responsible for providing a
 % The only repetitive operation of the Cantor algorithm is transforming an input polynomial of degree \( < 2^p \) into two polynomials, each with a degree \( < 2^{p-1} \), where $p=m-r$ in round $r$. This operation is repeated on the resulting polynomials over multiple rounds until the degree of the output polynomial becomes zero. In the previous section, we described how a polynomial should be transformed into two polynomials required for the next round via our polynomial division algorithm (Algorithm \ref{Algo:Polynomial Division}). However, the inputs for that algorithm will be determined by the module presented in this section.
 % \textit{Canopy} is the module for performing the primary operation of the Cantor algorithm. 
 % The module name is chosen to reflect both its function as the Cantor Operator (CanOP) and its hierarchical structure, where each Canopy module layers over its successor. 
-Cantor algorithm is implemented by Canopy modules of varying input sizes $2^p$ and indices $i$, denoted as $\mathsf{Canopy}_{p, i}$. The index $i$ indicates the module number in each round and determines the offset from the start of the $\fbu$ vector, where the coefficients of the input polynomial begin with $\mathsf{offset} = i2^p$.
+Cantor algorithm is implemented by Canopy modules of varying input sizes $2^p$ and indices $i$, denoted as $\mathsf{Canopy}_{p, i}$. The index $i$ indicates the module number in each round and determines the offset from the start of the $\fbu$ vector, where the coefficients of the input polynomial begin with $\mathsf{offset} = i2^p$. Figure \ref{fig:Canopy} illustrates our iterative approach of using Canopy modules to implementing the Cantor algorithm.
 
-% \begin{figure}
-	%     \centering
-	%     \includegraphics[width=0.8\linewidth]{Figures/Canopy.jpg}
-	%     \caption{\small Cantor FFT algorithm of length $n = 2^3$ which evaluates $f(x)\in\mathbb{F}[x]$ of degree $<8$ over $\theta$ + $W_3$, where $\theta \in \mathbb{F}_{2^k}$ and $W_3$ is the Cantor special basis.}
-	%     \label{fig:Canopy}
-	% \end{figure}%\vspace{-100pt}
+
+ \begin{figure}
+	     \centering
+	     \includegraphics[width=\linewidth]{Figures/Canopy.jpg}
+	     \caption{\small Cantor FFT algorithm of length $n = 2^3$ which evaluates $f(x)\in\mathbb{F}[x]$ of degree $<8$ over $\theta$ + $W_3$, where $\theta \in \mathbb{F}_{2^k}$ and $W_3$ is the Cantor special basis.}
+	     \label{fig:Canopy}
+	 \end{figure}%\vspace{-100pt}
 
 The $\mathsf{Canopy}_{p, i}$ determines $\theta_{i, r}$ and then evaluate $\mathbb{Z}_{W_{p-1}}(\theta_{i, r})$, which is necessary for running Algorithm~\ref{Algo:Polynomial Division}.  Let Cantor algorithm evaluate  $f(x)$ of degree $< 2^m$ over $\theta + \langle \beta_0 = 1, \beta_1, \ldots, \beta_{m-1} \rangle$.  
 % Here, we describe how to efficiently determine $\theta_{i, r}$ for each $\mathsf{Canopy}_{p, i}$. 
@@ -351,9 +375,36 @@ The storage required to store the precomputed values for the Cantor algorithm of
 $
 \sum_{i=0}^{m-1} \left(2^{\text{wt}(i)} - 1\right)
 $
-integers to store $\mathbf{Z} = (\zbu_0, \zbu_1, \ldots, \zbu_{m-1})$ and $2^m - 1$ field elements to store $\boldsymbol{\Psi} = (\boldsymbol{\psi}_0, \boldsymbol{\psi}_1, \ldots, \boldsymbol{\psi}_{m-1})$, where $\boldsymbol{\psi}_r = ( \psi_{0,r}, \psi_{1,r}, \ldots, \psi_{2^r-1,r} )$. Algorithm \ref{Algo:Cantor_Precomp} in Appendix \ref{sec:ap-additional_algorithms} describes the precomputation algorithm. 
+integers to store $\mathbf{Z} = (\zbu_0, \zbu_1, \ldots, \zbu_{m-1})$ and $2^m - 1$ field elements to store $\boldsymbol{\Psi} = (\boldsymbol{\psi}_0, \boldsymbol{\psi}_1, \ldots, \boldsymbol{\psi}_{m-1})$, where $\boldsymbol{\psi}_r = ( \psi_{0,r}, \psi_{1,r}, \ldots, \psi_{2^r-1,r} )$. Algorithm \ref{Algo:Cantor_Precomp}  describes the precomputation algorithm. 
+
+\begin{algorithm}[h]
+	\caption{Cantor Precomputation ($\theta$, $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$)}
+	\label{Algo:Cantor_Precomp}
+	\begin{algorithmic}[1]
+		\Require $\theta \in \mathbb{F}_{2^k}$ is the affine shift, and $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$ is the Cantor special basis.
+		\Ensure $\mathbf{Z} = (\zbu_0, \zbu_1, \ldots, \zbu_{m-1})$ is a vector of vanishing polynomials,  
+		$\boldsymbol{\Psi} = (\boldsymbol{\psi}_0, \boldsymbol{\psi}_1, \ldots, \boldsymbol{\psi}_{m-1})$,  
+		where $\boldsymbol{\psi}_r = ( \psi_{0,r}, \psi_{1,r}, \ldots, \psi_{2^r-1,r} )$
+		
+		\For{$r = 0$ to $m - 1$}
+		\State $\zbu_i, \mathsf{eval} \gets$ \Call{Vanishing Polynomial}{$m - r - 1$, $\theta$}
+		\For{$i = 0$ to $2^r - 1$}
+		\State $\psi_{i,r} \gets \mathsf{eval}$
+		\For{$j = 0$ to $r - 1$}
+		\State $\psi_{i,r} \gets \psi_{i,r} + i_j \times \beta_{j+1}$
+		\EndFor
+		\EndFor
+		\State $\boldsymbol{\psi}_r \gets ( \psi_{0,r}, \psi_{1,r}, \ldots, \psi_{2^r - 1,r} )$
+		\EndFor
+		
+		\State \Return $\mathbf{Z} \gets (\zbu_0, \zbu_1, \ldots, \zbu_{m-1}),\ \boldsymbol{\Psi} \gets (\boldsymbol{\psi}_0, \boldsymbol{\psi}_1, \ldots, \boldsymbol{\psi}_{m-1})$
+	\end{algorithmic}
+\end{algorithm}
+
+
 
 For a special case where the affine shift $\theta$ is an element of the Cantor special basis, we do not have to pre-compute all $\mathbb{Z}_{W_{p-1}}(\theta_{i, r})$, since these values are only combinations of the cantor basis. In this case we can precompute the lookup table where each store the combinations of subset of Cantor basis elements. 
+
 
 \section{Gao-Mateer Algorithm Building Blocks}\label{Sec:Gao-implementation}
 
@@ -368,10 +419,210 @@ We describe the Gao-Mateer algorithm through two primary modules: the \textsf{Ex
 
 
 
+
 \subsection{Taylor Expansion} \label{sec:Taylor Expansion}
 
-The Taylor expansion algorithm implemented in~\cite{libiop} is described in Algorithm \ref{Algo:TaylorExpansion}, where the input parameter $r$ specifies how many iterations are skipped. 
-% Specifically, the algorithm runs for $m - r - 1$ iterations for the input length of $2^m$. Algorithm \ref{Algo:TaylorExpansion}, on input of size $n = 2^m$ and parameter $r$, involves $2^{m-1}(m - r - 1)$ finite field additions. In the next section, we present our \textsf{Expand} module where we employed an alternative approach, as implemented in \cite{libiop}.
+Let $f(x) = \sum_{i=0}^{m-1}c_ix^i, c_i \in \F_{q}$, $\delta(x)=x^2+x$. We denote $y=\delta(x)$. Then  we may write $f$ as
+\begin{equation}\label{eq:T1}
+	f(x) = f_0(y) + x f_1(y)
+\end{equation}
+Here, $f_i$, $i \in \{0, 1\}$, are polynomials in $\mathbb{F}_{2^k}$ with degree $< 2^{m-1}$. The representation of $f$ by (\ref{eq:T1}) is referred to as the Taylor expansion in \cite{Gao2010FFT}. The polynomials $f_i$ can be obtained iteratively as follows. Let $\fbu = (c_0, \ldots, c_{n-1})$, referred to as the coefficient vector of $f(x)$, where $n = 2^m$, denoted as $f(x)\leftrightarrow \fbu$.   Let $t = {m-2}$, we define a \textit{quadrant concatenation} of  $\fbu$ as 
+$
+\fbu = (\cbu_0, \cbu_1, \cbu_2, \cbu_3)
+$
+where $c_i = (c_{i\cdot 2^{t}}, c_{i\cdot 2^{t} +1}, \ldots, c_{(i+1)\cdot 2^{t}-1})$.
+% \[
+% \begin{array}{ll}
+	%      \cbu_0& =(c_0, c_1, \ldots, c_{2^{t}-1})  \\
+	%      \cbu_1& =(c_{2^t}, c_{2^t+1}, \ldots, c_{2\cdot 2^{t}-1}) \\ 
+	%      \cbu_2& =(c_{2\cdot 2^{t}},  c_{2\cdot 2^{t}+1}, \ldots, c_{3\cdot 2^{t}-1}) \\ 
+	%        \cbu_3& =(c_{3\cdot 2^{t}}, c_{3\cdot 2^{t} +1}, \ldots, c_{4\cdot 2^{t}-1}).  \\ 
+	% \end{array}
+% \]
+In the following, we model the Taylor expansion of $f$ in terms of the concept of $\mathsf{T}_n$ module. 
+The $\mathsf{T}_n$ module operation on $f$ is defined as
+$
+\bbu = (\cbu_0, \cbu_1+\hbu, \hbu, \cbu_3), \mbox{where } \hbu=\cbu_2+\cbu_3.
+$
+From $\bbu=(\bbu_0, \bbu_1, \bbu_2, \bbu_3)$, we have the following result.
+\begin{lemma}\label{le:1}
+	With the above notation, we have   
+	\begin{equation}\label{eq:10}
+		f(x) = g_0(x) + g_1(x)y^{2^t}, \mbox{where }\, y= \delta(x)     
+	\end{equation}
+	where $g_0(x) \leftrightarrow (\bbu_0, \bbu_1)$ and $g_1(x) \leftrightarrow (\bbu_2, \bbu_3)$.
+	% \[
+	% \begin{array}{l}
+		% g_0(x) \leftrightarrow (\bbu_0, \bbu_1)\\
+		% g_1(x) \leftrightarrow (\bbu_2, \bbu_3).
+		% \end{array}
+	% \]
+	
+	% {\color{blue} 
+		% \[
+		% \begin{array}{l}
+			% g_0(x) \leftrightarrow \bbu[2i]\\
+			% g_1(x) \leftrightarrow \bbu[2i+1],
+			% \end{array}
+		% \]
+		% where $i\in[0,m/2)$.
+		% }
+\end{lemma}
+
+
+%$f(x)$ is denoted as follows:
+
+
+
+% \subsection{Algorithm for the Taylor Expansion}
+
+Now, to compute the Taylor expansion of $f(x) \in \mathbb{F}[x]$ of degree $<n = 2^m$, the Taylor expansion of $f(x)$ at $\delta(x)=x^2+x$, denoted as $\mathsf{TE}(f, n, 2)$ can be computed through the Taylor expansions of two polynomials:
+
+\begin{equation}\label{eq:T2}
+	\mathsf{TE}(f, n, 2) = (\mathsf{TE}(g_0, n, 2), \mathsf{TE}(g_1, n, 2)) 
+\end{equation}
+where $g_0$ and $g_1$ are computed in Lemma \ref{le:1} by $\mathsf{T}_n$ module. 
+
+% \begin{algorithm}[h]\label{Algo:Cantor_Precomp}
+	%     \caption{Cantor Precomputation ($\theta$, $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$)}
+	%     \SetAlgoLined
+	%     \KwIn{$\theta \in \mathbb{F}$ is the affine shift, and $\{\beta_0, \beta_1, \cdots, \beta_{m-1}\}$ is the Cantor special basis.}
+	%     \KwOut{$\mathbf{Z} = (\zbu_0, \zbu_1, \ldots, \zbu_{m-1})$ is a vector of vanishing polynomials, $\boldsymbol{\Psi} = (\boldsymbol{\psi}_0, \boldsymbol{\psi}_1, \ldots, \boldsymbol{\psi}_{m-1})$, where $\boldsymbol{\psi}_r = ( \psi_{0,r}, \psi_{1,r}, \ldots, \psi_{2^r-1,r} )$.}
+	
+	
+	%     \For{$r=0$ \KwTo $m-1$}{https://www.mozilla.org/firefox/?utm_medium=firefox-desktop&utm_source=bookmarks-toolbar&utm_campaign=new-users&utm_content=-global
+		%             $\zbu_i, \mathsf{eval} \leftarrow $ Vanishing Polynomial ($m-r-1$ , $\theta$) \\
+		%         \For{$i=0$ \KwTo $2^r-1$}{
+			%             $\psi_{i, r} \leftarrow \mathsf{eval}$\\
+			%             \For{$j=0$ \KwTo $r-1$}{
+				%                 $\psi_{i, r} \leftarrow \psi_{i, r} + i_j \times \beta_{j+1}$
+				%             }
+			%         }
+		%         $\boldsymbol{\psi}_r \leftarrow ( \psi_{0,r}, \psi_{1,r}, \ldots, \psi_{2^r-1,r} )$ \\
+		%     }
+	%     \Return $\mathbf{Z} \leftarrow (\zbu_0, \zbu_1, \ldots, \zbu_{m-1}), \boldsymbol{\Psi} \leftarrow  (\boldsymbol{\psi}_0, \boldsymbol{\psi}_1, \ldots, \boldsymbol{\psi}_{m-1})$.
+	% \end{algorithm}
+
+% Define a recursive process that splits the sequence based on the least significant bit (LSB):
+% \begin{itemize}
+	%     \item Even-index group: Indices where the LSB is 0.
+	%     \item Odd-index group: Indices where the LSB is 1.
+	% \end{itemize}
+
+
+
+% \begin{example}
+	%     \[
+	%     \begin{array}{c}
+		%         \set{0, 1, 2, 3, 4, 5, 6, 7} \\
+		%         \downarrow \text{ Step 1}\\
+		%         \set{0, 2, 4, 6} \quad \set{1, 3, 5, 7} \\
+		%         \downarrow \text{ Step 2}\\
+		%         \set{0, 4} \quad \set{2, 6} \quad \set{1, 5} \quad \set{3, 7} \\
+		%     \end{array}
+	%     \]
+	% \end{example}
+
+
+\begin{theorem} \label{th:even_odd}
+	Let $\ubu=(u_0, u_1, \ldots, u_{n-1})$ be the output at the  recursion $t$ in (\ref{eq:T2}),  then the Taylor expansion of $f$, defined by (\ref{eq:T1}), is given by  
+	\[
+	\begin{array}{l}
+		f_0 \leftrightarrow (u_0, u_2, \ldots, u_{2i}, \ldots, u_{2\lfloor{n/2\rfloor}})\\
+		f_1 \leftrightarrow (u_1, u_3, \ldots, u_{2i+1}, \ldots, u_{2\lfloor{n/2\rfloor}+1}),\\
+	\end{array}
+	\]
+	where $f_0$ and $f_1$, are polynomials each of degree $<\lfloor{n/2\rfloor}=2^{m-1}$.
+\end{theorem}
+
+As described in the above theorem, the polynomials $f_0$ and $f_1$ are constructed by performing an even-odd rearrangement on $\ubu$. Subsequently, as described in Algorithm \ref{Algo:Gao}, the evaluations $\mathsf{TE}(f_0, n/2, 2)$ and $\mathsf{TE}(f_1, n/2, 2)$ also need to be computed and so on their outputs as well. Alternatively, as implemented in \cite{libiop}, instead of performing the even-odd rearrangements, the positions of the coefficients of these two polynomials can be retained within $\ubu$. This allows us to compute a single $\mathsf{TE}(u, n/2, 2)$ on the entire polynomial $u(x)$, represented by $\ubu$, in $t-1$ recursive steps (one fewer recursion than required for $f$). Finally, to account for the skipped even-odd rearrangements, in the last round the resulting vector is rearranged in bit-reversal order defined as follows: 
+
+Define a recursive process that splits the sequence of indices $\set{0, 1, \ldots, 2^n - 1}$ into two groups based on the least significant bit (LSB): the even-index group, containing indices where the LSB is 0, and the odd-index group, containing indices where the LSB is 1. Recursively apply the same splitting process to each group based on the next least significant bit until all groups contain exactly two indices.
+% \noindent Define a recursive process that splits the sequence of indices $\set{0, 1, \ldots, 2^n - 1} $ based on the least significant bit (LSB) as follows: 
+
+% First, separate the indices into two groups:
+%     \begin{itemize}
+	%         \item Even-index group: Indices where the LSB is 0.
+	%         \item Odd-index group: Indices where the LSB is 1.
+	%     \end{itemize}
+
+
+
+\begin{proposition} \label{proposition: bit reversal}
+	The final arrangement of indices, after applying the recursive splitting process, represents the bit-reversal of the original sequence of indices $\set{0, 1, \ldots, 2^n - 1}$.
+\end{proposition}
+
+
+\begin{proof}
+	We will prove this statement using mathematical induction on $n$.
+	
+	For $n = 2$, we have the set of indices $\set{0, 1, 2, 3}$. In binary, the indices are represented as $\set{00_2, 01_2, 10_2, 11_2}$. The recursive splitting based on the least significant bit (LSB) yields:
+	\begin{itemize}
+		\item Even-index group: $\set{0, 2}= \set{00_2, 10_2}$ (LSB = 0)
+		\item Odd-index group: $\set{1, 3}= \set{01_2, 11_2}$ (LSB = 1)
+	\end{itemize}
+	
+	Thus, after splitting, the order is $\set{0, 2, 1, 3}$, which corresponds to the bit-reversal of the binary representations of the original sequence:
+	\[
+	\set{00_2, 01_2, 10_2, 11_2} \quad \text{becomes} \quad \set{00_2, 10_2, 01_2, 11_2}.
+	\]
+	Hence, the base case holds for $n=2$.
+	
+	Now, assume that for some $n = k \geq 2$, the recursive process results in a bit-reversal permutation for the sequence of indices $\set{0, 1, \ldots, 2^k - 1}$. That is, after the recursive splitting, the sequence of indices corresponds to the bit-reversal of their binary representations.
+	
+	We need to show that the result holds for $n = k+1$.
+	
+	Consider the sequence $\set{0, 1, \ldots, 2^{k+1} - 1}$ of $2^{k+1}$ elements. This sequence can be split into two groups based on the least significant bit (LSB):
+	\begin{itemize}
+		\item Even-index group $E$: Indices where the LSB is 0, i.e., 
+		\[
+		E = \set{0, 2, 4, \ldots, 2^{k+1} - 2}.
+		\]
+		\item Odd-index group $O$: Indices where the LSB is 1, i.e., 
+		\[
+		O = \set{1, 3, 5, \ldots, 2^{k+1} - 1}.
+		\]
+	\end{itemize}
+	
+	Note that each group $E$ and $O$ contains $2^k$ indices. By the inductive hypothesis, the recursive splitting within each group $E$ and $O$ will result in the bit-reversal of the indices within that group.
+	
+	After recursively applying the bit-reversal process to both groups, the final sequence of indices is formed by first placing the indices from the even group $E$ (which are already in bit-reversed order) followed by the indices from the odd group $O$ (also in bit-reversed order).
+	\begin{itemize}
+		\item Indices in $E$ correspond to even indices from the original sequence $\set{0, 1, \ldots, 2^{k+1} - 1}$.
+		\item Indices in $O$ correspond to odd indices from the original sequence $\set{0, 1, \ldots, 2^{k+1} - 1}$.
+	\end{itemize}
+	
+	Note that the binary representations of the indices in $E$ all end in $0$, and those in $O$ all end in $1$. When these groups are combined back together, the resulting sequence is formed by first appending the bit-reversed even-index group $E$, followed by the bit-reversed odd-index group $O$.
+	
+	Since the even-index group $E$ and odd-index group $O$ are already in bit-reversed order, combining them results in the bit-reversal of the entire sequence $\set{0, 1, \ldots, 2^{k+1} - 1}$.
+	
+	Hence, by the principle of mathematical induction, the result holds for all $n$.
+	
+	% \[
+	% \begin{array}{c}
+		%     S_0 = \set{0, 1, 2, \ldots, 2^{n}-3, 2^{n}-2, 2^{n}-1} \\
+		%     \downarrow \text{ Step 1} \\
+		%     S_{1,0}= \set{0, 2, \ldots, 2^{n}-2} = \set{i \in S_0 \mid i \equiv 0 \, (\text{mod } 2)} \quad S_{1,1}=\set{1, 3, \ldots, 2^{n}-1}= \set{i \in S_0 \mid i \equiv 1 \, (\text{mod } 2)} \\
+		%     \downarrow \text{ Step 2}\\
+		%     S_{2,0} =\set{i \in S_{1,0} \mid i \equiv 0 \, (\text{mod } 2^2)} \quad S_{2,1} =\set{i \in S_{1,0} \mid i \equiv 2 \, (\text{mod } 2^2)} \quad S_{2,2} =\set{i \in S_{1,1} \mid i \equiv 1 \, (\text{mod } 2^2)} \quad S_{2,3} =\set{i \in S_{1,1} \mid i \equiv 3 \, (\text{mod } 2^2)} \\
+		%     \downarrow \\
+		%     \vdots \\
+		%     \set{0, 2^i, \ldots, 2^n-2^i} \quad 
+		% \end{array}
+	% \]
+\end{proof}
+
+
+
+Figure \ref{fig:gao-expand} compares the two approaches for computing the Taylor expansion in each round of the \textsf{Expand} module, as described in the next section. We present the alternative Taylor Expansion algorithm using an iterative approach in Algorithm \ref{Algo:TaylorExpansion}, where the input parameter $r$ specifies how many iterations are skipped from the end of the algorithm. Specifically, the algorithm runs for $m - r - 1$ iterations for the input length of $2^m$. Algorithm \ref{Algo:TaylorExpansion}, on input of size $n = 2^m$ and parameter $r$, involves $2^{m-1}(m - r - 1)$ finite field additions. In the next section, we present our \textsf{Expand} module where we employed an alternative approach, as implemented in \cite{libiop}.
+
+
+
+
+
+
+
+
 
 
 
@@ -411,7 +662,32 @@ As discussed in Section \ref{sec:Taylor Expansion}, we omit even-odd rearrangeme
 % which alter the order of the coefficients in the polynomials embedded in $\fbu$, 
 so the coefficients of terms with the same degree are placed next to each other. This allows \textsf{Expand} to multiply consecutive elements by the same scaling factor. 
 
-In the last round of the \textsf{Expand} module, $\fbu$ is rearranged in bit-reversal order. Let the bit-reversed index of $j$ be denoted as $j\text{-}\mathsf{rev}$. During the bit-reversal rearrangement process, the elements \( c_j \) where \( j = j\text{-}\mathsf{rev} \) are not swapped. These elements are referred to as fixed elements. For an input of length \( n = 2^m \), the number of fixed elements is \( 2^{\lceil m/2 \rceil} \). Consequently, the algorithm requires \( 6 \times \frac{2^m - 2^{\lceil m/2 \rceil}}{2} \) memory accesses, as each swap involves 3 memory reads and 3 memory writes. Algorithm \ref{Algo:Expand} details the \textsf{Expand} module. The Bit-Reversal Rearrangement algorithm is described in Algorithm \ref{Algo:Bit Reversal} in Appendix \ref{sec:ap-additional_algorithms}.
+In the last round of the \textsf{Expand} module, $\fbu$ is rearranged in bit-reversal order. Let the bit-reversed index of $j$ be denoted as $j\text{-}\mathsf{rev}$. During the bit-reversal rearrangement process, the elements \( c_j \) where \( j = j\text{-}\mathsf{rev} \) are not swapped. These elements are referred to as fixed elements. For an input of length \( n = 2^m \), the number of fixed elements is \( 2^{\lceil m/2 \rceil} \). Consequently, the algorithm requires \( 6 \times \frac{2^m - 2^{\lceil m/2 \rceil}}{2} \) memory accesses, as each swap involves 3 memory reads and 3 memory writes. Algorithm \ref{Algo:Expand} details the \textsf{Expand} module. The Bit-Reversal Rearrangement algorithm is described in Algorithm \ref{Algo:Bit Reversal}.
+
+
+\begin{algorithm}[h]
+	\caption{\textsf{Bit Reverse Rearrangement} ($\fbu_\text{in}$)}
+	\label{Algo:Bit Reversal}
+	\begin{algorithmic}[1]
+		\Require $\fbu_\text{in} = (c_0, c_1, \ldots, c_j, \ldots, c_{n-1})$, where $n = 2^m$, and each index $j$ is represented as an $m$-bit integer.
+		\Ensure $\fbu_\text{out}$
+		
+		\For{$j = 0$ to $n - 1$}
+		\State $j\text{-}\mathsf{rev} \gets 0$
+		\State $j_{\text{tmp}} \gets j$
+		\For{$k = 0$ to $m - 1$}
+		\State $j\text{-}\mathsf{rev} \gets (j\text{-}\mathsf{rev} \ll 1) \ \text{OR} \ (j_{\text{tmp}} \ \text{AND} \ 1)$
+		\State $j_{\text{tmp}} \gets j_{\text{tmp}} \gg 1$
+		\EndFor
+		\If{$j < j\text{-}\mathsf{rev}$}
+		\State Swap $c_j$ and $c_{j\text{-}\mathsf{rev}}$
+		\EndIf
+		\EndFor
+		
+		\State \Return $\fbu_\text{out} \gets (c_0, c_1, \ldots, c_{n-1})$
+	\end{algorithmic}
+\end{algorithm}
+
 
 % Next, we introduce the \textsf{Aggregate} module, the second building block of the Gao-Mateer algorithm.
 
@@ -486,16 +762,62 @@ In the last round of the \textsf{Expand} module, $\fbu$ is rearranged in bit-rev
 
 % employs the Taylor expansion algorithm to divide $2^r$ polynomials of degree $< 2^{m-r}$ into $2^{r+1}$ smaller polynomials of degree $<2^{m-r-1}$. 
 
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{0.9\linewidth} % Correct usage of width specifier
+		\centering
+		\includegraphics[width=0.9\linewidth]{Figures/Gao_expand.pdf} 
+		\caption{ Original Approach: Groups even and odd indices after each Taylor expansion}
+		\label{fig:gao-expand-old}
+	\end{subfigure}
+	\vspace{1em} % Adjust the space between figures if necessary
+	\begin{subfigure}[b]{0.9\linewidth} % Correct usage of width specifier
+		\centering
+		\includegraphics[width=0.9\linewidth]{Figures/Gao_expand_binary.pdf} 
+		\caption{ Alternative Approach: Rearranges the vector in bit-reversal order in the final round}
+		\label{fig:gao-expand-binary}
+	\end{subfigure}
+	
+	\caption[The \textsf{Expand} Module in the Gao FFT Algorithm]{The \textsf{Expand} module in the Gao FFT algorithm of length $n=2^3$, which evaluates a polynomial $f(x) \in \mathbb{F}[x]$ of degree $< 8$ over $\theta + W_3$, where $W_3 = \langle \beta_0, \beta_1, \beta_2 \rangle$. 
+		In Figure (a), the \textsf{Expand} module groups even and odd indices after each Taylor expansion. In contrast, Figure (b) skips these rearrangements by using one $\textsf{T}_8$ module instead of two $\textsf{T}_4$ modules in round $r=1$ then performs the bit-reversal in the final round. 
+		 Additionally, in this figure, $\beta_{0,2} = \beta_2$, and $\beta_{1,1} = (\beta_1 \beta_2^{-1})^2 -  (\beta_1 \beta_2^{-1})$. Given that $\beta_{1,0} = (\beta_0 \beta_1^{-1})^2 -  (\beta_0 \beta_1^{-1})$, we can compute $\beta_{2,0} = (\beta_{1,0} \beta_{1,1}^{-1})^2 -  (\beta_{1,0} \beta_{1,1}^{-1})$.
+	}
+	
+	\label{fig:gao-expand}
+\end{figure}
 
+\clearpage
 \subsection{Aggregate Module}
 
-The \textsf{Aggregate} module combines $2^r$ adjacent elements in $\fbu$ during round $r$, where $0 \leq r \leq m-1$. Let $\{\eta_0, \eta_1, \ldots, \eta_{2^{r}-1} \}$ denote the elements in the affine subspace $\theta_r + \langle \gamma_{r,0}, \ldots, \gamma_{r,r-1} \rangle$ provided in the \textsf{Expand} module. At each round $r$, it computes those elements by spanning the mentioned affine subspace, which requires a total of $\sum_{i=0}^{r-1} 2^i = 2^r -1$ finite field additions and $2^r + r$ memory accesses: $r$ memory reads for retrieving the $\gamma_i$s and $2^r$ memory writes for storing the $\eta_k$s. The algorithm for computing $\eta_k$s is described in Algorithm \ref{Algo:Span} in Appendix \ref{sec:ap-additional_algorithms}.
+The \textsf{Aggregate} module combines $2^r$ adjacent elements in $\fbu$ during round $r$, where $0 \leq r \leq m-1$. Let $\{\eta_0, \eta_1, \ldots, \eta_{2^{r}-1} \}$ denote the elements in the affine subspace $\theta_r + \langle \gamma_{r,0}, \ldots, \gamma_{r,r-1} \rangle$ provided in the \textsf{Expand} module. At each round $r$, it computes those elements by spanning the mentioned affine subspace, which requires a total of $\sum_{i=0}^{r-1} 2^i = 2^r -1$ finite field additions and $2^r + r$ memory accesses: $r$ memory reads for retrieving the $\gamma_i$s and $2^r$ memory writes for storing the $\eta_k$s. The algorithm for computing $\eta_k$s is described in Algorithm \ref{Algo:Span}.
 
 % Algorithm \ref{Algo:Aggregate} describes the textsf{Aggregate} module te\tex. 
 
+\begin{algorithm}[htb]
+	\caption{\textsf{Span} ($\mathbf{G} = \{\gamma_0, \ldots, \gamma_{r-1}\}, \theta$)}
+	\label{Algo:Span}
+	\begin{algorithmic}[1]
+		\Require $\mathbf{G} = \{\gamma_0, \ldots, \gamma_{r-1}\}$ is a linearly independent set over $\mathbb{F}_2$, and $\theta \in \mathbb{F}_{2^k}$ is an affine shift.
+		\Ensure $\{\eta_0, \eta_1, \ldots, \eta_{2^r - 1}\} = \theta + \langle \gamma_0, \ldots, \gamma_{r-1} \rangle$
+		
+		\State $\eta_0 \gets \theta$
+		
+		\If{$\mathbf{G} = \emptyset$}
+		\State \Return $\{\eta_0\}$
+		\EndIf
+		
+		\For{$i = 0$ to $r - 1$}
+		\For{$k = 0$ to $2^i - 1$}
+		\State $\eta_{k + 2^i} \gets \eta_k + \gamma_i$
+		\EndFor
+		\EndFor
+		
+		\State \Return $\{\eta_0, \eta_1, \ldots, \eta_{2^r - 1}\}$
+	\end{algorithmic}
+\end{algorithm}
 
 
-\begin{algorithm}
+\begin{algorithm}[htb]
 	\caption{\textsf{Aggregate} ($\fbu_\text{in}, \boldsymbol{\Gamma}, \boldsymbol{\theta}$)}
 	\label{Algo:Aggregate}
 	\begin{algorithmic}[1]
@@ -600,10 +922,67 @@ Thus, by using Cantor special basis in the Gao-Mateer algorithm, we can efficien
 In this section, we introduce two levels of precomputation. The first level precomputes the set $\boldsymbol{\beta} = \{\beta_{0, m-1}, \ldots, \beta_{r, m-r-1}, \ldots, \beta_{m-1, 0} \}$, which is essential for determining the scaling factors. Additionally, it precomputes  $\boldsymbol{\Gamma} = (\mathbf{G}_0 = \emptyset, \mathbf{G}_1,  \ldots, \mathbf{G}_{m-1})$ and $\boldsymbol{\theta} = (\theta_0, \ldots, \theta_{m-1})$ required by the \textsf{Aggregate} module, initially provided by the \textsf{Expand} module. This precomputation requires $m$ finite field elements for $\boldsymbol{\beta}$ and $\boldsymbol{\theta}$, along with $\sum_{i=0}^{m-1} i = m(m-1)/2$ finite field elements for $\boldsymbol{\Gamma}$. Consequently, this algorithm stores a total of $(m^2+3m)/2$  finite field elements. 
 For the  variant of the Gao-Mateer algorithm described in Section~\ref{Sec:Gao-optimization-Cantor_basis}, the scaling operation is omitted, and each basis $\mathbf{G}_r$ is defined as $\{\beta_0, \beta_1, \ldots, \beta_{r-1}\}$. Therefore, this level of precomputation is not applicable for that.
 
+\begin{algorithm}[htb]
+	\caption{\small Gao-Mateer Precomputation Level 1 ($\theta$, $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$)}
+	\label{Algo:Gao_Precmp_lvl1}
+	\begin{algorithmic}[1]
+		\Require $\theta \in \mathbb{F}_{2^k}$ is the affine shift, and $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$ is a linearly independent set over $\mathbb{F}_2$
+		\Ensure $\boldsymbol{\beta} = \{\beta_{0, m-1}, \ldots, \beta_{r, m-r-1}, \ldots, \beta_{m-1, 0} \}$,  
+		$\boldsymbol{\theta} = (\theta_0, \ldots, \theta_{m-1})$,  
+		$\boldsymbol{\Gamma} = (\mathbf{G}_0 = \emptyset, \mathbf{G}_1, \ldots, \mathbf{G}_{m-1})$
+		
+		\State $\beta_{0, m-1} \gets \beta_{m-1}$
+		\State $\mathbf{G}_0 \gets \emptyset$
+		
+		\For{$r = 0$ to $m - 2$}
+		\For{$i = 0$ to $m - r - 2$}
+		\State $\gamma_{m - r - 1, i} \gets \beta_{r, i} \times \beta_{r, m - r - 1}^{-1}$
+		\State $\beta_{r + 1, i} \gets \gamma_{m - r - 1, i}^2 + \gamma_{m - r - 1, i}$
+		\EndFor
+		\State $\mathbf{G}_{m - r - 1} \gets (\gamma_{m - r - 1, 0}, \ldots, \gamma_{m - r - 1, m - r - 2})$
+		\State $\theta_{m - r - 1} \gets \theta \times \beta_{r, m - r - 1}^{-1}$
+		\State $\theta \gets \theta_{m - r - 1}^2 + \theta_{m - r - 1}$
+		\EndFor
+		
+		\State \Return $\boldsymbol{\beta} = \{\beta_{0, m-1}, \ldots, \beta_{r, m-r-1}, \ldots, \beta_{m-1, 0} \}$,  
+		$\boldsymbol{\theta} = (\theta_0, \ldots, \theta_{m-1})$,  
+		$\boldsymbol{\Gamma} = (\mathbf{G}_0 = \emptyset, \mathbf{G}_1, \ldots, \mathbf{G}_{m-1})$
+	\end{algorithmic}
+\end{algorithm}
+
+
 The second level of precomputation precomputes the powers of the actual scaling factors. Moreover, instead of storing the basis $\mathbf{G}_r$, it precomputes all elements in each affine subspace $\theta_r + \langle \gamma_{r,0}, \ldots, \gamma_{r,r-1} \rangle$. This requires storing $\sum_{r=0}^{m-1} (2^{m-r} - 1) = 2^{m+1} - m - 2$ finite field elements for all scaling factors stored in $\boldsymbol{\Psi} = (\boldsymbol{\psi}_0, \ldots, \boldsymbol{\psi}_{m-1})$ where $\boldsymbol{\psi}_r = (\psi_{r,1}, \ldots,   \psi_{r,2^{m-r}-1})$ and $\psi_{r,d} = \beta_{r, m-r-1}^d$. 
 Also, it stores $\sum_{r=0}^{m-1} 2^r = 2^m - 1$ finite field elements for all computed elements stored in $\mathbf{H} = (\boldsymbol{\eta}_0, \ldots, \boldsymbol{\eta}_{m-1})$, where $\boldsymbol{\eta}_r = \{\eta_0, \ldots, \eta_{2^r-1}\}$ are elements in $\theta_r + \langle \gamma_{r,0}, \ldots, \gamma_{r,r-1} \rangle$. Consequently, this algorithm stores a total of $3 \cdot 2^m - m - 3$ finite field elements. For the optimized variant described in Section~\ref{Sec:Gao-optimization-Cantor_basis}, the scaling factor is not required, and we only need to obtain the elements in $\theta + \langle\beta_0, \beta_1, \ldots, \beta_{m-1}\rangle$, which equals $2^m$ finite field elements.
 
-Algorithms~\ref{Algo:Gao_Precmp_lvl1} and \ref{Algo:Gao_Precmp_lvl2} in Appendix \ref{sec:ap-additional_algorithms} summarize those precomputations.
+\begin{algorithm}[htb]
+	\caption{\small Gao-Mateer Precomputation Level 2 ($\theta$, $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$)}
+	\label{Algo:Gao_Precmp_lvl2}
+	\begin{algorithmic}[1]
+		\Require $\theta \in \mathbb{F}_{2^k}$ is the affine shift, and $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$ is a linearly independent set over $\mathbb{F}_2$
+		\Ensure $\boldsymbol{\Psi} = (\boldsymbol{\psi}_0, \ldots, \boldsymbol{\psi}_{m-1})$,  
+		$\mathbf{H} = (\boldsymbol{\eta}_0, \ldots, \boldsymbol{\eta}_{m-1})$,  
+		where each $\boldsymbol{\eta}_r = \{\eta_0, \ldots, \eta_{2^r-1}\}$ is the output of \Call{Span}{$\mathbf{G}_r, \theta_r$}
+		
+		\State $\boldsymbol{\beta}, \boldsymbol{\theta}, \boldsymbol{\Gamma} \gets$ \Call{Gao Precomputation Level 1}{$\theta$, $\{\beta_0, \ldots, \beta_{m-1}\}$}
+		
+		\For{$r = 0$ to $m - 1$}
+		\State $\psi_{r,0} \gets 1$ \Comment{$\psi$ is the scaling factor of round $r$}
+		\For{$j = 1$ to $2^{m - r} - 1$}
+		\State $\psi_{r,j} \gets \psi_{r,j - 1} \times \beta_{r, m - r - 1}$
+		\EndFor
+		\State $\boldsymbol{\psi}_r \gets (\psi_{r,1}, \ldots, \psi_{r,2^{m - r} - 1})$ \Comment{Note: $\psi_{r,0} = 1$ is skipped}
+		\State $\boldsymbol{\eta}_r \gets$ \Call{Span}{$\mathbf{G}_r, \theta_r$}
+		\EndFor
+		
+		\State $\boldsymbol{\Psi} \gets (\boldsymbol{\psi}_0, \ldots, \boldsymbol{\psi}_{m - 1})$
+		\State $\mathbf{H} \gets (\boldsymbol{\eta}_0, \ldots, \boldsymbol{\eta}_{m - 1})$
+		
+		\State \Return $\boldsymbol{\Psi}$, $\mathbf{H}$
+	\end{algorithmic}
+\end{algorithm}
+
+
+Algorithms~\ref{Algo:Gao_Precmp_lvl1} and \ref{Algo:Gao_Precmp_lvl2} summarize those precomputations.
 
 
 \section{Aurora FFT Complexity Analysis} \label{Sec:FFT_Calls_in_Aurora}
@@ -648,7 +1027,6 @@ Let $\{\beta_0, \beta_1, \dots, \beta_{k-1}\}$ represent basis elements of $\mat
 \subsection{FFT/IFFT Calls}
 Table \ref{tab:fftcalls} summarizes the FFT and IFFT calls for computing the codewords in Table \ref{tab:codewords}. Virtual oracles are used for consistency checks, and are not included in the random combination of codewords input to the FRI protocol.
 
-\vspace{-2em}
 \begin{table}
 	\centering
 	\caption{ The FFT and IFFT calls in the Aurora zkSNARK protocol}
@@ -714,49 +1092,115 @@ Table \ref{tab:fftcalls} summarizes the FFT and IFFT calls for computing the cod
 
 
 
+\section{Complexity Analysis and Benchmarking}\label{Sec:ComplexityAnalysis}
+In this section, we provide a comprehensive comparison of the Cantor and the Gao-Mateer algorithms, along with their respective variants. The short names for these algorithms are summarized in Table \ref{tab:alg_shortnames}, and will be referenced throughout this section for clarity.  
 
 
+\begin{table}[h]
+	\centering
+	\caption{Short names for the algorithms used in the comparison.}
+	% \renewcommand{\arraystretch}{1.3}
+	\setlength{\tabcolsep}{8pt} % Adjusted column spacing
+%	\resizebox{0.9\textwidth}{!}{
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{Name} & \textbf{Description} \\
+			\midrule
+			Cantor & Cantor Algorithm  [Section \ref{Sec:Cantor Implementation}]\\
+			Cantor PC & Cantor Algorithm with precomputation [Section \ref{sec:cantor_precmp}] \\
+			GM & Gao-Mateer algorithm (implemented  libiop \cite{libiop}) \\
+			GM PCL1 & Gao-Mateer algorithm with level 1 precomputation [Section \ref{sec:gao-precmp}] \\
+			GM PCL2& Gao-Mateer algorithm with level 2 precomputation [Section \ref{sec:gao-precmp}] \\
+			GM CO & Gao-Mateer algorithm using Cantor Basis (Cantor Optimized) \\
+			GM CO PCL2& Gao-Mateer algorithm using Cantor Basis with level 2 precomputation \\
+			\bottomrule
+		\end{tabular}
+%	}
+	\label{tab:alg_shortnames}
+\end{table}
+
+Table \ref{tab:FFTcomparisons} presents the number of additions and multiplications for the precomputed variant of the FFT algorithms, while Table \ref{tab:precmp_comparison} compares the space requirements of each precomputation method. Figure~\ref{fig:sub_parts_normalized} illustrates the contribution of each sub-algorithm in the Gao-Mateer FFT implementation from \cite{libiop}. The basis computations, which are precomputed in GM PCL1, require fewer resources as \( m \) increases. In contrast, the computational cost of bit-reversal rearrangement and Taylor expansion grows more rapidly for larger \( m \), significantly impacting the overall FFT runtime.
 
 
+\begin{table}[h]
+	\centering
+	\caption{Comparison of the number of additions and multiplications}
+	\renewcommand{\arraystretch}{1.5}  % Adjust the value to control the row height (default is 1.0)
+	{
+		\begin{tabular}{lcc}
+			\toprule
+			\textbf{Name} &  \textbf{\# Additions} & \textbf{\# Multiplications} \\
+			\midrule
+			% Cantor  & & \\
+			% \hline
+			Cantor PC & $\frac{1}{2} n\log_2 n + \frac{1}{2}n\sum_{r=0}^{\log_2 (n)-1} 2^{\text{wt}(r)}$  & $\frac{1}{2} n\log_2 n$ \\
+%			\hline
+			% GM & & \\
+			% \hline
+			% GM PCL1 & & \\
+			% \hline
+			GM PCL2  & $\frac{1}{4}n(\log_2n)^2 + \frac{3}{4}n\log_2$  & $\frac{3}{2} n \log_2 n -n +1$ \\
+%			\hline  
+			% GM CO & & \\
+			% \hline
+			GM CO PCL2 & $\frac{1}{4}n(\log_2n)^2 + \frac{3}{4}n\log_2$ & $\frac{1}{2} n\log_2 n$\\
+%			\hline
+			% LCH & $ ?$  &  $?$\\
+			% \hline
+			% LCH PC & $O(n\log_2 n\log\log_2 n)+  n\log_2 n$ \textsuperscript{*} &  $\frac{1}{2} n\log_2 n$\\
+			 \bottomrule
+		\end{tabular}
+	}
+	\label{tab:FFTcomparisons}
+\end{table}
 
 
+\begin{table}
+	\centering
+	\caption{The storage required for precomputation of each algorithm}
+	\setlength{\tabcolsep}{8pt} % Adjusted column spacing
+%	\resizebox{0.9\textwidth}{!}{
+		\begin{tabular}{ll}
+			\toprule
+			\textbf{Method} & \textbf{Storage} \\
+			\midrule
+			Cantor PC & $2^m - 1$ elements in $\mathbb{F}_{2^k}$ and $\sum_{i=0}^{m-1} \left(2^{\text{wt}(i)} - 1\right)$ integers [Section \ref{sec:cantor_precmp}]\\ 
+			GM PCL1 & $(m^2 + 3m) / 2$ elements in $\mathbb{F}_{2^k}$ [Section \ref{sec:gao-precmp}]\\
+			GM PCL2 & $3 \cdot 2^m - m - 3$ elements in $\mathbb{F}_{2^k}$ [Section \ref{sec:gao-precmp}]\\
+			GM CO PCL2 & $2^m$ elements in $\mathbb{F}_{2^k}$ [Section \ref{sec:gao-precmp}]\\
+			% Add more rows as needed
+			\bottomrule
+	\end{tabular}
+%}
+	\label{tab:precmp_comparison}
+\end{table}
 
 
-% \begin{remark}
-	%  \textcolor{blue}{    
-		% "Note that in \cite{Gao2010FFT}, it discussed a case when $f(x)$'s degree is equal to $2^m$. But for our Cantor basis approach, we allow the degree of $f(x)$ be any". Please check whether this is correct! } 
-	% \end{remark}
+We implemented the all variants of the Cantor and Gao-Mateer algorithms in \CC except Gao-Mateer which has been implemented in the libiop library \cite{libiop}. We used the same library, libff \cite{libff}, for finite field operations as in libiop. We selected the field $\mathbb{F}_{2^{256}}$ for our experiments. Each field element is represented using four 64-bit limbs. Field multiplication is performed using 16 carry-less multiplication (CLMUL) instructions, commonly available on many x86 processors~\cite{gueron2010intel}, following a Karatsuba-like method for multiplying 4-limb values~\cite{libiop}.
 
-% \subsection{An efficient basis for the additive FFT}
+The benchmarks were conducted on a system featuring an AMD Ryzen 9 9950x @ 5.7 CPU, equipped with 64 GB of DDR5 RAM. The CPU governor was set to \textit{Performance}, to ensure the CPU operates at its maximum clock speed throughout testing, thus minimizes fluctuations caused by power-saving mechanisms.
+We executed each algorithm for 1000 different random polynomials \( f(x) \in \mathbb{F}_{2^{256}}[x] \) of degree less than \( n = 2^m \), where \( 4 \leq m \leq 28 \).
 
-% Let $t>s$,  the polynomial $f(x)$ have degree $<m=2^s$, and the additive FFT is to compute the evaluation of $f$ at $L$ iteratively.
-% \[
-% \begin{array}{ll}
-	% B_0& =<\alpha^{t-1}, \cdots, \alpha, 1>\\
-	% G_1& = <\alpha^{m-1}, \cdots, \alpha>\\
-	% D_1& = <\delta(\alpha^{m-1}), \cdots, \delta(\alpha)>.
-	% \end{array}
-% \]
-% This basis will save $m-1$ multiplications at the first step of the iteration. 
-% At step $i$,the bases are
-% \[
-% \begin{array}{ll}
-	% B_i& =D_i=<\beta_{m-1}, \cdots, \beta_i>\\
-	% G_{i+1}& = <\beta_{m-1}\beta_i^{-1}, \cdots, \beta_{i+1}\beta_i^{-1}> =<\gamma_{m-1}, \cdots, \gamma_{i+1}>\\
-	% D_{i+1}& = <\delta(\gamma_{m-1}), \cdots,   \delta(\gamma_{i+1})>.
-	% \end{array}
-% \]
+Figure~\ref{fig:benchmark} compares the runtime of the FFT algorithms. It shows that the time savings in Cantor PC are consistent across different input lengths. However, for Gao PCL1, Gao PCL2, and Gao CO PCL2, the savings become insignificant for larger $m$. The reason is that GM requires extensive memory access for Taylor expansion, the \textsf{Aggregate} module, and bit-reversal rearrangements, which suppresses the savings gained from the precomputations.  Figure~\ref{fig:sub_parts_normalized} depicts the fraction of each sub-algorithm in GM.
 
+\begin{figure}
+	\centering
+	\resizebox{\textwidth}{!}{
+		\input{Plots/plot_FFT}
+	}
+	\caption{Performance comparison of variances of Gao-Mateer and Cantor additive FFT algorithms of length $n=2^m$ for $4\leq m \leq 28$. The left plot is in a logarithmic scale. }
+	\label{fig:benchmark}
+\end{figure}
 
-% \textcolor{red}{Susanta: please put GM algorithm here, and take care of the ending layer, when the degree of $f$ satisfies that  $2^{s-v-1}\le deg(f) <2^{s-v}, v>0$, since it will be ended when $f(x)$ reduced to a linear polynomial, but $L$ only downs to a linear space with dimension $s-v$.  
-	% This is the case we need, but GM's paper did not consider that. Please get the exactly complexity by counting the number of multiplications and additions. 
-	% }
+\begin{figure}[ht!]
+	\centering
+	\resizebox{.9\textwidth}{!}{
+		\input{Plots/plot_GM_parts_normalized}
+	}
+	\caption{The fraction of execution time for each sub-algorithm in the Gao-Mateer FFT algorithm over $\mathbb{F}_{2^k}$ implemented in \cite{libiop}. The execution times of the Taylor expansion and bit-reversal sub-algorithms increase more rapidly with the input size.  \textit{Initialization} is a one-time computing for copying the input polynomial to a new vector. \textit{Span} and \textit{Merging} are the \textsf{Span} function and the nested for loop in \textsf{Aggregate} Module}
+	\label{fig:sub_parts_normalized}
+\end{figure}
 
-
-
-
-
-
-
-
+\section{Summary} \label{Sec:Summary}
+This work demonstrates the effectiveness of leveraging the Cantor special basis to enable the use of the Cantor additive FFT algorithm in post-quantum secure zkSNARKs, with a focus on Aurora~\cite{Aurora2019}. Our implementation shows that replacing the Gao-Mateer FFT with the Cantor FFT results in a significant reduction in computation time. Furthermore, we present a detailed theoretical analysis of the computational costs of the Cantor FFT, including exact counts of additions and multiplications, and an evaluation of FFT call complexity within the encoding of the R1CS in Aurora, based on the number of constraints, variables, and the target security parameter. Additionally, we introduce optimized building blocks for the Cantor FFT implementation and propose precomputation techniques that reduce overhead in both the Cantor and Gao-Mateer FFT algorithms when the basis of the affine subspaces is predetermined.
 

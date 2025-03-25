@@ -135,6 +135,7 @@ keys]{cryptocode}
 
 
 \usetikzlibrary{shapes.multipart, positioning, trees, shapes.geometric, fit}
+ \usetikzlibrary{patterns}
 \usetikzlibrary{arrows.meta, quotes}
 \tikzset{auto,
                 % > = Straight Barb,
@@ -158,6 +159,8 @@ every path/.style = {semithick}
 \newtheorem{lemma}{Lemma}[chapter]
 \theoremstyle{corollary}
 \newtheorem{corollary}{Corollary}[chapter]
+\theoremstyle{proposition}
+\newtheorem{proposition}{Proposition}[chapter]
 
 
 \def\CC{{C\nolinebreak[4]\hspace{-.05em}\raisebox{.4ex}{\tiny\bf ++}\hspace{.2em}}}
@@ -215,7 +218,7 @@ every path/.style = {semithick}
     pdfnewwindow=true,      % links in new window
     colorlinks=true,        % false: boxed links; true: colored links
     linkcolor=blue,         % color of internal links
-    citecolor=green,        % color of links to bibliography
+    citecolor=blue,        % color of links to bibliography
     filecolor=magenta,      % color of file links
     urlcolor=cyan           % color of external links
 }
@@ -290,20 +293,18 @@ every path/.style = {semithick}
 % Only use \documentclass or \begin{document} and \end{document} commands in this master document.
 % Tip: Putting each sentence on a new line is a way to simplify later editing.
 %----------------------------------------------------------------------
-% \input{chapters/1-chapter-introduction}
+ \input{chapters/1-chapter-introduction}
 \input{chapters/2-chapter-preliminaries}
-% \input{chapters/3-chapter-literature-review}
+ \input{chapters/3-chapter-literature-review}
 \input{chapters/7-chapter-additive-fft-implementation}
-%\input{chapters/8-chapter-accelerating-aurora-through-optimizing-additive-FFT}
-\input{chapters/4-chapter-zupply-framework-design}
-%\input{chapters/5-chapter-zupply-framework-security-analysys}
-\input{chapters/6-chapter-zupply-framework-implementation}
-
-
  \input{chapters/9-chapter-gkr-circuit-design-polaris}
-% \input{chapters/10-chapter-conclusions-and-future-works}
+\input{chapters/4-chapter-zupply-framework-design}
+\input{chapters/6-chapter-zupply-framework-implementation}
+ \input{chapters/10-chapter-conclusions-and-future-works}
 
 
+%\input{chapters/5-chapter-zupply-framework-security-analysys}
+%\input{chapters/8-chapter-accelerating-aurora-through-optimizing-additive-FFT}
 
 % \input{chapter-observations.tex}
 
@@ -316,6 +317,7 @@ every path/.style = {semithick}
 
 % The following statement selects the style to use for references.  
 % It controls the sort order of the entries in the bibliography and also the formatting for the in-text labels.
+
 \bibliographystyle{plainurl}
 % This specifies the location of the file containing the bibliographic information.  
 % It assumes you're using BibTeX to manage your references (if not, why not?).

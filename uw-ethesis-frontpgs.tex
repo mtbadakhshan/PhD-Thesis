@@ -13,7 +13,7 @@
         \vspace*{1.0cm}
 
         \Huge
-        {\bf Accelerating Post-Quantum Secure zkSNARKs and Designing a Privacy-Preserving Framework}
+        {\bf Accelerating Post-Quantum Secure zkSNARKs for Privacy-Preserving Frameworks}
 
         %Privacy Preserving Framework Design and Acceleration of Post-Quantum zkSNARKs
 
@@ -148,7 +148,17 @@ I understand that my thesis may be made electronically available to the public.
 \addcontentsline{toc}{chapter}{Abstract}
 \begin{center}\textbf{Abstract}\end{center}
 
-This is the abstract.
+Zero-Knowledge Succinct Non-Interactive Arguments of Knowledge (zkSNARKs) are gaining widespread adoption across various applications. Despite significant progress in developing post-quantum secure zkSNARKs, current schemes still encounter notable challenges, particularly regarding computational complexity.
+
+This thesis proposes utilizing the Cantor special basis to enhance post-quantum secure zkSNARKs operating over binary extension fields. By adopting this basis, we optimize the additive fast Fourier transform (FFT) algorithm employed in Aurora, a plausible post-quantum secure zkSNARK, replacing the previously utilized Gao-Mateer FFT with the more efficient Cantor FFT. Our implementation demonstrates substantial reductions in computation time for Aurora, indicating potential performance improvements for other zkSNARK systems reliant on additive FFTs. We offer a thorough theoretical analysis of the computational complexity of the Cantor FFT algorithm, providing precise counts of required additions, multiplications, and precomputation overhead. Additionally, we examine the FFT call complexity within the Rank-1 Constraint System encoding specifically for Aurora.
+
+Furthermore, this thesis includes an extensive analysis of the algorithms within Polaris, a plausible post-quantum zkSNARK protocol, by systematically decomposing its components for detailed evaluation. Recognizing the critical need for efficient real-world implementations, we propose a concrete GKR arithmetic circuit for integration into Polaris. We also enhance the efficiency of the FRI protocol within Polaris by eliminating costly field inversion operations.
+
+
+Finally, as an illustrative example of a privacy-preserving protocol utilizing zkSNARKs, we propose a novel framework called Anonymous Authentication Token (AAT). This framework supports the unlinkable transfer of token ownership (AAT Ownership Transfer or AATOT), including the merging and dividing of tokens in an unlinkable manner. Our construction leverages zkSNARK protocols to ensure robust anonymity, unlinkability, and authentication. Building upon this foundation, we introduce Zupply, a decentralized system designed to maintain directed acyclic graphs (DAGs) of authentic data records. Zupply operates atop a permissionless blockchain equipped with smart contracts, offering a trustless environment that preserves participant anonymity and unlinkability. Simultaneously, it ensures the integrity and authenticity of data records across the entire supply chain ecosystem. We design and implement optimized arithmetic circuits within the Zupply framework to minimize proof sizes and verification costs. We concurrently explore post-quantum secure solutions to future-proof the framework against quantum computing advancements. Our implementation of Zupply utilizes C++ and Solidity, leveraging two distinct zkSNARK protocols: Groth16 and Aurora. The Groth16 zkSNARK, while vulnerable to quantum attacks, provides computational efficiency and reduced operational costs, demonstrating Zupply’s practicality for real-world decentralized supply chain management (SCM) systems. Conversely, the Aurora zkSNARK is designed to be plausibly secure against quantum-capable adversaries. We conducted a comparative analysis of computation efficiency and proof sizes between these two zkSNARK variants,
+
+
+
 
 
 

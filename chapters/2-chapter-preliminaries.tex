@@ -1,5 +1,5 @@
 %======================================================================
-\chapter{Preliminaries}
+\chapter{Preliminaries} \label{ch:preliminaries}
 %======================================================================
 In this chapter, we provide definitions and mathematical preliminaries essential to this thesis.
 
@@ -139,7 +139,7 @@ Now, since $W_{m+1}= W_m \cup (\beta_{m}+W_m)$, we have
 	%     The coefficients of the vanishing polynomial $\mathbb{Z}_{W_{m+1}}(x)(x)$ will be in $\mathbb{F}_2$ if and only if the coefficients of $\mathbb{Z}_{W_{m}}(x)$ in $\mathbb{F}_2$ and $\mathbb{Z}_{W_{m}}(\beta_{m})=1$.
 	% \end{theorem}
 
-\subsection{Univariate Polynomials Vectorial Representation}
+\subsection{Univariate Polynomials Vectorial Representation}\label{sec:vec_rep}
 % {\color{blue} Just added:}\\
 For any univariate polynomial $f(x) = \sum_{i=0}^{n-1}c_ix^i, c_i\in \F$, where $\deg(f) < n = 2^m$, the coefficients are represented as a vector of $n$ elements, ordered from the constant term to the highest degree term. Namely, $$\fbu = (c_0, ..., c_{n-1}), c_i \in \mathbb{F}_{2^k}$$ represents the polynomial $f(x)$, where $\deg(f)<n$.
 
@@ -462,11 +462,11 @@ Depending on the commitment scheme used in the \gls{zksnark} construction, the $
 
 Different \gls{zksnark} constructions result in varying proof sizes. For instance, Groth's scheme~\cite{Groth2016} generates constant-size proofs, while the Aurora \gls{zksnark}\cite{Aurora2019}, which we discuss in Section\ref{sec:prel_aurora}, produces proofs whose sizes grow linearly with the instance size.
 
-\subsection{Trusted vs. Transparent Setup in zkSNARKs}
+\subsection{Trusted vs. Transparent Setup zkSNARKs}
 
 The extractable polynomial commitment scheme underlying a \gls{zksnark} determines whether the protocol requires a trusted or transparent setup. Protocols using polynomial commitments such as the KZG scheme, proposed by Kate, Zaverucha, and Goldberg~\cite{KZG2010}, require a one-time trusted setup to generate a structured common reference string (\gls{crs}). In contrast, polynomial commitment schemes like Bulletproofs~\cite{Bulletproofs2018} do not require such a trusted setup. However, the security of both KZG commitments and Bulletproofs relies fundamentally on the discrete logarithm assumption.
 
-Conversely, polynomial commitment schemes based on interactive oracle proofs (\gls{iop}) of proximity, such as FRI~\cite{FRI2018}, enable transparent setups. These schemes avoid reliance on the discrete logarithm assumption and other cryptographic assumptions known to be vulnerable to quantum computing attacks. Instead, their security relies on the existence and security properties of cryptographic hash functions (\glspl{crh}). This transparent polynomial commitment scheme is detailed further in Section~\ref{sec:prel_FRI}.
+Conversely, polynomial commitment schemes based on interactive oracle proofs (\gls{iop}) of proximity, such as \gls{fri}~\cite{FRI2018}, enable transparent setups. These schemes avoid reliance on the discrete logarithm assumption and other cryptographic assumptions known to be vulnerable to quantum computing attacks. Instead, their security relies on the existence and security properties of cryptographic hash functions (\glspl{crh}). This transparent polynomial commitment scheme is detailed further in Section~\ref{sec:prel_FRI}.
 
 
 
@@ -486,7 +486,7 @@ Conversely, polynomial commitment schemes based on interactive oracle proofs (\g
 
 \section{Relevant Proof Protocols}
 This section presents various  protocols that are used in this thesis. 
-\subsection{GKR Protocol}
+\subsection{GKR Protocol} \label{gkr}
 GKR \cite{GKR2008} is a public coin interactive proof protocol for any language computable by a log-space uniform layered (fan-in 2) arithmetic circuit $\mathcal{C}$, in which a prover $\mathcal{P}$ can run the computation and interactively prove the correctness of the result (output gate(s)) to a verifier $\mathcal{V}$. Consider a circuit with depth denoted by $d$ and size represented by $S$, where the size is defined as the total number of gates. For any layer $\ell$ within the circuit, $S_\ell$ indicates the number of gates at that layer. Specifically, $\ell=0$ corresponds to the output layer, while $\ell=d$ represents the input layer. Additionally, $\nu$ is the size of the input to  the circuit $\mathcal{C}$. The communication cost is $O(S_0 + d\log(S))$, the cost of $\mathcal{V}$  is $O(\nu + d\log(S))$, and the runtime of the $\mathcal{P}$ is bounded by $O(S^3)$. In the following, we briefly describe the GKR protocol following Thaler's presentation of the protocol in \cite{Thaler2022Proofs}.\\
 
 
@@ -696,7 +696,7 @@ The prover then proceeds to prove the consistency of the known witness with the 
 \begin{equation}\label{eq:proximity_parameter}
 \delta = \min\left( \frac{1-2\rho}{2}, \frac{1-\rho}{3}, 1-\rho \right).
 \end{equation}
-Furthermore, the transformation described in \cite{BCS2016} is employed to compile the described interactive protocol into a zkSNARK. In Section \ref{Sec:FFT_Calls_in_Aurora}, we will discuss the FFT complexity of Aurora which includes the size of the codeword domain $|L|$, and the number of input lengths FFT/IFFT calls. For example, the prover calls FFT and IFFT algorithms to compute the codewords in Table \ref{tab:codewords} and both prover and verifier call  IFFT  to interpolate the polynomials $p_\alpha$ and $p^{ABC}_\alpha$. 
+Furthermore, the transformation described in \cite{Ben-Sasson2016IOP} is employed to compile the described interactive protocol into a zkSNARK. In Section \ref{Sec:FFT_Calls_in_Aurora}, we will discuss the FFT complexity of Aurora which includes the size of the codeword domain $|L|$, and the number of input lengths FFT/IFFT calls. For example, the prover calls FFT and IFFT algorithms to compute the codewords in Table \ref{tab:codewords} and both prover and verifier call  IFFT  to interpolate the polynomials $p_\alpha$ and $p^{ABC}_\alpha$. 
 
 
 
@@ -714,9 +714,9 @@ Furthermore, the transformation described in \cite{BCS2016} is employed to compi
 	% 4. check citations
 	% } \\
 
-Polaris \cite{Polaris} is a zkSNARK protocol without a trusted setup that has quasi-linear time complexity for the prover and polylogarithmic proof size. Its verification time is relative to the size of the arithmetic circuit representing the statement to be proven. It achieves this efficiency by encoding the R1CS instance as a univariate polynomial in a quadratic arithmetic program (QAP) \cite{gennaro2013quadratic}. The main source of Polaris' efficiency is an arithmetic layered circuit design that allows the verifier to delegate query computations to the prover and verify the results using the GKR protocol \cite{GKR2008}. 
-Polaris combines univariate polynomial encoding described in Section \ref{univariate_pol} with univariate sumcheck protocol in Aurora \cite{aurora}.
-By accomplishing this, the protocol constructs an interactive proof that is complete and sound, and then extends it to incorporate zero-knowledge and non-interativeness using Fiat-Shamir protocol \cite{fiat1986prove}. Figure \ref{fig:polaris-blocks} below shows the building blocks of the Polaris protocol.
+Polaris \cite{Polaris} is a zkSNARK protocol without a trusted setup that has quasi-linear time complexity for the prover and polylogarithmic proof size. Its verification time is relative to the size of the arithmetic circuit representing the statement to be proven. It achieves this efficiency by encoding the R1CS instance as a univariate polynomial in a quadratic arithmetic program (QAP) \cite{GGPR13}. The main source of Polaris' efficiency is an arithmetic layered circuit design that allows the verifier to delegate query computations to the prover and verify the results using the GKR protocol \cite{GKR2008}. 
+Polaris combines univariate polynomial encoding described in Section \ref{univariate_pol} with univariate sumcheck protocol in Aurora~\cite{Aurora2019}.
+By accomplishing this, the protocol constructs an interactive proof that is complete and sound, and then extends it to incorporate zero-knowledge and non-interativeness using Fiat-Shamir protocol \cite{Fiat1987}. Figure \ref{fig:polaris-blocks} below shows the building blocks of the Polaris protocol.
 
 \begin{figure}[h]
 	\centering
@@ -777,7 +777,7 @@ where $\{\sigma_i \,|\, 0\le i<2^s\}$ is the Lagrange basis, given by
 \end{equation}
 Since $f(x)$ is a polynomial with coefficients in $\mathbb{F}$, we can naturally extend $f$ from a function mapping $N_{2^s} \rightarrow$  $\mathbb{F}$ to a function over $\mathbb{F}$.
 
-Given the definition of the vanishing polynomial in Equation \eqref{eq:vanishing_poly}, we can further represent $\mathbb{Z}_H(x)$, an affine linearized polynomial of $\mathbb{F}$ with dimension $s$, as below,
+Given the definition of the vanishing polynomial, we can further represent $\mathbb{Z}_H(x)$, an affine linearized polynomial of $\mathbb{F}$ with dimension $s$, as below,
 \begin{equation*}\label{eq-defZx2}
 	\mathbb{Z}_H(x)=x^{2^k}+\sum_{i=1}^{s}c_ix^{2^{i-1}}+c_0, c_i\in \mathbb{F}.  
 \end{equation*}
@@ -807,7 +807,7 @@ Equation \eqref{eq-uni2} represents a univariate polynomial leveraged from bivar
 
 \paragraph{Quadratic and Linear Checks}\label{linquad}
 
-In the Polaris protocol, the prover $\mathcal{P}$ wants to convince the verifier $\mathcal{V}$ that $(\mathbbm{x},\textbf{w})\in\mathcal{R}_{\mathrm{R1CS}}$ which is true if and only if the univariate  $\mathbb{F}_\textbf{w}(x) = 0$ at all points within the affine subspace $H$ of $\mathbb{F}$. According to the factor theorem (Theorem 1 in \cite{fu2022polaris}), this verification is the same as determining if there's a polynomial $G(X)$ where $\text{deg}(F_\textbf{w}) - |H| \leq |H| - 2$, such that 
+In the Polaris protocol, the prover $\mathcal{P}$ wants to convince the verifier $\mathcal{V}$ that $(\mathbbm{x},\textbf{w})\in\mathcal{R}_{\mathrm{R1CS}}$ which is true if and only if the univariate  $\mathbb{F}_\textbf{w}(x) = 0$ at all points within the affine subspace $H$ of $\mathbb{F}$. According to the factor theorem (Theorem 1 in \cite{Polaris}), this verification is the same as determining if there's a polynomial $G(X)$ where $\text{deg}(F_\textbf{w}) - |H| \leq |H| - 2$, such that 
 \begin{equation}
 	F_\textbf{w}(X) = \mathbb{Z}_H(X) \cdot G(X).
 	\label{eq:qad_lin_check}
@@ -888,7 +888,7 @@ The interactive protocol reveals information about the witness $\textbf{w}$ when
 	\alpha_1\cdot \widetilde{c}+s_1=\sum_{y\in H}(\alpha_1\cdot\widetilde{Q}{r_x}(y)+S_Q(y)).
 	\]
 	where $\widetilde{c}=r_A\cdot\widetilde{A}(r_x)+r_B\cdot\widetilde{B}(r_x)+r_C\cdot\widetilde{C}(r_x)$, referenced from Equation \eqref{eq-c}.  
-	This ensures $\widetilde{c}$ and $s_1$ can be correctly computed due to the random linear combination of the sumcheck, while revealing no information about $\widetilde{Q}{r_x}(\cdot)$ as it is masked by the random polynomial $S_Q(\cdot)$ \cite{aurora}\cite{zhang2020transparent} .
+	This ensures $\widetilde{c}$ and $s_1$ can be correctly computed due to the random linear combination of the sumcheck, while revealing no information about $\widetilde{Q}{r_x}(\cdot)$ as it is masked by the random polynomial $S_Q(\cdot)$ \cite{Aurora2019}\cite{Zhang2019VirgoZK} .
 \end{enumerate}
 
 %The closed-form of $G_1(X)=F_w(X)/\mathbb{Z}_{H}(X)$ now contains random polynomials $R_A,R_B,R_C$. To make the evaluation phase zero-knowledge, the prover $\mathcal{P}$ commits to a random polynomial $S_G(X)$ of degree $|H|$, sends $s_2=S_G(r_x)$ to $\mathcal{V}$, and they run the standard evaluation protocol on the blinded polynomial $\alpha_2\cdot G_1(X)+S_G(X)$, where $\alpha_2$ is $\mathcal{V}$'s random challenge.

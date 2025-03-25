@@ -1,5 +1,5 @@
 %======================================================================
-\chapter{Zupply Framework Design}
+\chapter{Zupply Framework Design} \label{ch:zupply-design}
 %======================================================================
 
 
@@ -98,7 +98,7 @@ Zupply utilizes the following cryptographic building blocks:
 
     \item \textit{Symmetric-key encryption} scheme (Definition \ref{def:Symmetric-key encryption})  is used for encrypting the private part of data records.
 
-    \item \textit{Zero-knowledge succinct non-interactive argument of knowledge} scheme (Definition \ref{def:Zero-knowledge succinct non-interactive argument of knowledge}) is used to ensure the authenticity of data records while preserving the anonymity of entities and unlinkability of \gls{aat} commitments.
+    \item \textit{Zero-knowledge succinct non-interactive argument of knowledge} scheme (Definition \ref{def:zkSNARK Properties}) is used to ensure the authenticity of data records while preserving the anonymity of entities and unlinkability of \gls{aat} commitments.
 \end{enumerate}
 
 
@@ -108,7 +108,7 @@ The adversary is driven by three primary motivations: the forgery or alteration 
 
 This adversary possesses the capability to access the blockchain, all data records stored on the \gls{dcs}, and observe all entities and their interactions with $\mathcal{C}_Z$. Zupply operates under the assumption that the adversary lacks possession of the product at each step of its lifecycle within the supply chain. This implies that they never hold an authentication token transferred from an authenticated entity. Therefore, any data reported by authorized entities, who are legitimately involved in the supply chain, is considered accurate. 
 
-A detailed discussion of the adversary's extensive assumptions, along with their objectives and potential attacks, is presented in Section \ref{sec:Attacker Model}.
+%A detailed discussion of the adversary's extensive assumptions, along with their objectives and potential attacks, is presented in Section \ref{sec:Attacker Model}.
 
 \subsection{Security Goals}
 
@@ -248,9 +248,41 @@ In the $\pi_\textsf{Auth}$, $\text{PKsig}$ is used as a public input. $\pi_\text
 \end{remark}
 
 
+\begin{definition}[Valid \gls{aat}]
+	\label{def:Valid Authentication Token}
+	$T_{i_2}$ is a valid \gls{aat} for authenticating a data record $d_{n_2}$ if and only if
+	the $\texttt{cm}_{i_2} := \mathsf{COMM}_{\rho_{i_2}}(T_{i_2})$ is included in \textsf{MHT}.
+\end{definition}
 
 
-\subsection{NP Problems}
+\begin{definition}[Authenticated Data]
+	\label{def:Authenticated Data}
+	A data record $d_{n}$ is an authenticated data if and only if $d_{n}$ contains
+	\begin{enumerate}
+		\item  a valid zero-knowledge proof of ($\pi_\texttt{Auth}$) of owning a \textit{valid \gls{aat}} $T_{i}$ (Definition \ref{def:Valid Authentication Token}).
+		\item a valid signature $\sigma$ is created using the secret key $\text{SKsig}_{i}$, ensuring that both it and its corresponding public key $\text{PKsig}_{i}$ are included in $T_{i}$.
+		\item valid tag(s) if and only if the predecessor data record is signed by different key(s) and $d_{n}.\text{pred} \neq \emptyset$
+	\end{enumerate}
+\end{definition}
+
+\begin{definition}[Valid Transaction]
+	\label{def:Valid Transaction}
+	A transaction $\texttt{tx} $ $ \in $ $ \{ \texttt{tx}_\textsf{Init}, $ $ \texttt{tx}_\textsf{Trans}, $ $ \texttt{tx}_\textsf{Merge}, $ $ \texttt{tx}_\textsf{Div} \}$ is a valid transaction if and only if
+	\begin{enumerate}
+		\item $\mathsf{MHT}.\mathsf{Verify}(\texttt{rt}_{\tau}, \texttt{rt}^\text{new}, \texttt{cm}, \mathsf{ind}, \mathsf{path}_\mathsf{ind}) = 1$, where The root of \textsf{MHT} was $\texttt{rt}_{\tau}$ before $\texttt{tx}$. For $\textsf{Div}$ transaction (i.e., $\texttt{tx}= \texttt{tx}_\textsf{Div}$) the transition of the root is examined in two rounds of running $\mathsf{MHT}.\mathsf{Verify}$ algorithm: $\texttt{rt}_\tau \rightarrow \texttt{rt}^\text{new}_1 \rightarrow \texttt{rt}^\text{new}_2$. 
+		
+		
+		\item $\texttt{eol} \notin  \mathbf{X}_\tau$. Where $\texttt{tx}_\mathsf{Trans}$ and $\texttt{tx}_\mathsf{Div}$ contain one and $\texttt{tx}_\mathsf{Merge}$ contains two \texttt{eol}s. This value represents the \gls{aat} that is expired during the owner transferring algorithms.
+		
+		\item $\mathsf{Verify}(\text{vk}_\mathbbm{x}, x_\mathbbm{x}, \pi_\mathbbm{x}) = 1$ for $\mathbbm{x} \in \{\mathsf{Trans}$, $\mathsf{Merge}$, $\mathsf{Div} \}$
+		
+	\end{enumerate}
+\end{definition}
+
+
+
+
+\subsection{NP Statements}
 \label{sec:Zero-knowledge Proofs}
 This section presents the \gls{np}-statements related to \gls{zkp}s employed in Zupply. 
 
@@ -724,28 +756,70 @@ To prove Property \ref{theorem:CorrectLeafPosition}, we first need to present an
 
 \section{Security Analysis}
 
+\subsection{Adversary Assumptions}
 
-%\subsection{Indistinguishability Experiment}
-In this section, we do not provide security proofs, deferring them to future work. Instead, we present the experimental setup for evaluating ledger indistinguishability. To characterize the ledger indistinguishability of the Zupply framework, we design an \textsf{L-IND} experiment following the similarly named experiment in Zerocash~\cite{zcash2014}.  
-Recall that a ledger $L$ includes a set of transactions $\mathbf{TX}$. From $\mathbf{TX}$, we extract the ordered set $\mathbf{C}$, which stores commitments to \gls{aat}s (\texttt{cm}s), and the set of \gls{eol}s, denoted as $\mathbf{X}$. Each \texttt{cm} in $\mathbf{C}$  can be replaced by a tuple $(\texttt{cm}, \text{TXtype}, e)$, where $\texttt{cm}$ is the commitment added to the ledger by an entity $e$ through a transaction of type TXtype. The transaction type can be either \textsf{Trans} or \textsf{Init}. We call this new $\mathbf{C}$ as its generalized form.  Notably, if $\text{TXtype} = \textsf{Trans}$, the entity $e$ does not \textit{own} the corresponding \gls{aat}; rather, it only adds it to the ledger. The adversary’s capabilities determine whether they can extract the entity $e$ associated with each commitment in the transactions. For simplicity, we first assume that the adversary lacks this capability.
+In the Zupply framework $\Pi$, The adversary $\mathcal{A}$ is probabilistic polynomial-time (\gls{ppt}) and has access to $\mathbf{TX}_\tau$, $\mathbf{E}_\tau$, $\mathbf{C}_\tau$,  $\mathbf{X}_\tau$, $\mathsf{MHT}$ and $\mathbf{D}_\tau$ and is capable of executing either the exact or modified versions of the algorithms defined in $\Pi$, except the $\mathsf{Setup}$ algorithm, when a trusted setup \gls{zksnark} is employed. The capabilities of the adversary can be enhanced by assuming it has oracle access to the following two functionalities:
+
+\begin{enumerate}
+	\item \textit{\gls{aat} commitment attribution oracle}: The adversary $\mathcal{A}$ can query an oracle, denoted as $\mathcal{O}^\mathsf{Attr}: \mathbf{C}_\tau \mapsto \mathbf{E}_\tau$. This oracle acts as a mapping function, $\mathcal{O}^\mathsf{Attr}(\texttt{cm}_i) = e_j$, where it assigns each commitment $\texttt{cm}_i$ to the entity $e_j$ that created it. 
+	
+	\item \textit{\gls{aat} commitment classification oracle}: The adversary $\mathcal{A}$ has the capability to categorize commitments based on the type of transaction they're contained in. The Adversary's oracle access for classifying \gls{aat} commitments is:\\ $\mathcal{O}^\mathsf{Class}: \mathbf{C}_\tau \mapsto \{\textsf{Init}, \textsf{Trans}, \textsf{Merge}, \textsf{Div}\}$. 
+\end{enumerate}
+
+If we assume that blockchain public addresses reveal the identities of their owners, the first assumption becomes realistic. Many existing on-chain privacy-preserving protocols~\cite{altawy2019mesh,ZEXE,zkLedger2018,ZeeStar} do not adequately address this assumption. We formally define this assumption later in Section \ref{sec:ind_experiment}. Under this assumption, measuring the anonymity and unlinkability of entities within the Zupply framework requires evaluating the probability that each entity sends a specific transaction type to the blockchain within a given time interval (e.g., during block generation). The second assumption states that an adversary cannot distinguish between transactions of different types, as their contents are indistinguishable. This assumption is adopted without further elaboration. 
+
+Potentially, in the Zupply framework, the adversary $\mathcal{A}$ may attempt to 
+
+        \begin{enumerate}        
+	
+	\item Link a data record, $d_n$, to its corresponding \gls{aat} commitment, $\texttt{cm}_i$ (\textit{Data de-anonymizing attack}).
+	
+	
+	\item Determine whether two \gls{aat} commitments, $\texttt{cm}_i$ and $\texttt{cm}_j$, which are created by different entities are consecutive authentication tokens, with one having been transferred to the other (\textit{Linking attack}).
+	
+	\item
+	Forge $\pi_\mathsf{Auth}^\ast$ and $\sigma^\ast$ such that they are consistent to an \gls{aat} that the attacker does not have access to (\textit{Data forging attack}). 
+	
+	
+	\item
+	Generate transactions $\texttt{tx}_\mathsf{Trans}$, $\texttt{tx}_\mathsf{Merge}$, $\texttt{tx}_\mathsf{Div}$ to  transfer, merge, or divide\gls{aat}s that the attacker does not have access to (\textit{\gls{aat} ownership spoofing attack}).
+	
+	
+	\item
+	Alter any existing $d_{n} \in \mathbf{D}_\tau$ (\textit{Data tampering attack}).
+	
+	\item
+	 Re-transfers a token that is already transferred, merged, or divided (\textit{\gls{aat} double transfer attack}).
+\end{enumerate}
+
+
+
+\subsection{Indistinguishability Experiment} \label{sec:ind_experiment}
+In this section, we do not provide security proofs, deferring them to future work.
+Instead, we discuss the formalization of the privacy property within the Zupply framework. Informally, consider an adversary $\mathcal{A}$ that constructs two ledgers and two corresponding \glspl{dag} by inducing honest entities, ensuring consistency between the public information of  ledgers and \gls{dag}s. If the adversary is then provided with both ledgers but only one \gls{dag}, it should not be able to distinguish the ledgers. Thus, the adversary remains uncertain about the association between the given \gls{dag} and the respective ledgers.
+
+
+ To formalize this, we present the experimental setup for evaluating ledger indistinguishability. To characterize the ledger indistinguishability of the Zupply framework $Pi$, we design an \textsf{L-IND} experiment following the similarly named experiment in Zerocash~\cite{zcash2014}.  
+Recall that a ledger $L$ includes a set of transactions $\mathbf{TX}$. From $\mathbf{TX}$,  the ordered set $\mathbf{C}$, which stores commitments to \gls{aat}s (\texttt{cm}s), and the set of \gls{eol}s, denoted as $\mathbf{X}$ can be computed. Furthermore, the \textsf{MHT} can be constructed from $\mathbf{C}$.
+Each \texttt{cm} in $\mathbf{C}$  can be replaced by a tuple $(\texttt{cm}, \text{TXtype}, e)$, where $\texttt{cm}$ is the commitment added to the ledger by an entity $e$ through a transaction of type TXtype. Here, for simplicity, the transaction type is either \textsf{Trans} or \textsf{Init}. We denote this new set as $\mathbf{C}_G$ as the generalized form of $\mathbf{C}$.  Notably, if $\text{TXtype} = \textsf{Trans}$, the entity $e$ does not \textit{own} the corresponding \gls{aat}; rather, it only adds it to the ledger. The adversary’s capabilities determine whether they can extract the entity $e$ associated with each commitment in the transactions ($\mathcal{A}$'s access to $\mathcal{O}^\mathsf{Attr}$). 
 
 Let $\mathcal{C}$ denote the challenger in the \textsf{L-IND} experiment, which receives queries from the adversary $\mathcal{A}$, performs sanity checks, and forwards them to the Zupply framework oracle, denoted as $\mathcal{O}^\Pi$. In the \textsf{L-IND} experiment, we instantiate two oracles, $\mathcal{O}_0^\Pi$ and $\mathcal{O}_1^\Pi$.  Each oracle $\mathcal{O}^\Pi$ internally stores:  
 \begin{enumerate}
-	\item The set $\mathbf{C}$ in its generalized form.
+	\item The set $\mathbf{C}_G$ (generalized form).
 	\item A set of entities $\mathbf{E}$.
 	\item A set of \gls{eol}s, denoted as $\mathbf{X}$.
 	\item Sets of \gls{aat}s \textit{owned} by each entity $e \in \mathbf{E}$, denoted as $\mathbf{T}^e$.
 	\item A set of data records, denoted as $\mathbf{D}$.
 \end{enumerate}
 
-The oracle $\mathcal{O}^\Pi$ is initialized by public parameters \textsc{pp} and can receive and answer the following queries:
+The oracle $\mathcal{O}^\Pi$ is initialized by public parameters \textsc{pp} and can receive and process the following queries:
 
 %% INIT
 \begin{itemize}
 	\item $Q(\textbf{Init}, q, e)$ 
 	\begin{enumerate}
 		\item Compute $\textsf{Init}(\textsc{pp}, q) \rightarrow (\texttt{tx}_\textsf{Init}, T)$, where $\texttt{tx}_\textsf{Init} = \big(\texttt{cm}, \texttt{rt}^{\text{new}}, \mathsf{ind}, \mathsf{path}_{\mathsf{ind}}\big)$,
-		\item  Add $(\texttt{cm}, \textsf{Init}, e)$ to $\mathbf{C}$.
+		\item  Add $(\texttt{cm}, \textsf{Init}, e)$ to $\mathbf{C}_G$.
 		\item Add $T$ to $\mathbf{T}^e$
 	\end{enumerate}
 
@@ -756,31 +830,55 @@ The oracle $\mathcal{O}^\Pi$ is initialized by public parameters \textsc{pp} and
 		\item Assert $\texttt{cm}^\text{old}$ is in $\mathbf{C}$, otherwise output $\perp$.
 		\item Let $T^{e^\text{old}} \in \mathbf{T}^{e^\text{old}}$ be the \gls{aat} corresponding to $\texttt{cm}^\text{old}$.
 		\item Sample $ (\text{PKsig}^\text{new}, \text{SKsig}^\text{new})  \leftarrow {\mathcal{K}_\mathsf{sig}} (\textsc{pp})$
-		\item \sloppy Compute \textsf{Trans}$\big($\textsc{pp}$, T^{e^\text{old}},  \text{PKsig}^\text{new} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Trans}}, \Tilde{T}^{e^\text{new}}, \texttt{Tag}\big)$, where $\texttt{tx}_{\textsf{Trans}} = \big(\pi_{\textsf{Trans}}, x_{\textsf{Trans}}, \texttt{eol}, \texttt{cm}, \texttt{rt}^{\text{new}}, \mathsf{ind}, \mathsf{path}_{\mathsf{ind}} \big)$
-		\item  Add $(\texttt{cm}, \textsf{Trans}, e^\text{old})$ to $\mathbf{C}$.
+		\item \sloppy Compute \textsf{Trans}$\big($\textsc{pp}$, T^{e^\text{old}},  \text{PKsig}^\text{new} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Trans}}, \Tilde{T}^{e^\text{new}}, \texttt{Tag}\big)$, where $\texttt{tx}_{\textsf{Trans}} = \big(\pi_{\textsf{Trans}}, x_{\textsf{Trans}}, \texttt{eol}, \texttt{cm}^{\text{new}}, \texttt{rt}^{\text{new}}, \mathsf{ind}, \mathsf{path}_{\mathsf{ind}} \big)$ and $x_\textsf{Trans} = \big(\texttt{eol}, \texttt{cm}^{\text{new}}, \texttt{rt}^{\text{old}}\big)$
+		\item  Add $(\texttt{cm}, \textsf{Trans}, e^\text{old})$ to $\mathbf{C}_G$.
 		\item Add $T^{e^\text{new}} = (\Tilde{T}^{e^\text{new}},  \text{PKsig}^\text{new})$ to $\mathbf{T}^{e^{\text{new}}}$
 	\end{enumerate}
 	
-	\item $Q(\textbf{Upload}, \text{IsTransferred}, d^\text{old}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$, where $d_{\text{pub}, \text{pri}}^\text{new}$ represents the public and private part of the new data to be added to $D$, succeeding $d^\text{old}$, which is already in $D$. The Boolean variable $\text{IsTransferred}$ indicates whether the new data has a different $\text{PKsig}$ than $d^\text{old}$; it is set to \texttt{True} if $\text{PKsig}$ differs and \texttt{False} otherwise.\footnote{The query $Q(\textbf{Upload}, \text{False}, \text{Null}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$ initiates a \gls{dag}.}
+	\item $Q(\textbf{Upload}, \text{IsTransferred}, d^\text{old}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$, where $d_{\text{pub}, \text{pri}}^\text{new}$ represents the public and private parts of the new data to be added to $D$, succeeding $d^\text{old}$, which is already in $D$. The Boolean variable $\text{IsTransferred}$ indicates whether the new data has a different $\text{PKsig}$ than $d^\text{old}$; it is set to \texttt{True} if $\text{PKsig}$ differs and \texttt{False} otherwise.\footnote{The query $Q(\textbf{Upload}, \text{False}, \text{Null}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$ initiates a \gls{dag}.}
 	
 	\begin{enumerate}
-		\item Assert $d^\text{old}$ is either Null or is in $D$, otherwise output $\perp$.
+		\item Assert $d^\text{old}$ is either Null or is in $D$ and it is the last data in a progressive data sequence, otherwise output $\perp$.
 		\item If  $d^\text{old} \neq \text{Null}$, find the $T^\text{old}$ with $\text{PKsig}^\text{old}$ in all $\mathbf{T}^e$s and from that determine  $\text{SKsig}^\text{old}$ otherwise do nothing.
-		\item If $\text{IsTransferred} = \texttt{True}$, then commit to $T^\text{old}$ to compute $\texttt{cm}^\text{old}$, and run  $Q(\textbf{Trans}, \texttt{cm}^\text{old}, e^\text{new})$ to produce $T^{e^\text{new}}$. Otherwise, $T^{e^\text{new}} = T^\text{old}$.
+		\item \sloppy If $\text{IsTransferred} = \texttt{True}$, then commit to $T^\text{old}$ to compute $\texttt{cm}^\text{old}$, and execute  $Q(\textbf{Trans}, \texttt{cm}^\text{old}, e^\text{new})$ to produce $T^{e^\text{new}}$. Otherwise, $T^{e^\text{new}} = T^\text{old}$.
 		\item Sample a random \textsc{k} and Compute \textsf{Upload} $\big($\textsc{pp}$, d^\text{old}, T^{e^\text{new}}, d^\text{new}_{\mathsf{pub}, \mathsf{pri}}, \textsc{k}, [\textsf{tags}]  \big)$ $\rightarrow$ $d^\text{new}$.
 		\item Add $d^\text{new}$ to $D$.
 	\end{enumerate}
 	
-	\item $Q(\textbf{Insert}, \texttt{tx})$, where $\texttt{tx}$ is either the type of \textsf{Trans} or  \textsf{Init}.
+	\item $Q(\textbf{InsertTX}, \texttt{tx})$, where $\texttt{tx}$ is either the type of \textsf{Trans} or  \textsf{Init}.
 	\begin{enumerate}
 		\item If \textsf{VerifyTX} $\big($\textsc{pp}$, \texttt{tx} \big)$  returns 0, return $\perp$.
 		\item Add the $(\texttt{cm}, \text{TXtype}, e^*)$ to  $\mathbf{C}$, where $e^*$ denote the type of entities where the oracle does not hold their $T^{e^*}$.
 		\item If $ \text{TXtype} = \textsf{Trans}$ and the receiver of the \gls{aat} is not of type $e^*$, add   Add $T^{e^\text{new}}$ to $\mathbf{T}^{e^{\text{new}}}$.
 	\end{enumerate}
+	
+		\item $Q(\textbf{InsertData}, d)$, 
+	\begin{enumerate}
+		\item If \textsf{Audit} $\big($\textsc{pp}$, d \big)$  returns 0, return $\perp$.
+		\item Add $d$ to  $\mathbf{D}$.
+	\end{enumerate}
 \end{itemize}
 
-Now, in the \textsf{L-IND} experiment, the challenger $\mathcal{C}$ instantiate two oracles denoted as  $\mathcal{O}_0^\Pi$ and $\mathcal{O}_1^\Pi$. Then, $\mathcal{C}$ randomly picks $b \in \{0,1\}$ and provides two ledgers $L_\text{Left} = L_b$  and  $L_\text{Right} = L_{1-b}$ to $\mathcal{A}$. A sends two queries of $Q$ and $Q'$ to the challenger where they are publicly consistent, meaning that every public values in those two queries are the same.	 
-The challenger sends $Q$ to $L_0$ and $Q'$ to $L_1$. The adversary's advantage in this experiment is the probability that the adversary can guess $b$.
+In the \textsf{L-IND} experiment, the challenger $\mathcal{C}$ instantiates two oracles, denoted as $\mathcal{O}_0^\Pi$ and $\mathcal{O}_1^\Pi$. Then, $\mathcal{C}$ randomly selects $b \in \{0,1\}$ and provides the adversary $\mathcal{A}$ with two ledgers: $L_\text{Left} = L_b$ and $L_\text{Right} = L_{1-b}$. The adversary then submits two queries, $Q$ and $Q'$, to $\mathcal{C}$, where both queries are of the same type and are publicly consistent, meaning all public values in these queries are identical.  Let $D_b$ and $D_{1-b}$ denote the data sets corresponding to each ledger. If the queries are of type \textbf{InsertTX} or \textbf{InsertData}, the challenger $\mathcal{C}$ sends $Q$ to $(L_b, D_b)$ and $Q'$ to $(L_{1-b}, D_{1-b})$. Otherwise, $\mathcal{C}$ sends $Q$ to $(L_0, D_0)$ and $Q'$ to $(L_1, D_1)$.
+
+
+Notably, here we do not assume that the adversary has access to the $\mathcal{O}^\mathsf{Attr}$ oracle. As a result, the adversary is restricted to constructing $\mathbf{C}$ from each ledger and cannot derive $\mathbf{C}_G$ from them. Consequently, selecting different entities in queries $Q$ and $Q'$ does not violate the public consistency of the queries. Furthermore,  selecting different entities  does not provide $\mathcal{A}$ with any advantage in distinguishing the ledgers.
+
+
+The adversary's advantage in this experiment, denoted as $\mathsf{Adv}^{\textsf{L-IND}}_{\Pi}$, is the probability that the adversary can correctly guess $b$ given $L_b$, $L_{1-b}$, and $D_0$. The core idea of the experiment is that each random-looking value is either randomly sampled or simulated, rather than being generated according to the actual algorithm. Later, in the proof, it must be shown that the simulated results are indistinguishable from those produced by the actual algorithm execution. This can be achieved by leveraging the security properties of the underlying building blocks.
+
+
+
+Here, we provide an overview of the \textsf{L-IND} experiment without delving into the details. In this experiment, when $\mathbf{C}$ receives an \textbf{Init} query, it modifies the \textsf{Init} algorithm for each $Q$ and $Q'$, constructing the commitments \texttt{cm} by committing to random values instead of \gls{aat}s. 
+When $\mathbf{C}$ receives a \textbf{Trans} query, it modifies the \textsf{Trans} algorithm such that the \texttt{eol} value included in the created transaction is randomly sampled. If $e^\text{new}$ is not one of the entities whose secrets the adversary knows (i.e., $e^\text{new} \neq e^*$), $\mathbf{C}$ randomly samples $T^{e^\text{new}}$ and \texttt{cm}; otherwise, it follows the original \textsf{Trans} algorithm. 
+Finally, the \gls{zkp}s in \textbf{Trans} and \textbf{Upload} queries are simulated based on their public inputs. We leave the detailed description of the experiment and its proof for future work. 
+
+Now, suppose the adversary has access to $\mathcal{O}^\mathsf{Attr}$. In this case, $\mathcal{C}$ should not enforce $\mathcal{A}$ to use identical entities in both $Q$ and $Q'$ queries to satisfy the public consistency requirement. Consequently, the adversary would be able to distinguish between the two ledgers (i.e., guess $b$) with a significant probability. 
+To address this scenario, additional assumptions are required, such as assigning a probability to each entity in an anonymity set for sending a specific transaction type within a given time interval.
+The formalization of this scenario and the measurement of anonymity based on the aforementioned probability will be addressed in future research.
+
+
+
 
 
 %\begin{enumerate}

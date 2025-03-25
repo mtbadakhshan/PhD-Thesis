@@ -1,0 +1,78 @@
+% \documentclass[tikz]{standalone}
+% \usepackage{pgfplots}
+% \pgfplotsset{compat=1.18}
+% \usetikzlibrary{patterns}
+% \begin{document}
+\begin{tikzpicture}
+    \begin{axis}[
+        width=14cm, height=8cm,
+        xlabel={m},
+        ylabel={Fraction of Total Execution in GM \cite{libiop}},
+        legend style={at={(0.5,-0.2)}, anchor=north, legend columns=3},
+        ymin=0,
+        grid=major,
+        stack plots=y,
+        area style,
+        cycle list={
+            {black, fill=black!30, pattern=north east lines, pattern color=black!80},
+            {blue, fill=blue!30, pattern=horizontal lines, pattern color=blue!80},
+            {green, fill=green!30, pattern=north west lines, pattern color=green!80},
+            {orange, fill=orange!30, pattern=grid, pattern color=orange!80},
+            {purple, fill=purple!30, pattern=crosshatch, pattern color=purple!80},
+            {cyan, fill=cyan!30, pattern=dots, pattern color=cyan!80},
+            {brown, fill=brown!30, pattern=crosshatch dots, pattern color=brown!80}
+        }
+    ]
+
+    % Plot Initialization
+    \addplot table[
+        x=m, y=Initialization,
+        col sep=comma
+    ] {CSVs/GM_sub_parts_time/normalized_chrono_output.csv} \closedcycle;
+    \addlegendentry{Initialization}
+
+    % Plot Scaling
+    \addplot table[
+        x=m, y=Scaling,
+        col sep=comma
+    ] {CSVs/GM_sub_parts_time/normalized_chrono_output.csv}  \closedcycle;
+    \addlegendentry{Scaling}
+
+    % Plot TaylorEx
+    \addplot table[
+        x=m, y=TaylorEx,
+        col sep=comma
+    ] {CSVs/GM_sub_parts_time/normalized_chrono_output.csv}  \closedcycle;
+    \addlegendentry{Taylor Expansion}
+
+    % Plot BasisComputation
+    \addplot table[
+        x=m, y=BasisComputation,
+        col sep=comma
+    ] {CSVs/GM_sub_parts_time/normalized_chrono_output.csv}  \closedcycle;
+    \addlegendentry{Basis Computation}
+
+    % Plot Bitreverse
+    \addplot table[
+        x=m, y=Bitreverse,
+        col sep=comma
+    ] {CSVs/GM_sub_parts_time/normalized_chrono_output.csv}  \closedcycle ;
+    \addlegendentry{Bit reverse}
+
+    % Plot Span
+    \addplot table[
+        x=m, y=Span,
+        col sep=comma
+    ] {CSVs/GM_sub_parts_time/normalized_chrono_output.csv}  \closedcycle;
+    \addlegendentry{Span}
+
+    % Plot Aggregate
+    \addplot table[
+        x=m, y=Aggregate,
+        col sep=comma
+    ] {CSVs/GM_sub_parts_time/normalized_chrono_output.csv}  \closedcycle;
+    \addlegendentry{Merging}
+
+        \end{axis}
+\end{tikzpicture}
+% \end{document}

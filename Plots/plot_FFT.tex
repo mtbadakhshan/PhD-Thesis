@@ -1,0 +1,83 @@
+% \documentclass{article}
+% \usepackage{pgfplots}
+% \pgfplotsset{compat=1.18}
+% \usepgfplotslibrary{groupplots} % Load groupplots library
+
+% \begin{document}
+
+% \begin{figure}[htbp]
+    % \centering
+    \begin{tikzpicture}
+    
+    % Group style: two plots side by side, wider and with one common legend
+    \begin{groupplot}[
+        group style={
+            group size=2 by 1,
+            horizontal sep=.5cm, % Horizontal space between the plots
+        },
+        width=10cm, % Increase the width of each plot
+        height=8cm,
+        xlabel={$m$},
+        ylabel={Time (microseconds)}, % Left plot has a y-axis label
+        grid=major,
+        % legend to name=commonlegend, % Single common legend
+        legend style={at={(0.25,0.98)}, anchor=north}
+        ]
+    
+    % First subplot (log scale, x <= 12)
+    \nextgroupplot[
+        ymode=log,
+        xmax=18,
+        xmin=4
+    ]
+    
+\addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_libiop_additive_fft.csv};
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_gao_additive_fft_lvl1.csv};
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_gao_additive_fft_lvl2.csv};
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_gao_additive_fft_co.csv};
+    \addplot [red, mark=diamond*] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_gao_additive_fft_co_lvl2.csv};
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_cantor_additive_fft.csv};
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_cantor_additive_fft_precmp.csv};
+
+    % Second subplot (regular scale, x >= 12, without y-axis label)
+    \nextgroupplot[
+        xmin=18,
+        xmax=28,
+        % yticklabel=\empty, % Remove y-axis labels on the right plot
+        ylabel={Time (microseconds)}, % Remove the y-axis label
+        axis y line=right, % Enable the right-side y-axis
+        ylabel near ticks % Optional: move y-axis label near the ticks
+    ]
+
+        \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_libiop_additive_fft.csv};
+    \addlegendentry{GM \cite{libiop}};
+
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_gao_additive_fft_lvl1.csv};
+    \addlegendentry{GM PCL1};
+
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_gao_additive_fft_lvl2.csv};
+    \addlegendentry{GM PCL2};
+
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_gao_additive_fft_co.csv};
+    \addlegendentry{GM CO};
+
+    \addplot [red, mark=diamond*] table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_gao_additive_fft_co_lvl2.csv};
+    \addlegendentry{GM CO PCL2};
+
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_cantor_additive_fft.csv};
+    \addlegendentry{Cantor};
+
+    \addplot table [x=Range, y={Mean CPU Time (microseconds)}, col sep=comma] {CSVs/FFT_Algorithms/BM_cantor_additive_fft_precmp.csv};
+    \addlegendentry{Cantor PC};
+    
+
+    \end{groupplot}
+    
+    % Place the common legend below both plots
+    % \node at ($(group c1r1.south east)!0.5!(group c2r1.south west)$) {\pgfplotslegendfromname{commonlegend}};
+    
+    \end{tikzpicture}
+    % \caption{Performance comparison of different additive FFT algorithms}
+% \end{figure}
+
+% \end{document}

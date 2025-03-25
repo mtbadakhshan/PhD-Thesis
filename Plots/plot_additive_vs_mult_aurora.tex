@@ -1,0 +1,67 @@
+%\documentclass{article}
+%\usepackage{pgfplots}
+%\pgfplotsset{compat=1.18}
+%\usepackage{pgfplotstable}
+%
+%\begin{document}
+%	
+%	\begin{figure}
+%		\centering
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=14cm,
+				height=9cm,
+				xlabel={$\log N$},
+				ylabel={Time (ms)},
+				legend pos=north west,
+				grid=both,
+				grid style={line width=.1pt, draw=gray!10},
+				major grid style={line width=.2pt,draw=gray!50},
+				ymin=100,
+				ymode=log,
+				log basis y=10,
+				title={Aurora Prover Time (Log Scale)},
+				legend style={nodes={scale=0.8, transform shape}},
+				]
+				
+				% Ensure the CSV file has exactly the columns: Algorithm,Instance,Mean Time (ms)
+				\addplot[
+				color=red,
+				mark=square*,
+				thick
+				] table[
+				col sep=comma,
+				x=Instance,
+				y={Mean Time (ms)}
+				] {CSVs/Additive_vs_Mult_Aurora/aurora_prover_prime_field.csv};
+				\addlegendentry{$\mathbb{F}_{p}$ (libiop \cite{libiop})}
+				
+				\addplot[
+				color=green!50!black,
+				mark=triangle*,
+				thick
+				] table[
+				col sep=comma,
+				x=Instance,
+				y={Mean Time (ms)}
+				] {CSVs/Additive_vs_Mult_Aurora/aurora_prover_standard_basis.csv};
+				\addlegendentry{$\mathbb{F}_{2^{256}}$ (libiop \cite{libiop}) }
+				
+				\addplot[
+				color=blue,
+				mark=*,
+				thick
+				] table[
+				col sep=comma,
+				x=Instance,
+				y={Mean Time (ms)}
+				] {CSVs/Additive_vs_Mult_Aurora/aurora_prover_cantor_basis.csv};
+				\addlegendentry{$\mathbb{F}_{2^{256}}$ (Chapter \ref{ch:additive-fft})}
+				
+				
+			\end{axis}
+		\end{tikzpicture}
+%		\caption{Aurora Prover Time Comparison}
+%	\end{figure}
+%	
+%\end{document}
