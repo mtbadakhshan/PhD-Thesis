@@ -19,7 +19,7 @@ The \gls{fft} over additive groups can be utilized in various \gls{zksnark} prot
 For this study, we select Aurora~\cite{Aurora2019} to demonstrate the performance improvements achieved by optimizing the \gls{fft} algorithm using the Cantor special basis \cite{Cantor1989FFT}. While our optimization is applicable to all the aforementioned \gls{zksnark}s, Aurora was chosen due to its small proof size, which makes it a strong candidate for post-quantum secure digital signature schemes. Accordingly, Aurora serves as the foundation of Preon~\cite{Preon2023}, a post-quantum digital signature scheme that was a first-round candidate in NIST’s post-quantum cryptography standardization process~\cite{nist_pqc_round1_signatures}.
 
 \begin{table}
-	\caption[Prover and Verifier of the Aurora zkSNARK using Gao-Mateer and Cantor FFT algoritms]{ Prover and Verifier of the Aurora zkSNARK \cite{Aurora2019} over $\mathbb{F}_{2^{256}}$ based on the number of constraints $N$ and the size of the Reed-Solomon codeword domain $|L|$, using Gao-Mateer and Cantor FFTs, on an AMD Ryzen 9 9950x @ 5.7 GHz (sec).}
+	\caption[Prover and verifier of the Aurora zkSNARK using Gao-Mateer and Cantor FFT algoritms]{ Prover and Verifier of the Aurora zkSNARK \cite{Aurora2019} over $\mathbb{F}_{2^{256}}$ based on the number of constraints $N$ and the size of the Reed-Solomon codeword domain $|L|$, using Gao-Mateer and Cantor FFTs, on an AMD Ryzen 9 9950x @ 5.7 GHz (sec).}
 	\label{tab:cost_analysis_intorduction}
 	\centering
 	{\small
@@ -190,7 +190,7 @@ Since the coefficients in $\mathbb{Z}_{W_{p-1}}(x)$ are in $\mathbb{F}_2$, divis
 \begin{figure}[tbh]
 	\centering
 	\includegraphics[width=0.75\linewidth]{Figures/Division.jpg}
-	\caption{Computing the polynomials for the next round from the outputs of dividing \( f_{i,r}(x) \) (of degree \( < 8 \)) by \( \mathbb{Z}_{W_{p-1}} \), represented by \( \zbu_{p-1} \). %This figure separates the computation of \( f_{2i,r+1}(x) \) from the division algorithm, despite the actual implementation.
+	\caption[Computing the polynomials for the next round of the Cantor FFT algorithm]{Computing the polynomials for the next round from the outputs of dividing \( f_{i,r}(x) \) (of degree \( < 8 \)) by \( \mathbb{Z}_{W_{p-1}} \), represented by \( \zbu_{p-1} \). %This figure separates the computation of \( f_{2i,r+1}(x) \) from the division algorithm, despite the actual implementation.
 	}  
 	\label{fig:division}
 \end{figure}
@@ -255,7 +255,7 @@ Cantor algorithm is implemented by Canopy modules of varying input sizes $2^p$ a
  \begin{figure}
 	     \centering
 	     \includegraphics[width=\linewidth]{Figures/Canopy.jpg}
-	     \caption{\small Cantor FFT algorithm of length $n = 2^3$ which evaluates $f(x)\in\mathbb{F}[x]$ of degree $<8$ over $\theta$ + $W_3$, where $\theta \in \mathbb{F}_{2^k}$ and $W_3$ is the Cantor special basis.}
+	     \caption[The Canopy module in the Cantor FFT algorithm]{\small Cantor FFT algorithm of length $n = 2^3$ which evaluates $f(x)\in\mathbb{F}[x]$ of degree $<8$ over $\theta$ + $W_3$, where $\theta \in \mathbb{F}_{2^k}$ and $W_3$ is the Cantor special basis.}
 	     \label{fig:Canopy}
 	 \end{figure}%\vspace{-100pt}
 
@@ -778,7 +778,7 @@ In the last round of the \textsf{Expand} module, $\fbu$ is rearranged in bit-rev
 		\label{fig:gao-expand-binary}
 	\end{subfigure}
 	
-	\caption[The \textsf{Expand} Module in the Gao FFT Algorithm]{The \textsf{Expand} module in the Gao FFT algorithm of length $n=2^3$, which evaluates a polynomial $f(x) \in \mathbb{F}[x]$ of degree $< 8$ over $\theta + W_3$, where $W_3 = \langle \beta_0, \beta_1, \beta_2 \rangle$. 
+	\caption[The \textsf{Expand} module in the Gao FFT algorithm]{The \textsf{Expand} module in the Gao FFT algorithm of length $n=2^3$, which evaluates a polynomial $f(x) \in \mathbb{F}[x]$ of degree $< 8$ over $\theta + W_3$, where $W_3 = \langle \beta_0, \beta_1, \beta_2 \rangle$. 
 		In Figure (a), the \textsf{Expand} module groups even and odd indices after each Taylor expansion. In contrast, Figure (b) skips these rearrangements by using one $\textsf{T}_8$ module instead of two $\textsf{T}_4$ modules in round $r=1$ then performs the bit-reversal in the final round. 
 		 Additionally, in this figure, $\beta_{0,2} = \beta_2$, and $\beta_{1,1} = (\beta_1 \beta_2^{-1})^2 -  (\beta_1 \beta_2^{-1})$. Given that $\beta_{1,0} = (\beta_0 \beta_1^{-1})^2 -  (\beta_0 \beta_1^{-1})$, we can compute $\beta_{2,0} = (\beta_{1,0} \beta_{1,1}^{-1})^2 -  (\beta_{1,0} \beta_{1,1}^{-1})$.
 	}
@@ -1188,7 +1188,7 @@ Figure~\ref{fig:benchmark} compares the runtime of the FFT algorithms. It shows 
 	\resizebox{\textwidth}{!}{
 		\input{Plots/plot_FFT}
 	}
-	\caption{Performance comparison of variances of Gao-Mateer and Cantor additive FFT algorithms of length $n=2^m$ for $4\leq m \leq 28$. The left plot is in a logarithmic scale. }
+	\caption[Performance comparison of variances of Gao-Mateer and Cantor FFT algorithms]{Performance comparison of variances of Gao-Mateer and Cantor additive FFT algorithms of length $n=2^m$ for $4\leq m \leq 28$. The left plot is in a logarithmic scale. }
 	\label{fig:benchmark}
 \end{figure}
 
