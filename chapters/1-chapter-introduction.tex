@@ -1,5 +1,5 @@
 %======================================================================
-\chapter{Introduction}
+\chapter{Introduction} \label{ch:Intro}
 %======================================================================
 Zero-knowledge succinct non-interactive argument of knowledge (\gls{zksnark}) protocols are cryptographic schemes involving a prover and a verifier. The prover generates a publicly verifiable and succinct proof that demonstrates knowledge of a witness vector (secret inputs) satisfying a given constraint system ($\mathcal{NP}$ statement). The proof does not reveal any information about the witness itself. These protocols have a wide range of applications, such as post-quantum secure digital signature algorithms \cite{faest2023,picnic2017,Preon2023,picnic2018}, privacy-preserving applications over blockchains \cite{zcash-proc,Hawk,ZeeStar,ZEXE,williamson2018aztec}, blockchain scalability solutions using rollups \cite{Arun2024Jolt,Chaliasos2024,Thibault2022,PolygonZKEVM,zkSync,STARKnet}, data availability proofs for lightweight clients in Ethereum \cite{HallAndersen2024FRIDA}, the proof of replication in Filecoin~\cite{benet2017proof}, verifying the computation of neural networks~\cite{Haochen2024zkLLM,Chen2024ZKML,Weng2021Mystique}, and verifying the authenticity of edited images~\cite{Dziembowski2025VIMz}. 
 The efficiency of the prover and verifier algorithms, along with the proof size of the  \gls{zksnark} protocol, are crucial factors influencing the cost-effectiveness and overall practicality of the aforementioned applications. Additionally, two other important factors are: first, whether the \gls{zksnark} protocol relies on a trusted setup or employs a transparent setup; and second, whether it offers plausible post-quantum security against a malicious prover with quantum capabilities.
@@ -13,7 +13,7 @@ The \gls{fft} algorithm used in a \gls{zksnark} protocol can be either multiplic
 	{
 		\input{Plots/plot_additive_vs_mult_aurora}
 	}
-	\caption[The Aurora zkSNARK Runtime over Prime Versus Binary Extension Fields]{Comparison of Aurora \gls{zksnark}~\cite{Aurora2019} performance over prime fields and binary extension fields on an AMD Ryzen 9 9950X @ 5.7 GHz. The prime field is defined by a 255-bit prime $p$, corresponding to the scalar field of the BLS12-381 curve~\cite{BLS_curve2003}. $N$ denotes the number of constraints.}
+	\caption[The Aurora zkSNARK Runtime Over Prime Versus Binary Extension Fields]{Comparison of Aurora \gls{zksnark}~\cite{Aurora2019} performance over prime fields and binary extension fields on an AMD Ryzen 9 9950X @ 5.7 GHz. The prime field is defined by a 255-bit prime $p$, corresponding to the scalar field of the BLS12-381 curve~\cite{BLS_curve2003}. $N$ denotes the number of constraints.}
 	\label{fig:prime_vs_binary_aurora}
 \end{figure}
 

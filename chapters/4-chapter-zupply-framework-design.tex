@@ -2,13 +2,13 @@
 \chapter{Zupply Framework Design} \label{ch:zupply-design}
 %======================================================================
 
-
-In this chapter, we propose a novel anonymous authentication token (\gls{aat}) framework that supports unlinkable \gls{aat} ownership transfer (\gls{aatot}) including unlinkable merging and dividing of \gls{aat}s. The construction leverages zero-knowledge proof (\gls{zkp}) protocols to guarantee anonymity, unlinkability, and authentication. Building on this foundation, we introduce Zupply, a decentralized framework for maintaining directed acyclic graphs (\gls{dag}s) of authentic data records. Designed on a permissionless, smart contract-enabled blockchain, Zupply provides a trustless framework that preserves anonymity and unlinkability among participants while ensuring the integrity and authenticity of data records throughout the supply chain.
-
 \section*{Declaration of Contributions}
 This chapter is based on \cite{Badakhshan2024Zupply}. I am the sole author of this chapter.
 
+
+
 \section{Introduction}
+
 
 The Zupply framework facilitates the authenticated and privacy-preserving, decentralized maintenance of directed acyclic graphs (\gls{dag}s). \gls{dag}s, which are pivotal in representing data flows, find utility in diverse applications. One notable application is in supply chain management (\gls{scm}), where a \gls{dag} is instrumental in tracking a product's progression. In this context, each \gls{dag} node represents a unique stage in the product's lifecycle, facilitating an understanding of the sequence and interdependencies of these stages. \gls{dag} data structure has the flexibility to either extend a sequence, divide it into two, or merge two sequences into one. Beyond \gls{scm}, \gls{dag} structured data (or simply \gls{dag}) is also employed in various other domains, including version control systems (\gls{vcs}) (e.g., Git \cite{gitonline2023} and Mercurial \cite{mercurial}). Proposing a practical, fully decentralized, and trustless scheme for maintaining \gls{dag} that simultaneously preserves the privacy of entities creating data records and ensures the authentication of these records addresses significant challenges in current \gls{scm} solutions.
 
@@ -359,10 +359,10 @@ Zupply framework $\Pi$ Consists of a tuple of polynomial-time algorithms and pro
 
 \subsection{Algorithms} \label{sec:Zupply-Algorithms}%
 % Using security parameter $\lambda$, we define Zupply Scheme. // explain $i$
-All algorithms have read-only access to $\mathbf{TX}_\tau$, $\mathbf{C}_\tau$, and $\mathbf{X}_\tau$, and $\mathbf{D}_\tau$ (via \textsf{DCS} queries). The smart contract and \textsf{DCS} can update these sets when the \textsf{VerifyTX} or \textsf{Audit} algorithms output~1.
+All algorithms have read-only access to $\mathbf{TX}\tau$, $\mathbf{C}\tau$, \textsf{MHT}, $\mathbf{X}\tau$, and $\mathbf{D}\tau$ (accessible via \textsf{DCS} queries). The smart contract is responsible for updating $\mathbf{TX}\tau$, $\mathbf{C}\tau$, $\mathbf{X}_\tau$, and the root of \textsf{MHT} when the \textsf{VerifyTX} algorithm outputs 1.
 
 \subsubsection{\textsf{Setup} ($1^{\lambda}$) $\rightarrow$ $\textsc{pp}$}
-Given a security parameter $\lambda$, \textsf{Setup} generates a set of global public parameters, denoted as \textsc{pp}. The specific implementation of \textsf{Setup} depends on the zkSNARK algorithm in use: it may require a trusted party, or it may rely on a transparent (public) setup. The resulting \textsc{pp} is made publicly available. The pseudocode for \textsf{Setup} is provided in Algorithm~\ref{alg:Setup}.
+Given a security parameter $\lambda$, \textsf{Setup} generates a set of global public parameters, denoted as \textsc{pp}. The specific implementation of \textsf{Setup} depends on the \gls{zksnark} algorithm in use: it may require a trusted party, or it may rely on a transparent (public) setup. The resulting \textsc{pp} is made publicly available. The pseudocode for \textsf{Setup} is provided in Algorithm~\ref{alg:Setup}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% Setup %%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{algorithm}[h]
@@ -388,271 +388,113 @@ Given a security parameter $\lambda$, \textsf{Setup} generates a set of global p
 \end{algorithm}
 % ###########################################
 
-\newpage
 
 \subsubsection{\textsf{Init} ($\textsc{pp}$, $q_{i_1}$) $\rightarrow$ ($\texttt{tx}_{\textsf{Init}}$, $T_{i_1}$) }
-Initiates a DAG. The algorithm gets $q_{i_1}$, which will be maintained in the DAG. It creates a new token $T_{i_1}$, commits to it, and sends the commitment via $\texttt{tx}_{\mathsf{Init}}$$ := (\texttt{cm}_{i_1}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}})$ to the blockchain. The pseudocode for \textsf{Init} is provided in Algorithm~\ref{alg:Init}.
+Initiates a \gls{dag}. The algorithm gets $q_{i_1}$, which will be maintained in the \gls{dag}. It creates a new token $T_{i_1}$, commits to it, and sends the commitment via
+ \[
+ \texttt{tx}_{\mathsf{Init}} := (\texttt{cm}_{i_1}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}})
+ \]
+ to the blockchain. The pseudocode for \textsf{Init} is provided in Algorithm~\ref{alg:Init} is provided in Algorithm~\ref{alg:trans} in Appendix \ref{a_ch:zupply_algorithms}.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%% Init %%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}[h]
-\caption{\textsf{Init} ($\textsc{pp}$, $q_{i_1}$) $\rightarrow$ ($\texttt{tx}_{\textsf{Init}}$, $T_{i_1}$) }\label{alg:Init}
-\begin{algorithmic}[1]
-\State {$\textsc{pp}_\mathsf{sig} \gets \textsc{pp}$}
-\State {$\rho_{i_1} \xleftarrow{R} \{0,1\}^{N_\rho}$}
-% \State {$k \gets \mathcal{H}\big(r|| \big[\mathcal{H}\big(e_I.a_{pk}||\rho \big)\big]_{128} \big)$}
-\State {$(\text{PKsig}_{i_1}, \text{SKsig}_{i_1} ) \gets \mathcal{K}_\mathsf{sig}\big(\textsc{pp}_\mathsf{sig}\big) $}
-\State {$\Tilde{T}_{i_1} \gets \big( 
-q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1} \big)$}, {$T_{i_1} \gets \big(\Tilde{T}_{i_1}, \text{SKsig}_{i_1}\big)$}
-\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}
-\State{$(\texttt{rt}^{\text{new}}, \mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_1})$}
-\State {$\texttt{tx}_{\textsf{Init}} \gets \big(\texttt{cm}_{i_1}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}\big)$}
 
-\State {\Return $\texttt{tx}_{\textsf{Init}}, T_{i_1}$}
-\end{algorithmic}
-\end{algorithm}
-% ###########################################
-
-\newpage
 
 \subsubsection{\textsf{Trans} (\textsc{pp}, $T_{i_1}$,  $\text{PKsig}_{i_2}$) $\rightarrow$ ($\texttt{tx}_{\textsf{Trans}}$, $\Tilde{T}_{i_2}$, $\texttt{Tag}$)}
 
-Obsoletes  $T_{i_1}$ and generates $\Tilde{T}_{i_2}$. The quantity $q_{i_1}=q_{i_2}$ remains unchanged, and $T_{i_1}$, $\Tilde{T}_{i_2}$, and $\texttt{cm}_{i_1}$ are not disclosed. It uploads $\texttt{cm}_{i_2}$ on the blockchain via $\texttt{tx}_\mathsf{Trans}$. The pseudocode for \textsf{Trans} is provided in Algorithm~\ref{alg:trans}.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%% TRANS %%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}[h]
-\caption{\textsf{Trans} $\big($\textsc{pp}$, T_{i_1},  \text{PKsig}_{i_2} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Trans}}, \Tilde{T}_{i_2}, \texttt{Tag}\big)$}\label{alg:trans}
-\begin{algorithmic}[1]
-\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}
-\If {$\texttt{cm}_{i_1}\notin \mathbf{C}_\tau$} {}
-\State \Return $\perp$
-\EndIf
-\State $(\mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_1})$
-\State {$\mathsf{pk}_\mathsf{Trans} \gets \textsc{pp}$}
-\State $\texttt{eol}_{i_1} \gets \mathcal{H} \big( \rho_{i_1}\big)$
-\State $q_{i_2} \gets q_{i_1}$
-\State {$\rho_{i_2} \xleftarrow{R} \{0,1\}^{N_\rho}$}
-\State {$\Tilde{T}_{i_2} \gets \big( 
-q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2} \big)$}
-\State {$\texttt{cm}_{i_2} \gets \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2}) $}
-% \State
-\State $x_\textsf{Trans} \gets \big(\texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}_\tau \big)$
-\State $w_\textsf{Trans} \gets \big( \Tilde{T}_{i_1}, \Tilde{T}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_1}}\big)$
-\State $\pi_{\textsf{Trans}} \gets \textsf{Prove}\big(\mathsf{pk}_{\textsf{Trans}}, x_{\textsf{Trans}}, w_{\textsf{Trans}}\big)$
-
-\State{$(\texttt{rt}^{\text{new}}, \mathsf{ind}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_2}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_2})$}
-\State$\texttt{tx}_{\textsf{Trans}} \gets \big(\pi_{\textsf{Trans}}, x_{\textsf{Trans}}, \texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_2}} \big)$
-
-\State $\texttt{Tag} \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_1}, \text{PKsig}_{i_2})$
-\State \Return $\texttt{tx}_{\textsf{Trans}}$, $\Tilde{T}_{i_2}$ , $\texttt{Tag}$
-\end{algorithmic}
-\end{algorithm}
-% ###########################################
-
-\newpage
-
-\subsubsection{\textsf{Merge} (\textsc{pp}, $T_{i_{1,2}}$,  $\text{PKsig}_{i_3}$) $\rightarrow$ ($\texttt{tx}_{\textsf{Merge}}$, $\Tilde{T}_{i_3}$, $\texttt{Tag}_{i_{1,2}}$)}
-
-Obsoletes $T_{i_1}$, $T_{i_2}$ and generates $\Tilde{T}_{i_3}$ ($q_{i_3} = q_{i_1} + q_{i_2}$).  $T_{i_1}$, $T_{i_2}$, $\Tilde{T}_{i_3}$, $\texttt{cm}_{i_1}$, and $\texttt{cm}_{i_2}$ are not disclosed. $\texttt{tx}_\mathsf{Merge} $:$=(\pi_{\mathsf{Merge}}, x_\mathsf{Merge}, \texttt{eol}_{i_{1,2}},  \texttt{cm}_{i_3}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_3}} )$,
- where $x_\mathsf{Merge} = (\texttt{eol}_{i_{1,2}}, \texttt{cm}_{i_3}, \texttt{rt}_\tau)$.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%% Merge %%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}
-\caption{\textsf{Merge} $\big($\textsc{pp}$, T_{i_{1,2}},  \text{PKsig}_{i_3} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Merge}}, \Tilde{T}_{i_3}, \texttt{Tag}_{i_{1,2}}\big)$}\label{alg:merge}
-\begin{algorithmic}[1]
-\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}, {$\texttt{cm}_{i_2} \gets \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2}) $}
-\If {$\texttt{cm}_{i_1}\notin \mathbf{C}_\tau$ or $\texttt{cm}_{i_2}\notin \mathbf{C}_\tau$} {}
-\State \Return $\perp$
-\EndIf
-\State $(\mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_1})$
-\State $(\mathsf{ind}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_2}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_2})$
-
-\State {$\mathsf{pk}_\mathsf{Merge} \gets \textsc{pp}$}
-\State {$\texttt{eol}_{i_1} \gets \mathcal{H} \big( \rho_{i_1}\big)$, $\texttt{eol}_{i_2} \gets \mathcal{H} \big( \rho_{i_2}\big)$}
-\State $q_{i_3} \gets q_{i_1} +  q_{i_2}$
-\State {$\rho_{i_3} \xleftarrow{R} \{0,1\}^{N_\rho}$}
-\State {$\Tilde{T}_{i_3} \gets \big( 
-q_{i_3}, \text{PKsig}_{i_3}, \rho_{i_3} \big)$}
-\State {$\texttt{cm}_{i_3} \gets \mathsf{COMM}_{\rho_{i_3}}(\Tilde{T}_{i_3}) $}
-% \State
-\State $x_\textsf{Merge} \gets \big(\texttt{eol}_{i_{1,2}}, \texttt{cm}_{i_3}, \texttt{rt}_\tau \big)$
-\State $w_\textsf{Merge} \gets \big( \Tilde{T}_{i_{1,2}}, \Tilde{T}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_{1,2}}}\big)$
-\State $\pi_{\textsf{Merge}} \gets \textsf{Prove}\big(\mathsf{pk}_{\textsf{Merge}}, x_{\textsf{Merge}}, w_{\textsf{Merge}}\big)$
-
-\State{$(\texttt{rt}^{\text{new}}, \mathsf{ind}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_3}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_3})$}
-\State$\texttt{tx}_{\textsf{Merge}} \gets \big(\pi_{\textsf{Merge}}, x_{\textsf{Merge}}, \texttt{eol}_{i_{1,2}}, \texttt{cm}_{i_3}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_3}} \big)$
-% \State $T^{\text{new}} \gets \big( q^{\text{old}}
-% \text{PK}_{\text{sig}}^{\text{new}}, , \rho^{\text{new}}\big)$
-% \State $\mathcal{C} = \text{Enc} \big(\text{pk}_{\text{enc}}, \{T^{\text{old}}.q, \rho^{\text{new}}\big\}\big)$
-\State $\texttt{Tag}_{i_1} \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_1}, \text{PKsig}_{i_3})$
-\State $\texttt{Tag}_{i_2} \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_2}, \text{PKsig}_{i_3})$
-
-\State \Return $\texttt{tx}_{\textsf{Merge}}$, $\Tilde{T}_{i_3}$ , $\texttt{Tag}_{i_{1,2}}$
-\end{algorithmic}
-\end{algorithm}
-
-% ###########################################
-\newpage
-
-\subsubsection{\textsf{Divide} ($\textsc{pp}$, $T_{i_1}$,  $\text{PKsig}_{i_{2,3}}$, $q_{i_{2,3}}$) $\rightarrow$ ($\texttt{tx}_{\textsf{Div}}$, $\Tilde{T}_{i_{2,3}}$, $\texttt{Tag}_{i_{2,3}}$)}
-
-Obsoletes $T_{i_1}$ and generates $\Tilde{T}_{i_2}$ and $\Tilde{T}_{i_3}$ ($q_{i_1} = q_{i_2} + q_{i_3}$). $T_{i_1}$, $\Tilde{T}_{i_2}$, $\Tilde{T}_{i_3}$, and  $\texttt{cm}_{i_1}$ are not disclosed. $\texttt{tx}_\mathsf{Div} $:$=(\pi_{\mathsf{Div}}, x_\mathsf{Div}, \texttt{eol}_{i_{1}},  \texttt{cm}_{i_{2,3}}, \texttt{rt}_{1,2}^{\text{new}},\mathsf{ind}_{i_{2,3}}, \mathsf{path}_{\mathsf{ind}_{i_{2,3}}} )$, where $x_\mathsf{Div} =\big(\texttt{eol}_{i_1}, \texttt{cm}_{i_{2,3}}, \texttt{rt}_\tau \big)$.
+This algorithm takes an existing \gls{aat} $T_{i_1}$ and renders it obsolete by publishing its associated \gls{eol} on the blockchain. Specifically, it computes $\texttt{eol}_{i_1} := \mathcal{H}(\rho_{i_1})$, where $\rho_{i_1}$ is a secret contained in $T_{i_1}$, and includes this value in the resulting transaction $\texttt{tx}_{\textsf{Trans}}$.
+Subsequently, the algorithm constructs a new partial \gls{aat}, denoted $\Tilde{T}_{i_2}$, by sampling a fresh random value $\rho_{i_2}$ and assigning it the same quantity as in $T_{i_1}$. The public key $\text{PKsig}_{i_2}$ is used to bind the new token to its intended recipient, in accordance with the \textsf{OT-Protocol} described in Section~\ref{sec:Ownership Transfer}. The algorithm commits to $\Tilde{T}_{i_2}$ and includes the resulting commitment in the transaction.
+The transaction also includes a \gls{zkp} demonstrating:
+(1)  knowledge of $T_{i_1}$ whose commitment is included in the \textsf{MHT}, without revealing the commitment itself,
+(2) consistency of this committment with the published $\texttt{eol}_{i_1}$,
+(3) knowledge of the preimage of the new commitment ($\texttt{cm}_{i_2}$) to $\Tilde{T}_{i_2}$, and
+(4) equality of the quantity values in $T_{i_1}$ and $\Tilde{T}_{i_2}$.
+Accordingly, the contents of the transaction $\texttt{tx}_{\textsf{Trans}}$ are defined as:
+\[
+\texttt{tx}_{\textsf{Trans}} := \big(\pi_{\textsf{Trans}}, x_{\textsf{Trans}}, \texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_2}} \big)
+\]
+where 
+\[
+x_\textsf{Trans} := \big(\texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}_\tau \big)
+\]
+denotes the public inputs to the \gls{zkp}, $\texttt{rt}^{\text{new}}$ is the updated root of the \textsf{MHT} after inserting the new commitment $\texttt{cm}_{i_2}$, and $\mathsf{ind}_{i_2}$ with $\mathsf{path}_{\mathsf{ind}{i_2}}$ represent the index and Merkle proof of the new commitment.
+Finally, the algorithm outputs a $\texttt{Tag}$, which enables the new \gls{aat} owner to continue the data sequence, ensuring continuity with the most recent data record generated using $T_{i_1}$. The pseudocode for \textsf{Trans} is provided in Algorithm~\ref{alg:trans} in Appendix~\ref{a_ch:zupply_algorithms}.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%% Divide %%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}
-\caption{\textsf{Divide} $\big($\textsc{pp}$, T_{i_1},  \text{PKsig}_{i_{2,3}}, q_{i_{2,3}} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Div}}, \Tilde{T}_{i_{2,3}}, \texttt{Tag}_{i_{2,3}}\big)$}\label{alg:divide}
-\begin{algorithmic}[1]
-\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}
-\If {$\texttt{cm}_{i_1}\notin \mathbf{C}_\tau$ \textbf{or} $q_{i_{1}} \neq q_{i_{2}} + q_{i_{3}}$} 
-\State \Return $\perp$
-\EndIf
-\State $(\mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_1})$
-\State {$\mathsf{pk}_\mathsf{Div} \gets \textsc{pp}$}
-\State $\texttt{eol}_{i_1} \gets \mathcal{H} \big( \rho_{i_1}\big)$
-% \State Select $q_{i_2}$ and $q_{i_3}$ such that $q_{i_1} = q_{i_2} + q_{i_3}$
-\State {$\rho_{i_2} \xleftarrow{R} \{0,1\}^{N_\rho}$, $\rho_{i_3} \xleftarrow{R} \{0,1\}^{N_\rho}$}
-\State {$\Tilde{T}_{i_2} \gets \big(q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2} \big)$, $\Tilde{T}_{i_3} \gets \big(q_{i_3}, \text{PKsig}_{i_3}, \rho_{i_3} \big)$}
-\State {$\texttt{cm}_{i_2} \gets \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2}) $, $\texttt{cm}_{i_3} \gets \mathsf{COMM}_{\rho_{i_3}}(\Tilde{T}_{i_3}) $}
-% \State
-\State $x_\textsf{Div} \gets \big(\texttt{eol}_{i_1}, \texttt{cm}_{i_{2,3}}, \texttt{rt}_\tau \big)$
-\State $w_\textsf{Div} \gets \big( \Tilde{T}_{i_1}, \Tilde{T}_{i_{2,3}}, \mathsf{path}_{\mathsf{ind}_{i_1}}\big)$
-\State $\pi_{\textsf{Div}} \gets \textsf{Prove}\big(\mathsf{pk}_{\textsf{Div}}, x_{\textsf{Div}}, w_{\textsf{Div}}\big)$
-
-\State{$(\texttt{rt}_1^{\text{new}}, \mathsf{ind}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_2}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_2})$}
-\State{$(\texttt{rt}_2^{\text{new}}, \mathsf{ind}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_3}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_3})$}
-\State$\texttt{tx}_{\textsf{Div}} \gets \big(\pi_{\textsf{Div}}, x_{\textsf{Div}}, \texttt{eol}_{i_1}, \texttt{cm}_{i_{2,3}}, \texttt{rt}_{1,2}^{\text{new}}, \mathsf{ind}_{i_{2,3}}, \mathsf{path}_{\mathsf{ind}_{i_{2,3}}} \big)$
-% \State $T^{\text{new}} \gets \big( q^{\text{old}}
-% \text{PK}_{\text{sig}}^{\text{new}}, , \rho^{\text{new}}\big)$
-% \State $\mathcal{C} = \text{Enc} \big(\text{pk}_{\text{enc}}, \{T^{\text{old}}.q, \rho^{\text{new}}\big\}\big)$
-\State $\texttt{Tag}_2 \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_1}, \text{PKsig}_{i_2})$
-\State $\texttt{Tag}_3 \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_1}, \text{PKsig}_{i_3})$
-\State \Return $\texttt{tx}_{\textsf{Div}}$, $\Tilde{T}_{i_{2,3}}$ , $\texttt{Tag}_{i_{2,3}}$
-\end{algorithmic}
-\end{algorithm}
 
 
-% ###########################################
-\newpage
+\subsubsection{\textsf{Merge} (\textsc{pp}, $T_{i_{1}}$, $T_{i_{2}}$,  $\text{PKsig}_{i_3}$) $\rightarrow$ ($\texttt{tx}_{\textsf{Merge}}$, $\Tilde{T}_{i_3}$, $\texttt{Tag}_{i_{1}}$, $\texttt{Tag}_{i_{2}}$)}
 
-\subsubsection{\textsf{VerifyTX} (\textsc{pp}, \texttt{tx}) $\rightarrow$ $b \in \{0, 1\}$}
+The \textsf{Merge} algorithm follows a similar approach to the \textsf{Trans} algorithm. In this procedure, two \glspl{aat}, $T_{i_1}$ and $T_{i_2}$, are rendered obsolete, and their corresponding \glspl{eol}, $\texttt{eol}_{i_{1}}$ and $\texttt{eol}_{i_{2}}$, are published to the blockchain via $\texttt{tx}_{\textsf{Merge}}$. A new partial token, $\Tilde{T}_{i_3}$, is created using the input public key $\text{PKsig}_{i_3}$, sampling a random value $\rho_{i_2}$, and a quantity value set to the sum of the quantity values in $T_{i_1}$ and $T_{i_2}$.
+The transaction also includes a commitment to the new \gls{aat}, denoted by $\texttt{cm}_{i_3}$, along with a \gls{zkp} that proves the following statements without revealing the underlying values: (1) knowledge of $T_{i_1}$ and $T_{i_2}$ whose commitments are included in the \textsf{MHT}, (2)  consistency of these commitments with the published $\texttt{eol}_{i_{1}}$ and $\texttt{eol}_{i_{2}}$, (3) the knowledge of $\Tilde{T}{i_3}$ in the new commitment $\texttt{cm}_{i_3}$ to $\Tilde{T}_{i_3}$, and (4) that the quantity in $\Tilde{T}_{i_3}$ equals the sum of the quantities in $T_{i_1}$ and $T_{i_2}$.  Accordingly, the transaction $\texttt{tx}_{\textsf{Merge}}$ is defined as:
+\[
+\texttt{tx}_\mathsf{Merge} :=(\pi_{\mathsf{Merge}}, x_\mathsf{Merge}, \texttt{eol}_{i_{1}}, \texttt{eol}_{i_{2}},  \texttt{cm}_{i_3}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_3}}),
+\]
+where
+\[
+x_\mathsf{Merge} = (\texttt{eol}_{i_{1}}, \texttt{eol}_{i_{2}} \texttt{cm}_{i_3}, \texttt{rt}_\tau)
+\]
+denotes the public inputs to the \gls{zkp}. Here, $\texttt{rt}_1^{\text{new}}$ is the updated root of the \textsf{MHT} after inserting the first new commitment $\texttt{cm}_{i_2}$, and $\texttt{rt}_2^{\text{new}}$ is the root after inserting the second new commitment $\texttt{cm}_{i_3}$. Accordingly, $\mathsf{ind}_{i_2}$ with its corresponding Merkle path $\mathsf{path}_{\mathsf{ind}_{i_2}}$, and $\mathsf{ind}_{i_3}$ with $\mathsf{path}_{\mathsf{ind}_{i_3}}$, represent the indices and Merkle proofs for the first and second new commitments, respectively.
+The \textsf{Merge} algorithm also outputs two data ownership transfer tags, $\texttt{Tag}_{i_{1}}$ and $\texttt{Tag}_{i_{2}}$, which are used together in a new data record to ensure continuity with the two most recent data records generated by the \glspl{aat} $T_{i_1}$ and $T_{i_2}$ and merging those sequences. The pseudocode for the \textsf{Merge} algorithm is provided in Algorithm~\ref{alg:merge} in Appendix~\ref{a_ch:zupply_algorithms}.
 
-Takes a transaction \texttt{tx} and returns one if and only if \texttt{tx} is a valid transaction as specified in Definition \ref{def:Valid Transaction}.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%% VerifyTX %%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}
-\caption{\textsf{VerifyTX} $\big($\textsc{pp}$, \texttt{tx} \big)$ $\rightarrow$ $b \in \{0, 1\}$}\label{alg:VerifyTX}
-\begin{algorithmic}[1]
-\State {$\mathbbm{x}$ $\gets$ type of \texttt{tx} } \Comment{$\mathbbm{x} \in \{\mathsf{Trans}, \mathsf{Merge}, \mathsf{Div}\}$} 
-\State {$\mathsf{vk}_\mathbbm{x}  \gets \textsc{pp}$}
-\State $(x_\mathbbm{x}, \pi_\mathbbm{x}, \texttt{eol}_1, \texttt{cm}_1, \texttt{rt}_1^{\text{new}}, \mathsf{ind}_{1}, \mathsf{path}_{\mathsf{ind}_{1}}) \gets \texttt{tx}$
-
-\If{$\texttt{eol}_1 \in  \mathbf{X}_\tau$}
-\State \Return 0
-\EndIf
-
-\If{$\mathbbm{x} = \mathsf{Merge}$}
-\State {$\texttt{eol}_2 \gets \texttt{tx}$}
-    \If{$\texttt{eol}_2 \in  \mathbf{X}_\tau$}
-    \State \Return 0
-    \EndIf
-\EndIf
+%Obsoletes $T_{i_1}$, $T_{i_2}$ and generates $\Tilde{T}_{i_3}$ ($q_{i_3} = q_{i_1} + q_{i_2}$).  $T_{i_1}$, $T_{i_2}$, $\Tilde{T}_{i_3}$, $\texttt{cm}_{i_1}$, and $\texttt{cm}_{i_2}$ are not disclosed. $\texttt{tx}_\mathsf{Merge} $:$=(\pi_{\mathsf{Merge}}, x_\mathsf{Merge}, \texttt{eol}_{i_{1,2}},  \texttt{cm}_{i_3}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_3}} )$,
+% where $x_\mathsf{Merge} = (\texttt{eol}_{i_{1,2}}, \texttt{cm}_{i_3}, \texttt{rt}_\tau)$.
 
 
-\If{$\textsf{Verify}\big(\mathsf{vk}_\mathbbm{x}, x_\mathbbm{x}, \pi_\mathbbm{x} \big) \neq 1$}
-\State \Return 0
-\EndIf
-% \State $() \gets \texttt{tx}$
-\If {$\mathsf{MHT}.\mathsf{Verify}(\texttt{rt}_{\tau}, \texttt{rt}_1^{\text{new}}, \texttt{cm}_1, \mathsf{ind}_1, \mathsf{path}_{\mathsf{ind}_1}) \neq 1$}
-\State \Return 0
-\EndIf
-\If{ $\mathbbm{x} = \mathsf{Div}$} 
-    \State $(\texttt{cm}_2, \texttt{rt}_2^{\text{new}}, \mathsf{ind}_{2}, \mathsf{path}_{\mathsf{ind}_{2}}) \gets \texttt{tx}$
-    \If {$\mathsf{MHT}.\mathsf{Verify}(\texttt{rt}_1^{\text{new}}, \texttt{rt}_2^{\text{new}}, \texttt{cm}_2, \mathsf{ind}_2, \mathsf{path}_{\mathsf{ind}_2}) \neq 1$}
-    \State \Return 0
-\EndIf
 
-\EndIf
+\subsubsection{\textsf{Divide} ($\textsc{pp}$, $T_{i_1}$,  $\text{PKsig}_{i_{2}}$, $\text{PKsig}_{i_{3}}$, $q_{i_{2}}$, $q_{i_{3}}$) $\rightarrow$ ($\texttt{tx}_{\textsf{Div}}$, $\Tilde{T}_{i_{2}}$, $\Tilde{T}_{i_{3}}$, $\texttt{Tag}_{i_{2}}$, $\texttt{Tag}_{i_{3}}$)}
 
-% \If{$\textsf{Verify}()$}
-\State \Return 1
-\end{algorithmic}
-\end{algorithm}
+The \textsf{Divide} algorithm is the inverse of the \textsf{Merge} algorithm. It takes a single \gls{aat}, $T_{i_1}$, as input and creates two new partial \glspl{aat}, denoted $\Tilde{T}_{i_2}$ and $\Tilde{T}_{i_3}$. These are generated using the provided public keys $\text{PKsig}_{i_2}$ and $\text{PKsig}_{i_3}$, sampled random values $\rho_{i_2}$ and $\rho_{i_3}$, and quantity values $q_{i_2}$ and $q_{i_3}$, such that the sum $q_{i_2} + q_{i_3}$ equals the quantity in $T_{i_1}$. 
+This algorithm renders $T_{i_1}$ obsolete, and its associated \gls{eol}, denoted $\texttt{eol}_{i_1}$, is included in the transaction sent to the blockchain. The transaction also includes the commitments to the newly created partial tokens, $\texttt{cm}_{i_2}$ and $\texttt{cm}_{i_3}$, as well as a \gls{zkp} proving the following statements: (1) knowledge of $T_{i_1}$, whose commitment is included in the \textsf{MHT}, (2) consistency between the commitment to $T_{i_1}$ and the published $\texttt{eol}_{i_1}$, (3)  knowledge of $\Tilde{T}_{i_2}$ and $\Tilde{T}_{i_3}$ which are the preimages of the commitments $\texttt{cm}{i_2}$ and $\texttt{cm}{i_3}$, and (4)  that the quantity in $T_{i_1}$ equals the sum of the quantities in $\Tilde{T}_{i_2}$ and $\Tilde{T}_{i_3}$.
+Accordingly, the transaction $\texttt{tx}_{\textsf{Div}}$ is defined as:
+\[
+\texttt{tx}_\mathsf{Div} :=(\pi_{\mathsf{Div}}, x_\mathsf{Div}, \texttt{eol}_{i_{1}},  \texttt{cm}_{i_{2}}, \texttt{cm}_{i_{3}}, \texttt{rt}_{1}^{\text{new}}, , \texttt{rt}_{2}^{\text{new}}, \mathsf{ind}_{i_{2}}, \mathsf{ind}_{i_{3}}, \mathsf{path}_{\mathsf{ind}_{i_{2}}}, \mathsf{path}_{\mathsf{ind}_{i_{3}}} )
+\]
+where
+\[
+x_\mathsf{Div} =\big(\texttt{eol}_{i_1}, \texttt{cm}_{i_{2}}, \texttt{cm}_{i_{3}}, \texttt{rt}_\tau \big)
+\]
+denotes the public inputs to the \gls{zkp}.  The algorithm also outputs two data ownership transfer tags, $\texttt{Tag}_{i_2}$ and $\texttt{Tag}_{i_3}$, which are used in two separate data records whose common predecessor is the most recent data record generated by $T_{i_1}$. Each resulting data record initiates a new data sequence.  The pseudocode for the \textsf{Divide} algorithm is provided in Algorithm~\ref{alg:divide} in Appendix~\ref{a_ch:zupply_algorithms}.
+
+%Obsoletes $T_{i_1}$ and generates $\Tilde{T}_{i_2}$ and $\Tilde{T}_{i_3}$ ($q_{i_1} = q_{i_2} + q_{i_3}$). $T_{i_1}$, $\Tilde{T}_{i_2}$, $\Tilde{T}_{i_3}$, and  $\texttt{cm}_{i_1}$ are not disclosed. $\texttt{tx}_\mathsf{Div} $:$=(\pi_{\mathsf{Div}}, x_\mathsf{Div}, \texttt{eol}_{i_{1}},  \texttt{cm}_{i_{2,3}}, \texttt{rt}_{1,2}^{\text{new}},\mathsf{ind}_{i_{2,3}}, \mathsf{path}_{\mathsf{ind}_{i_{2,3}}} )$, where $x_\mathsf{Div} =\big(\texttt{eol}_{i_1}, \texttt{cm}_{i_{2,3}}, \texttt{rt}_\tau \big)$.
 
 
-% ###########################################
-\newpage
-
-\subsubsection{\textsf{Upload} ($\textsc{pp}$, $[\textsf{pred}]$, $T_i$, $d_{\mathsf{pub}, \mathsf{pri}}$, $\textsc{k}_{n_3}$, $[\textsf{tags}]$) $\rightarrow$ $d_{n_3}$}
-
-Processes components of $d_{n_3}$ along with the \textsc{cid} of the predecessor data records and the corresponding tags, if applicable. It gets $\textsc{k}_{n_3}$ and $T_i$; then, it encrypts the private part of the data record, attaches a $\pi_\textsf{Auth}$ of owning $T_i$, and signs $d_{n_3}$ using the signing key associated with $T_i$.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%% Upload %%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}
-\caption{\textsf{Upload} $\big($\textsc{pp}$, [\textsf{pred}], T_i, d_{\mathsf{pub}, \mathsf{pri}}, \textsc{k}_{n_3}, [\textsf{tags}]  \big)$ $\rightarrow$ $d_{n_3}$}\label{alg:Upload}
-\begin{algorithmic}[1]
-\State {$\mathsf{pk}_\mathsf{Auth} \gets \textsc{pp}$}
-\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}
-\State $(\mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_1})$
-\State $(\text{PKsig}_{i}, \text{SKsig}_{i}) \gets T_i$
-\State $c_{n_3} \gets \mathcal{E}_\mathsf{sym}(\textsc{k}_{n_3}, d_{{n_3}, \mathsf{pri}} )$
-\State $x_\texttt{Auth} \gets (\texttt{rt}_\tau, \text{PKsig}_{i})$
-\State $w_\texttt{Auth} \gets (T_i, \mathsf{path}_{\mathsf{ind}_{i}})$
-\State $\pi_{\textsf{Auth}} \gets \textsf{Prove}\big(\mathsf{pk}_{\textsf{Auth}}, x_{\textsf{Auth}}, w_{\textsf{Auth}}\big)$
-\State $m \gets ([\textsf{pred}], d_{\mathsf{pub}}, c_{n_3}, [\textsf{tags}], \pi_{\textsf{Auth}}, x_\texttt{Auth})$
-\State $\sigma_{n_3} \gets \mathcal{S}_\mathsf{sig}\big(\text{SKsig}_{i}, m \big)$
-\State $d_{n_3} \gets \big([\textsf{pred}],  d_{\mathsf{pub}}, c_{n_3},
-        [\textsf{tags}], \pi_\texttt{Auth}, x_\texttt{Auth}, \sigma_{n_3}, \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau)\big)$
-\State \Return $d_{n_3}$
-\end{algorithmic}
-\end{algorithm}
 
 
-% ###########################################
-\newpage
+
+\subsubsection{\textsf{VerifyTX} (\textsc{pp}, $\texttt{tx}_\mathbbm{x}$) $\rightarrow$ $b \in \{0, 1\}$}
+
+The \textsf{VerifyTX} algorithm is executed within the Zupply smart contract $\mathcal{C}_Z$.
+It takes as input a transaction $\texttt{tx}$ and returns one if and only if $\texttt{tx}$ is valid, as defined in Definition~\ref{def:Valid Transaction}. Below, we present the algorithm in more detail.
+
+The verification steps depend on the type of transaction, denoted by $\mathbbm{x}$, which can be one of \textsf{Trans}, \textsf{Merge}, or \textsf{Div}. Regardless of the type, the algorithm ensures that the \gls{eol} in the transaction is not included in the set $\mathbf{X}_\tau$. It also calls the \textsf{MHT}.\textsf{Verify} algorithm (described in Algorithm~\ref{alg:ٰMHTVerify}) to check whether the proposed updated Merkle root $\texttt{rt}^\textsf{new}$ has been computed correctly, following the \textsf{MHT-Protocol}, which is introduced later.  Note that the smart contract does not store the \textsf{MHT} itself.
+Furthermore, the \glspl{zkp} corresponding to each transaction type, $\pi_\mathsf{Trans}$, $\pi_\mathsf{Merge}$, and $\pi_\mathsf{Div}$, are verified using their respective verification keys, namely $\mathsf{vk}_\mathsf{Trans}$, $\mathsf{vk}_\mathsf{Merge}$, and $\mathsf{vk}_\mathsf{Div}$, along with the public inputs embedded in the transaction.
+
+In addition to the shared verification logic, \texttt{tx} of type \textsf{Merge} includes one extra \gls{eol} element that must also be checked for exclusion from $\mathbf{X}_\tau$. On the other hand, a \textsf{Div} transaction includes two new commitments, requiring an additional verification step. After verifying the first new Merkle root as described, the algorithm verifies the second root against the second commitment.
+
+If any of these verifications fail, the algorithm returns zero. Otherwise, it returns one.
+The pseudocode for \textsf{VerifyTX} is provided in Algorithm~\ref{alg:divide} in Appendix~\ref{a_ch:zupply_algorithms}.
+
+
+\subsubsection{\textsf{Upload} ($\textsc{pp}$, $[\textsf{pred}]$, $T_i$, $d_{\mathsf{pub}}$, $d_{\mathsf{pri}}$, $\textsc{k}_{n_3}$, $[\textsf{tags}]$) $\rightarrow$ $d_{n_3}$}
+
+The \textsf{Upload} algorithm processes components of $d_{n_3}$ along with the \textsc{cid} of the predecessor data records and the corresponding data ownership transfer tags, if applicable. 
+
+The algorithm commits to the \gls{aat} $T_i$ provided as input and searches for the corresponding commitment in the \textsf{MHT}. Once the commitment is located, it generates a \gls{zkp}, denoted as $\pi_\mathsf{Auth}$, that proves knowledge of a pre-image to a commitment in the \textsf{MHT}. Unlike the \glspl{zkp} generated by other algorithms, this proof includes $\text{PKsig}_i$, which is embedded in $T_i$, as a public input to the proof.
+This inclusion is essential because, once all components of the new data record $d_{n_3}$ are generated, the record is signed using the $\text{SKsig}_i$ found in $T_i$. The presence of $\text{PKsig}_i$ as a public input allows the verifier to validate the signature and ensures that the same $T_i$ (which includes $\text{PKsig}_i$) was used throughout the sequence. If a different \gls{aat} were substituted in the sequence, the \textsf{Audit} algorithm, described later, would reject the data record, as it detects a mismatch in the $\text{PKsig}$ relative to previous records. An exception to this rule occurs only when a data ownership transfer tag is included in the first data record that uses a different \gls{aat}. Such a tag is generated by one of the \textsf{Trans}, \textsf{Merge}, or \textsf{Divide} algorithms. 
+
+The public input to the aforementioned \gls{zkp} includes the Merkle root at the time the proof is generated, denoted as $\texttt{rt}_\tau$. Since auditors are lightweight clients and do not store the blockchain, they cannot directly verify whether the claimed $\texttt{rt}_\tau$ is indeed the Merkle root of the \textsf{MHT}. To address this, the prover includes $\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau)$, a proof that attests to the correctness of $\texttt{rt}_\tau$ on the blockchain. This proof is constructed in a manner that allows verification by lightweight clients. 
+
+Moreover, given the secret key $\textsc{k}_{n_3}$ and the private portion of the data record, denoted as $d_\text{pri}$, the \textsf{Upload} algorithm encrypts $d_\text{pri}$ using $\textsc{k}_{n_3}$. The pseudocode for \textsf{Upload} is provided in Algorithm~\ref{alg:Upload} in Appendix~\ref{a_ch:zupply_algorithms}.
+
+
+
 
 \subsubsection{\textsf{Audit} ($\textsc{pp}$, $d_n$) $\rightarrow$ $b \in \{0, 1\}$}
 
-Takes a data record \(d_{n}\) and returns one if and only if it is an authenticated data record as specified in Definition \ref{def:Authenticated Data}.
+The \textsf{Audit} algorithm takes a data record \(d_{n}\) and returns one if and only if it is an authenticated data record, as specified in Definition~\ref{def:Authenticated Data}. More precisely, it verifies the \gls{zkp} included in \(d_n\), and checks the correctness of \(\texttt{rt}_\tau\) using \(\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau)\).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%% Audit %%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}
-\caption{\textsf{Audit} $\big($\textsc{pp}$, d_n  \big)$ $\rightarrow$ $b \in \{0, 1\}$}\label{alg:Audit}
-\begin{algorithmic}[1]
-\State {$\mathsf{vk}_\mathsf{Auth} \gets \textsc{pp}$}
-\State {$\big([\textsf{pred}],  d_{\mathsf{pub}}, c_{n},
-        [\textsf{tags}], \pi_\texttt{Auth}, x_\texttt{Auth}, \sigma_{n}, \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau)\big) \gets d_{n}$}
-\State $(\texttt{rt}_\tau, \text{PKsig}_{i}) \gets x_\texttt{Auth}$
-\State $m \gets ([\textsf{pred}], d_{\mathsf{pub}}, c_{n}, [\textsf{tags}], \pi_{\textsf{Auth}}, x_\texttt{Auth})$
+If the set of predecessor data records \(\textsf{pred}\) is non-empty, the algorithm retrieves each predecessor and checks whether they share the same \text{PK{sig}}. Otherwise, \(d_n\) must include a data ownership transfer tag, which consists of the \text{PK{sig}} in \(d_n\) signed by the key that signed the predecessor data record. The \textsf{Audit} algorithm then verifies the signature in \(d_n\) as well as the data ownership transfer tags, if present. The pseudocode for \textsf{Audit} is provided in Algorithm~\ref{alg:Audit} in Appendix~\ref{a_ch:zupply_algorithms}.
 
-\If{$\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau)$ is not valid}
-    \State \Return 0
-\EndIf
 
-\If{$\mathcal{V}_\mathsf{sig}(\text{PKsig}_{i}, m, \sigma_{n}) = 0$}
-    \State \Return 0
-\EndIf
-
-\If{$\mathsf{Verify}(\mathsf{vk}_\mathsf{Auth}, x_\texttt{Auth}, \pi_\texttt{Auth}) = 0$}
-    \State \Return 0
-\EndIf
-
-\While {\textbf{not} $\textsf{pred}.\textsf{isEmpty}()$ } 
-    \State {$\textsc{cid} \gets \mathsf{pred}.\mathsf{pop}()$}
-    \State $d_p \gets \mathsf{DCS}(\textsc{cid})$
-    \State $\text{PKsig}_{j} \gets d_p$
-    \If{$\text{PKsig}_{i} \neq \text{PKsig}_{j}$}
-        \State {$\texttt{Tag} \gets \mathsf{tags}.\mathsf{pop}()$}
-            \If{$\mathcal{V}_\mathsf{sig}(\text{PKsig}_{j}, \text{PKsig}_{i}, \texttt{Tag}) = 0$}
-                \State \Return 0
-            \EndIf
-    \EndIf
-\EndWhile
-\State \Return 1
-\end{algorithmic}
-\end{algorithm}
-
-% ###########################################
-\newpage
 
 \subsection{Protocols}
 \label{sec:Zupply-Protocols}
@@ -799,7 +641,7 @@ In this section, we do not provide security proofs, deferring them to future wor
 Instead, we discuss the formalization of the privacy property within the Zupply framework. Informally, consider an adversary $\mathcal{A}$ that constructs two ledgers and two corresponding \glspl{dag} by inducing honest entities, ensuring consistency between the public information of  ledgers and \gls{dag}s. If the adversary is then provided with both ledgers but only one \gls{dag}, it should not be able to distinguish the ledgers. Thus, the adversary remains uncertain about the association between the given \gls{dag} and the respective ledgers.
 
 
- To formalize this, we present the experimental setup for evaluating ledger indistinguishability. To characterize the ledger indistinguishability of the Zupply framework $Pi$, we design an \textsf{L-IND} experiment following the similarly named experiment in Zerocash~\cite{zcash2014}.  
+ To formalize this, we present the experimental setup for evaluating ledger indistinguishability. To characterize the ledger indistinguishability of the Zupply framework $Pi$, we design an \textsf{L-IND} experiment following the similarly named experiment in Zerocash~\cite{zcash-proc}.  
 Recall that a ledger $L$ includes a set of transactions $\mathbf{TX}$. From $\mathbf{TX}$,  the ordered set $\mathbf{C}$, which stores commitments to \gls{aat}s (\texttt{cm}s), and the set of \gls{eol}s, denoted as $\mathbf{X}$ can be computed. Furthermore, the \textsf{MHT} can be constructed from $\mathbf{C}$.
 Each \texttt{cm} in $\mathbf{C}$  can be replaced by a tuple $(\texttt{cm}, \text{TXtype}, e)$, where $\texttt{cm}$ is the commitment added to the ledger by an entity $e$ through a transaction of type TXtype. Here, for simplicity, the transaction type is either \textsf{Trans} or \textsf{Init}. We denote this new set as $\mathbf{C}_G$ as the generalized form of $\mathbf{C}$.  Notably, if $\text{TXtype} = \textsf{Trans}$, the entity $e$ does not \textit{own} the corresponding \gls{aat}; rather, it only adds it to the ledger. The adversary’s capabilities determine whether they can extract the entity $e$ associated with each commitment in the transactions ($\mathcal{A}$'s access to $\mathcal{O}^\mathsf{Attr}$). 
 
@@ -898,7 +740,7 @@ In this section, we discuss the applicability of the Zupply framework in real-wo
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=.6\linewidth]{Figures/ZupplyNetwork}
+    \includegraphics[width=.65\linewidth]{Figures/ZupplyNetwork}
     \caption{The lifecycle of a Product in the Zupply framework}
     \label{fig:enter-label}
 \end{figure}
@@ -956,7 +798,12 @@ In the Zupply framework, various key management schemes can be employed to encry
 
 \section{Summary}
 \label{app:zupply-summary}
-Zupply provides an anonymous, unlinkable, trustless, fully decentralized, and efficient solution for managing off-chain \gls{dag}-structured data in supply chains. We proposed an \gls{aat} scheme, which includes \gls{aatot} protocol realized by \textsf{OT-Protocol} to ensure unlinkability during ownership transfer. Its efficiency is realized by the \textsf{MHT-Protocol} which updates the root of the \textsf{MHT} on the $\mathcal{C}_Z$  and eliminate the need for storing the entire tree on-chain.
+
+
+Transferring applications such as \gls{scm}  to permissionless (public) blockchains eliminates the need for trust in a manager and offers a range of benefits, which we will discuss later in this paper. However, by the nature of permissionless blockchain, miners, monitors, auditors and validators see the plain transactions on the blockchain.  This could reveal the privacy of the data providers  and actors in  ownership transfer  of the data from one to another.  However, those will expose inventory information of different business sectors.  So, for blockchain based \gls{scm}, the privacy of data uploader (anonymous problem), and ownership transfer of data (unlinkable problem) is a crucial factor to deploy this technology. 
+
+This chapter proposed a novel anonymous authentication token (\gls{aat}) framework that supports unlinkable \gls{aat} ownership transfer (\gls{aatot}) including unlinkable merging and dividing of \gls{aat}s, realized by \textsf{OT-Protocol} to ensure unlinkability during ownership transfer. The construction leverages zero-knowledge proof (\gls{zkp}) protocols to guarantee anonymity, unlinkability, and authentication. Building on this foundation, we introduce Zupply, a decentralized framework for maintaining directed acyclic graphs (\gls{dag}s) of authentic data records. Designed on a permissionless, smart contract-enabled blockchain, Zupply provides a trustless framework that preserves anonymity and unlinkability among participants while ensuring the integrity and authenticity of data records throughout the supply chain. Its efficiency is realized by minimizing the number of public inputs to the ZKPs, and the \textsf{MHT-Protocol} which updates the root of the MHT on the $\mathcal{C}_Z$  and eliminate the need for storing the entire tree on-chain. 
 
 
 
+Zupply adopted a stricter adversary model that previous methods, in which the underlying blockchain platform does not preserve the anonymity of the transaction issuer (adversary's access to $\mathcal{O}^\mathsf{Attr}$). Moreover, transactions scale independently of participant count, Zupply requires no centralized servers or layer-1 changes, and let auditors focus only on relevant records. In contrast, zkLedger \cite{zkLedger2018}has to involve all entities per transaction, Mesh \cite{altawy2019mesh} lacks unlinkability and needs a central server, and DECOUPLES \cite{Maouchi2019DECOUPLES} modifies the base blockchain. 

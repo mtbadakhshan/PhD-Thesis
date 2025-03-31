@@ -1,7 +1,10 @@
 %======================================================================
 \chapter{Preliminaries} \label{ch:preliminaries}
 %======================================================================
-In this chapter, we provide definitions and mathematical preliminaries essential to this thesis.
+
+\section*{Declaration of Contributions}
+This chapter contains preliminary material from an unpublished work and the paper~\cite{Badakhshan2025Ursa}, both of which I co-authored. The preliminaries in those works were written in collaboration with all co-authors. In addition, this chapter includes content from~\cite{Badakhshan2024Zupply}, of which I am the sole author.
+
 
 %----------------------------------------------------------------------
 \section{Algebraic Foundations}
@@ -59,7 +62,7 @@ Furthermore, if $m < k-1$ and $\theta$ is any linear combination of $\{\beta_{m+
 
 \subsection{Rank-1 Constraint System}
 
-Zero-knowledge proof (\gls{zkp}) system toolchains, such as \cite{Groth2016, Aurora2019, Chiesa2020Fractal, Ames2017Ligero} that generate arithmetic or boolean circuits from high-level programming languages, usually use rank-1 constraint systems (\gls{r1cs}s), which is so straightforward that it can be used to create efficient argument systems. \gls{r1cs} has also proven to be reliable in real-world applications, such as Zcash \cite{zcash2014}. We provide the definition of \gls{r1cs} in the following:
+Zero-knowledge proof (\gls{zkp}) system toolchains, such as \cite{Groth2016, Aurora2019, Chiesa2020Fractal, Ames2017Ligero} that generate arithmetic or boolean circuits from high-level programming languages, usually use rank-1 constraint systems (\gls{r1cs}s), which is so straightforward that it can be used to create efficient argument systems. \gls{r1cs} has also proven to be reliable in real-world applications, such as Zcash \cite{zcash-proc}. We provide the definition of \gls{r1cs} in the following:
 
 \begin{definition}[rank-1 constraint system (\gls{r1cs})] \label{def:R1CS}
 	Let $d_1$, $d_2$, and $d_3$ be positive integers where denote the number of constraints, the number of variables, and the number of public inputs respectively. The \gls{r1cs} relation consists of matrices $\mathbf{A},\mathbf{B},\mathbf{C} \in \mathbb{F}^{d_1\times (d_2+1)}$ and public inputs $\vec{{v}} \in \mathbb{F}^{d_3}$. A vector $\vec{{w}} \in \mathbb{F}^{d_2-d_3}$, denoting private (auxiliary) inputs, satisfies the system if
@@ -164,6 +167,8 @@ Reed-Solomon (\gls{rs}) code is proposed in 1960  \cite{rs-code}. It is a block-
 	that are the evaluation of polynomials over \(L\) with degree \( < \rho|L| \).
 \end{definition}
 
+%{\color{red} Low-Degree-Testing}
+
 \section{Cryptographic Primitives}
 \label{sec:prel_Cryptographic Primitives}
 
@@ -181,7 +186,7 @@ Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable securit
 
 \begin{definition}[Statistically-hiding Commitment]
 	\label{def:Statistically-hiding commitment}
-	A statistically-hiding commitment scheme  $\{\mathsf{COMM}_\rho:\{0,1\}^* \rightarrow \{0, 1\}^{O(\boldsymbol{\lambda})} \}_\rho$ \cite{zcash2014} where $\rho$ denotes the commitment trapdoor, should hold the following two properties \cite{katz2020introduction, zcash2014}:
+	A statistically-hiding commitment scheme  $\{\mathsf{COMM}_\rho:\{0,1\}^* \rightarrow \{0, 1\}^{O(\boldsymbol{\lambda})} \}_\rho$ \cite{zcash-proc} where $\rho$ denotes the commitment trapdoor, should hold the following two properties \cite{katz2020introduction, zcash-proc}:
 	\begin{itemize}
 		\item \textit{Statistically Hiding}: The commitment reveals nothing about the committed value for \textit{every} adversary. 
 		\item \textit{Computationally Binding}: It is impossible for all \textit{PPT adversaries} to output commitment that can be opened in two different ways.
@@ -295,7 +300,7 @@ As stated in \cite{Thaler2022Proofs}, for any \gls{ip} where \( \delta_c < 0 \),
 \subsubsection{Argument Systems and Computational Soundness}
 Definition \ref{def:IP-Completeness-Soundness} requires \textit{statistical} (or \textit{information-theoretic}) soundness, meaning that soundness holds against computationally unbounded provers in \gls{ip}. However, \textit{argument systems}, a special case of \gls{ip} introduced in~\cite{BRASSARD1988Minimum}, require \textit{computational} soundness, where soundness is guaranteed only against \gls{ppt} provers~\cite{Ben-Sasson2016IOP}. This implies that an infinitely powerful prover could cheat in an argument system. Such systems typically assume that a \gls{ppt} prover cannot cheat under a given cryptographic assumption. Through $\Theta(k)$ repetitions of the protocol, the soundness error $\delta_s$ can be reduced to $\delta_s^k$.
 
-\subsection{Zero-knowledge Proof and Proof of Knowledge Systems}
+\subsection{Zero-knowledge Proof and Proof of Knowledge System}
 
 A zero-knowledge proof (\gls{zkp}) system for verifying whether a common input \( x \) belongs to a language \( L \) is an augmented \gls{ip} in which the verifier is convinced of \( x \)'s membership in \( L \) without gaining any additional knowledge beyond \( x \in L \). The prover in \gls{zkp} systems is also prababilistic, meaning that we assume a read-only random tape, denoted as $r_P$ for the prover machine. 
 
@@ -595,21 +600,21 @@ Aurora~\cite{Aurora2019} is a \gls{zksnark} protocol for \gls{r1cs} relations. I
 Aurora ensures the zero-knowledge property for its univariate sumcheck protocol and \gls{ldt}, and consequently for the entire protocol, by employing the technique introduced in~\cite{Ben-Sasson2016Zero-Knowledge}.
 
 % Let $\eta$, $\mu+1$, and $\kappa+1$ be powers of two (without loss of generality). 
-\subsubsection{Step 0: Protocol Setup}
+%\subsubsection{Step 0: Protocol Setup}
 At the beginning of the protocol, the prover $P$ and verifier $V$ establish a finite field \( \mathbb{F} \), a security parameter $\boldsymbol{\lambda}$, a rate $\rho$, an \gls{fri} localization parameter $\eta$, an \gls{r1cs} parameters
 \(
 (\mathbb{F}, d_1, d_2, d_3, \mathbf{A}, \mathbf{B}, \mathbf{C})
 \),
  and two subspaces \( H_1, H_2 \subset \mathbb{F} \), where \( |H_1| = d_1 \) and \( |H_2| = d_2 + 1 \) such that $H_1 \subseteq H_2$ or $H_2 \subseteq H_1$. We can write $H_1 \cup H_2 = \{h_0, \dots, h_{t-1}\}$, where $t = |H_1 \cup H_2| = \max(d_1, d_2+1)$. 
 
-\subsubsection{Step 1: Polynomial Encoding}
-
-
-\subsubsection{Step 2: Lincheck}
-
-\subsubsection{Step 3: Univariate Sumcheck}
-
-\subsubsection{Step 4: Low-Degree Test}
+%\subsubsection{Step 1: Polynomial Encoding}
+%
+%
+%\subsubsection{Step 2: Lincheck}
+%
+%\subsubsection{Step 3: Univariate Sumcheck}
+%
+%\subsubsection{Step 4: Low-Degree Test}
 
 
 First, the prover computes the low degree extension (LDE) of the unique polynomial of degree $\kappa+1$
@@ -888,7 +893,7 @@ The interactive protocol reveals information about the witness $\textbf{w}$ when
 	\alpha_1\cdot \widetilde{c}+s_1=\sum_{y\in H}(\alpha_1\cdot\widetilde{Q}{r_x}(y)+S_Q(y)).
 	\]
 	where $\widetilde{c}=r_A\cdot\widetilde{A}(r_x)+r_B\cdot\widetilde{B}(r_x)+r_C\cdot\widetilde{C}(r_x)$, referenced from Equation \eqref{eq-c}.  
-	This ensures $\widetilde{c}$ and $s_1$ can be correctly computed due to the random linear combination of the sumcheck, while revealing no information about $\widetilde{Q}{r_x}(\cdot)$ as it is masked by the random polynomial $S_Q(\cdot)$ \cite{Aurora2019}\cite{Zhang2019VirgoZK} .
+	This ensures $\widetilde{c}$ and $s_1$ can be correctly computed due to the random linear combination of the sumcheck, while revealing no information about $\widetilde{Q}{r_x}(\cdot)$ as it is masked by the random polynomial $S_Q(\cdot)$ \cite{Aurora2019}\cite{Zhang2020Virgo} .
 \end{enumerate}
 
 %The closed-form of $G_1(X)=F_w(X)/\mathbb{Z}_{H}(X)$ now contains random polynomials $R_A,R_B,R_C$. To make the evaluation phase zero-knowledge, the prover $\mathcal{P}$ commits to a random polynomial $S_G(X)$ of degree $|H|$, sends $s_2=S_G(r_x)$ to $\mathcal{V}$, and they run the standard evaluation protocol on the blinded polynomial $\alpha_2\cdot G_1(X)+S_G(X)$, where $\alpha_2$ is $\mathcal{V}$'s random challenge.

@@ -2,6 +2,9 @@
 \chapter{Literature Review}\label{ch:lit_review}
 %======================================================================
 
+\section*{Declaration of Contributions}
+Section~\ref{sec:lit_additive_fft} of this chapter includes material from an unpublished work that I co-authored. Additionally, other sections incorporate content from~\cite{Badakhshan2024Zupply, Badakhshan2023Outline, Badakhshan2025AuroraZupply}, all of which I authored independently.
+
 %\section{Post Quantum Secure zkSNARKs}
 %
 %Among these \glspl{zksnark}, Fractal features the fastest verifier algorithm, Ligero boasts the fastest prover algorithm, and Aurora achieves the smallest proof size. While STARK employs Algebraic Intermediate Representation (AIR), which is designed for converting the execution trace of a program into algebraic representations (e.g., polynomials), the others rely on Rank-1 Constraint System (R1CS) \cite{Gong2024}, which is suited for arithmetic circuit and is preferred in cryptography related applications, as many privacy-preserving solutions rely on zero-knowledge proofs of knowledge of the preimage of a leaf in a Merkle hash tree constructed by the circuit of a hash algorithm (e.g., SHA-256). Furthermore, zkSNARK-based post-quantum digital signature schemes typically involve proving knowledge of the secret key for a symmetric-key encryption algorithm (e.g., AES) represented as an arithmetic circuit.
@@ -20,7 +23,7 @@
 
 
 
-\section{Additive FFT Algorithms}
+\section{Additive FFT Algorithms}\label{sec:lit_additive_fft}
 The fast Fourier transform (\gls{fft}) over additive groups, known as additive \gls{fft}, over finite fields was developed in the late 1980s. Wang and Zhu~\cite{WangZhu1988} first introduced this concept in 1988, followed independently by Cantor~\cite{Cantor1989FFT} in 1989. These algorithms evaluate polynomials at the roots of the vanishing polynomial corresponding to a subspace or an affine subspace. In~\cite{Cantor1989FFT}, Cantor introduced an \gls{fft} algorithm for the evaluation of a polynomial $f(x)$ of degree less than $n = 2^m$ over an $m$-dimensional affine subspace of the field (or subfield) $\mathbb{F}_{2^k}$, with $k = 2^\ell$ for some $\ell$. This foundational work was later generalized to accommodate any arbitrary values of $k$ by von zur Gathen and Gerhard~\cite{zurGathenFFT}, although their approach incurs a greater operational cost. Subsequently, Gao and Mateer~\cite{Gao2010FFT} proposed two algorithms for computing the additive \gls{fft} utilizing the concept of Taylor expansion. The first algorithm is applicable to any arbitrary $k$ and requires fewer operations compared to the method developed by von zur Gathen and Gerhard. Their second algorithm, designed for the additive \gls{fft} of length $2^m$, where $m$ is a power of 2, matches Cantor’s in the number of multiplications while reducing the number of additions. 
 
 

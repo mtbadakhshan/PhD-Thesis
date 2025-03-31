@@ -1,0 +1,231 @@
+%======================================================================
+\chapter{The Pseudocodes of the Algorithms in the Zupply Framework}\label{a_ch:zupply_algorithms}
+%======================================================================
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Init %%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+	\caption{\textsf{Init} ($\textsc{pp}$, $q_{i_1}$) $\rightarrow$ ($\texttt{tx}_{\textsf{Init}}$, $T_{i_1}$) }\label{alg:Init}
+	\begin{algorithmic}[1]
+		\State {$\textsc{pp}_\mathsf{sig} \gets \textsc{pp}$}
+		\State {$\rho_{i_1} \xleftarrow{R} \{0,1\}^{N_\rho}$}
+		% \State {$k \gets \mathcal{H}\big(r|| \big[\mathcal{H}\big(e_I.a_{pk}||\rho \big)\big]_{128} \big)$}
+		\State {$(\text{PKsig}_{i_1}, \text{SKsig}_{i_1} ) \gets \mathcal{K}_\mathsf{sig}\big(\textsc{pp}_\mathsf{sig}\big) $}
+		\State {$\Tilde{T}_{i_1} \gets \big( 
+			q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1} \big)$}, {$T_{i_1} \gets \big(\Tilde{T}_{i_1}, \text{SKsig}_{i_1}\big)$}
+		\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}
+		\State{$(\texttt{rt}^{\text{new}}, \mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_1})$}
+		\State {$\texttt{tx}_{\textsf{Init}} \gets \big(\texttt{cm}_{i_1}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}\big)$}
+		
+		\State {\Return $\texttt{tx}_{\textsf{Init}}, T_{i_1}$}
+	\end{algorithmic}
+\end{algorithm}
+% ###########################################
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% TRANS %%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h]
+	\caption{\textsf{Trans} $\big($\textsc{pp}$, T_{i_1},  \text{PKsig}_{i_2} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Trans}}, \Tilde{T}_{i_2}, \texttt{Tag}\big)$}\label{alg:trans}
+	\begin{algorithmic}[1]
+		\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}
+		\If {$\texttt{cm}_{i_1}\notin \mathbf{C}_\tau$} {}
+		\State \Return $\perp$
+		\EndIf
+		\State $(\mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_1})$
+		\State {$\mathsf{pk}_\mathsf{Trans} \gets \textsc{pp}$}
+		\State $\texttt{eol}_{i_1} \gets \mathcal{H} \big( \rho_{i_1}\big)$
+		\State $q_{i_2} \gets q_{i_1}$
+		\State {$\rho_{i_2} \xleftarrow{R} \{0,1\}^{N_\rho}$}
+		\State {$\Tilde{T}_{i_2} \gets \big( 
+			q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2} \big)$}
+		\State {$\texttt{cm}_{i_2} \gets \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2}) $}
+		% \State
+		\State $x_\textsf{Trans} \gets \big(\texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}_\tau \big)$
+		\State $w_\textsf{Trans} \gets \big( \Tilde{T}_{i_1}, \Tilde{T}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_1}}\big)$
+		\State $\pi_{\textsf{Trans}} \gets \textsf{Prove}\big(\mathsf{pk}_{\textsf{Trans}}, x_{\textsf{Trans}}, w_{\textsf{Trans}}\big)$
+		
+		\State{$(\texttt{rt}^{\text{new}}, \mathsf{ind}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_2}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_2})$}
+		\State$\texttt{tx}_{\textsf{Trans}} \gets \big(\pi_{\textsf{Trans}}, x_{\textsf{Trans}}, \texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_2}} \big)$
+		
+		\State $\texttt{Tag} \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_1}, \text{PKsig}_{i_2})$
+		\State \Return $\texttt{tx}_{\textsf{Trans}}$, $\Tilde{T}_{i_2}$ , $\texttt{Tag}$
+	\end{algorithmic}
+\end{algorithm}
+% ###########################################
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Merge %%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}
+	\caption{\textsf{Merge} $\big($\textsc{pp}$, T_{i_{1,2}},  \text{PKsig}_{i_3} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Merge}}, \Tilde{T}_{i_3}, \texttt{Tag}_{i_{1,2}}\big)$}\label{alg:merge}
+	\begin{algorithmic}[1]
+		\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}, {$\texttt{cm}_{i_2} \gets \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2}) $}
+		\If {$\texttt{cm}_{i_1}\notin \mathbf{C}_\tau$ or $\texttt{cm}_{i_2}\notin \mathbf{C}_\tau$} {}
+		\State \Return $\perp$
+		\EndIf
+		\State $(\mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_1})$
+		\State $(\mathsf{ind}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_2}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_2})$
+		
+		\State {$\mathsf{pk}_\mathsf{Merge} \gets \textsc{pp}$}
+		\State {$\texttt{eol}_{i_1} \gets \mathcal{H} \big( \rho_{i_1}\big)$, $\texttt{eol}_{i_2} \gets \mathcal{H} \big( \rho_{i_2}\big)$}
+		\State $q_{i_3} \gets q_{i_1} +  q_{i_2}$
+		\State {$\rho_{i_3} \xleftarrow{R} \{0,1\}^{N_\rho}$}
+		\State {$\Tilde{T}_{i_3} \gets \big( 
+			q_{i_3}, \text{PKsig}_{i_3}, \rho_{i_3} \big)$}
+		\State {$\texttt{cm}_{i_3} \gets \mathsf{COMM}_{\rho_{i_3}}(\Tilde{T}_{i_3}) $}
+		% \State
+		\State $x_\textsf{Merge} \gets \big(\texttt{eol}_{i_{1,2}}, \texttt{cm}_{i_3}, \texttt{rt}_\tau \big)$
+		\State $w_\textsf{Merge} \gets \big( \Tilde{T}_{i_{1,2}}, \Tilde{T}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_{1,2}}}\big)$
+		\State $\pi_{\textsf{Merge}} \gets \textsf{Prove}\big(\mathsf{pk}_{\textsf{Merge}}, x_{\textsf{Merge}}, w_{\textsf{Merge}}\big)$
+		
+		\State{$(\texttt{rt}^{\text{new}}, \mathsf{ind}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_3}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_3})$}
+		\State$\texttt{tx}_{\textsf{Merge}} \gets \big(\pi_{\textsf{Merge}}, x_{\textsf{Merge}}, \texttt{eol}_{i_{1,2}}, \texttt{cm}_{i_3}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_3}} \big)$
+		% \State $T^{\text{new}} \gets \big( q^{\text{old}}
+		% \text{PK}_{\text{sig}}^{\text{new}}, , \rho^{\text{new}}\big)$
+		% \State $\mathcal{C} = \text{Enc} \big(\text{pk}_{\text{enc}}, \{T^{\text{old}}.q, \rho^{\text{new}}\big\}\big)$
+		\State $\texttt{Tag}_{i_1} \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_1}, \text{PKsig}_{i_3})$
+		\State $\texttt{Tag}_{i_2} \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_2}, \text{PKsig}_{i_3})$
+		
+		\State \Return $\texttt{tx}_{\textsf{Merge}}$, $\Tilde{T}_{i_3}$ , $\texttt{Tag}_{i_{1,2}}$
+	\end{algorithmic}
+\end{algorithm}
+
+% ###########################################
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Divide %%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}
+	\caption{\textsf{Divide} $\big($\textsc{pp}$, T_{i_1},  \text{PKsig}_{i_{2,3}}, q_{i_{2,3}} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Div}}, \Tilde{T}_{i_{2,3}}, \texttt{Tag}_{i_{2,3}}\big)$}\label{alg:divide}
+	\begin{algorithmic}[1]
+		\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}
+		\If {$\texttt{cm}_{i_1}\notin \mathbf{C}_\tau$ \textbf{or} $q_{i_{1}} \neq q_{i_{2}} + q_{i_{3}}$} 
+		\State \Return $\perp$
+		\EndIf
+		\State $(\mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_1})$
+		\State {$\mathsf{pk}_\mathsf{Div} \gets \textsc{pp}$}
+		\State $\texttt{eol}_{i_1} \gets \mathcal{H} \big( \rho_{i_1}\big)$
+		% \State Select $q_{i_2}$ and $q_{i_3}$ such that $q_{i_1} = q_{i_2} + q_{i_3}$
+		\State {$\rho_{i_2} \xleftarrow{R} \{0,1\}^{N_\rho}$, $\rho_{i_3} \xleftarrow{R} \{0,1\}^{N_\rho}$}
+		\State {$\Tilde{T}_{i_2} \gets \big(q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2} \big)$, $\Tilde{T}_{i_3} \gets \big(q_{i_3}, \text{PKsig}_{i_3}, \rho_{i_3} \big)$}
+		\State {$\texttt{cm}_{i_2} \gets \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2}) $, $\texttt{cm}_{i_3} \gets \mathsf{COMM}_{\rho_{i_3}}(\Tilde{T}_{i_3}) $}
+		% \State
+		\State $x_\textsf{Div} \gets \big(\texttt{eol}_{i_1}, \texttt{cm}_{i_{2,3}}, \texttt{rt}_\tau \big)$
+		\State $w_\textsf{Div} \gets \big( \Tilde{T}_{i_1}, \Tilde{T}_{i_{2,3}}, \mathsf{path}_{\mathsf{ind}_{i_1}}\big)$
+		\State $\pi_{\textsf{Div}} \gets \textsf{Prove}\big(\mathsf{pk}_{\textsf{Div}}, x_{\textsf{Div}}, w_{\textsf{Div}}\big)$
+		
+		\State{$(\texttt{rt}_1^{\text{new}}, \mathsf{ind}_{i_2}, \mathsf{path}_{\mathsf{ind}_{i_2}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_2})$}
+		\State{$(\texttt{rt}_2^{\text{new}}, \mathsf{ind}_{i_3}, \mathsf{path}_{\mathsf{ind}_{i_3}}) \gets \mathsf{MHT}.\mathsf{Add}(\texttt{cm}_{i_3})$}
+		\State$\texttt{tx}_{\textsf{Div}} \gets \big(\pi_{\textsf{Div}}, x_{\textsf{Div}}, \texttt{eol}_{i_1}, \texttt{cm}_{i_{2,3}}, \texttt{rt}_{1,2}^{\text{new}}, \mathsf{ind}_{i_{2,3}}, \mathsf{path}_{\mathsf{ind}_{i_{2,3}}} \big)$
+		% \State $T^{\text{new}} \gets \big( q^{\text{old}}
+		% \text{PK}_{\text{sig}}^{\text{new}}, , \rho^{\text{new}}\big)$
+		% \State $\mathcal{C} = \text{Enc} \big(\text{pk}_{\text{enc}}, \{T^{\text{old}}.q, \rho^{\text{new}}\big\}\big)$
+		\State $\texttt{Tag}_2 \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_1}, \text{PKsig}_{i_2})$
+		\State $\texttt{Tag}_3 \leftarrow \mathcal{S}_\mathsf{sig}(\text{SKsig}_{i_1}, \text{PKsig}_{i_3})$
+		\State \Return $\texttt{tx}_{\textsf{Div}}$, $\Tilde{T}_{i_{2,3}}$ , $\texttt{Tag}_{i_{2,3}}$
+	\end{algorithmic}
+\end{algorithm}
+
+
+% ###########################################
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% VerifyTX %%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}
+	\caption{\textsf{VerifyTX} $\big($\textsc{pp}$, \texttt{tx}_\mathbbm{x} \big)$ $\rightarrow$ $b \in \{0, 1\}$}\label{alg:VerifyTX}
+	\begin{algorithmic}[1]
+		\State {$\mathbbm{x}$ $\gets$ type of $\texttt{tx}_\mathbbm{x}$ } \Comment{$\mathbbm{x} \in \{\mathsf{Trans}, \mathsf{Merge}, \mathsf{Div}\}$} 
+		\State {$\mathsf{vk}_\mathbbm{x}  \gets \textsc{pp}$}
+		\State $(x_\mathbbm{x}, \pi_\mathbbm{x}, \texttt{eol}_1, \texttt{cm}_1, \texttt{rt}_1^{\text{new}}, \mathsf{ind}_{1}, \mathsf{path}_{\mathsf{ind}_{1}}) \gets \texttt{tx}$
+		
+		\If{$\texttt{eol}_1 \in  \mathbf{X}_\tau$}
+		\State \Return 0
+		\EndIf
+		
+		\If{$\mathbbm{x} = \mathsf{Merge}$}
+		\State {$\texttt{eol}_2 \gets \texttt{tx}$}
+		\If{$\texttt{eol}_2 \in  \mathbf{X}_\tau$}
+		\State \Return 0
+		\EndIf
+		\EndIf
+		
+		
+		\If{$\textsf{Verify}\big(\mathsf{vk}_\mathbbm{x}, x_\mathbbm{x}, \pi_\mathbbm{x} \big) \neq 1$}
+		\State \Return 0
+		\EndIf
+		% \State $() \gets \texttt{tx}$
+		\If {$\mathsf{MHT}.\mathsf{Verify}(\texttt{rt}_{\tau}, \texttt{rt}_1^{\text{new}}, \texttt{cm}_1, \mathsf{ind}_1, \mathsf{path}_{\mathsf{ind}_1}) \neq 1$}
+		\State \Return 0
+		\EndIf
+		\If{ $\mathbbm{x} = \mathsf{Div}$} 
+		\State $(\texttt{cm}_2, \texttt{rt}_2^{\text{new}}, \mathsf{ind}_{2}, \mathsf{path}_{\mathsf{ind}_{2}}) \gets \texttt{tx}$
+		\If {$\mathsf{MHT}.\mathsf{Verify}(\texttt{rt}_1^{\text{new}}, \texttt{rt}_2^{\text{new}}, \texttt{cm}_2, \mathsf{ind}_2, \mathsf{path}_{\mathsf{ind}_2}) \neq 1$}
+		\State \Return 0
+		\EndIf
+		
+		\EndIf
+		
+		% \If{$\textsf{Verify}()$}
+		\State \Return 1
+	\end{algorithmic}
+\end{algorithm}
+
+
+% ###########################################
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Upload %%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}
+	\caption{\textsf{Upload} $\big($\textsc{pp}$, [\textsf{pred}], T_i, d_{\mathsf{pub}}, d_{\mathsf{pri}}, \textsc{k}_{n_3}, [\textsf{tags}]  \big)$ $\rightarrow$ $d_{n_3}$}\label{alg:Upload}
+	\begin{algorithmic}[1]
+		\State {$\mathsf{pk}_\mathsf{Auth} \gets \textsc{pp}$}
+		\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}
+		\State $(\mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}}) \gets \mathsf{MHT}.\mathsf{Search}(\texttt{cm}_{i_1})$
+		\State $(\text{PKsig}_{i}, \text{SKsig}_{i}) \gets T_i$
+		\State $c_{n_3} \gets \mathcal{E}_\mathsf{sym}(\textsc{k}_{n_3}, d_{{n_3}, \mathsf{pri}} )$
+		\State $x_\texttt{Auth} \gets (\texttt{rt}_\tau, \text{PKsig}_{i})$
+		\State $w_\texttt{Auth} \gets (T_i, \mathsf{path}_{\mathsf{ind}_{i}})$
+		\State $\pi_{\textsf{Auth}} \gets \textsf{Prove}\big(\mathsf{pk}_{\textsf{Auth}}, x_{\textsf{Auth}}, w_{\textsf{Auth}}\big)$
+		\State $m \gets ([\textsf{pred}], d_{\mathsf{pub}}, c_{n_3}, [\textsf{tags}], \pi_{\textsf{Auth}}, x_\texttt{Auth}, \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau))$
+		\State $\sigma_{n_3} \gets \mathcal{S}_\mathsf{sig}\big(\text{SKsig}_{i}, m \big)$
+		\State $d_{n_3} \gets \big([\textsf{pred}],  d_{\mathsf{pub}}, c_{n_3},
+		[\textsf{tags}], \pi_\texttt{Auth}, x_\texttt{Auth}, \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau), \sigma_{n_3}\big)$
+		\State \Return $d_{n_3}$
+	\end{algorithmic}
+\end{algorithm}
+
+
+% ###########################################
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Audit %%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}
+	\caption{\textsf{Audit} $\big($\textsc{pp}$, d_n  \big)$ $\rightarrow$ $b \in \{0, 1\}$}\label{alg:Audit}
+	\begin{algorithmic}[1]
+		\State {$\mathsf{vk}_\mathsf{Auth} \gets \textsc{pp}$}
+		\State {$\big([\textsf{pred}],  d_{\mathsf{pub}}, c_{n},
+			[\textsf{tags}], \pi_\texttt{Auth}, x_\texttt{Auth}, \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau), \sigma_{n}\big) \gets d_{n}$}
+		\State $(\texttt{rt}_\tau, \text{PKsig}_{i}) \gets x_\texttt{Auth}$
+		\State $m \gets ([\textsf{pred}], d_{\mathsf{pub}}, c_{n}, [\textsf{tags}], \pi_{\textsf{Auth}}, x_\texttt{Auth})$
+		
+		\If{$\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt}_\tau)$ is not valid}
+		\State \Return 0
+		\EndIf
+		
+		\If{$\mathcal{V}_\mathsf{sig}(\text{PKsig}_{i}, m, \sigma_{n}) = 0$}
+		\State \Return 0
+		\EndIf
+		
+		\If{$\mathsf{Verify}(\mathsf{vk}_\mathsf{Auth}, x_\texttt{Auth}, \pi_\texttt{Auth}) = 0$}
+		\State \Return 0
+		\EndIf
+		
+		\While {\textbf{not} $\textsf{pred}.\textsf{isEmpty}()$ } 
+		\State {$\textsc{cid} \gets \mathsf{pred}.\mathsf{pop}()$}
+		\State $d_p \gets \mathsf{DCS}(\textsc{cid})$
+		\State $\text{PKsig}_{j} \gets d_p$
+		\If{$\text{PKsig}_{i} \neq \text{PKsig}_{j}$}
+		\State {$\texttt{Tag} \gets \mathsf{tags}.\mathsf{pop}()$}
+		\If{$\mathcal{V}_\mathsf{sig}(\text{PKsig}_{j}, \text{PKsig}_{i}, \texttt{Tag}) = 0$}
+		\State \Return 0
+		\EndIf
+		\EndIf
+		\EndWhile
+		\State \Return 1
+	\end{algorithmic}
+\end{algorithm}
+
+% ###########################################
+

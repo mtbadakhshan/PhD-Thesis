@@ -3,7 +3,7 @@
 %======================================================================
 
 \section*{Declaration of Contributions}
-This chapter is based on [?]. I have co-authored the paper and my main contributions are as follows:
+This chapter is based on an unpublished paper. I have co-authored the paper and my main contributions are as follows:
 \begin{itemize}
 	\item Deriving the exact number of additions and multiplications in the Cantor additive fast Fourier transform (\gls{fft}) \cite{Cantor1989FFT}. 
 	\item The \CC implementation of all the Cantor additive \gls{fft} algorithm with the minimum number of additions.
@@ -1176,7 +1176,7 @@ Table \ref{tab:FFTcomparisons} presents the number of additions and multiplicati
 \end{table}
 
 
-We implemented the all variants of the Cantor and Gao-Mateer algorithms in \CC except Gao-Mateer which has been implemented in the libiop library \cite{libiop}. We used the same library, libff \cite{libff}, for finite field operations as in libiop. We selected the field $\mathbb{F}_{2^{256}}$ for our experiments. Each field element is represented using four 64-bit limbs. Field multiplication is performed using 16 carry-less multiplication (CLMUL) instructions, commonly available on many x86 processors~\cite{gueron2010intel}, following a Karatsuba-like method for multiplying 4-limb values~\cite{libiop}.
+We implemented the all variants of the Cantor and Gao-Mateer algorithms in \CC except Gao-Mateer which has been implemented in the libiop library \cite{libiop}. We used the same library, libff \cite{libff}, for finite field operations as in libiop. We selected the field $\mathbb{F}_{2^{256}}$ for our experiments. Each field element is represented using four 64-bit limbs. Field multiplication is performed using 13 carry-less multiplication (\texttt{CLMUL}) instructions, commonly available on many x86 processors~\cite{gueron2010intel}, following the Karatsuba multiplication~\cite{karatsuba1962multiplication} method for multiplying 4-limb values~\cite{libiop}. This approach is provided in Appendix~\ref{a_ch:ff_mult}.
 
 The benchmarks were conducted on a system featuring an AMD Ryzen 9 9950x @ 5.7 CPU, equipped with 64 GB of DDR5 RAM. The CPU governor was set to \textit{Performance}, to ensure the CPU operates at its maximum clock speed throughout testing, thus minimizes fluctuations caused by power-saving mechanisms.
 We executed each algorithm for 1000 different random polynomials \( f(x) \in \mathbb{F}_{2^{256}}[x] \) of degree less than \( n = 2^m \), where \( 4 \leq m \leq 28 \).
@@ -1197,7 +1197,7 @@ Figure~\ref{fig:benchmark} compares the runtime of the FFT algorithms. It shows 
 	\resizebox{.9\textwidth}{!}{
 		\input{Plots/plot_GM_parts_normalized}
 	}
-	\caption{The fraction of execution time for each sub-algorithm in the Gao-Mateer FFT algorithm over $\mathbb{F}_{2^k}$ implemented in \cite{libiop}. The execution times of the Taylor expansion and bit-reversal sub-algorithms increase more rapidly with the input size.  \textit{Initialization} is a one-time computing for copying the input polynomial to a new vector. \textit{Span} and \textit{Merging} are the \textsf{Span} function and the nested for loop in \textsf{Aggregate} Module}
+	\caption[The fraction of execution time for each sub-algorithm in the Gao-Mateer FFT algorithm]{The fraction of execution time for each sub-algorithm in the Gao-Mateer FFT algorithm over $\mathbb{F}_{2^k}$ implemented in \cite{libiop}. The execution times of the Taylor expansion and bit-reversal sub-algorithms increase more rapidly with the input size.  \textit{Initialization} is a one-time computing for copying the input polynomial to a new vector. \textit{Span} and \textit{Merging} are the \textsf{Span} function and the nested for loop in \textsf{Aggregate} Module}
 	\label{fig:sub_parts_normalized}
 \end{figure}
 

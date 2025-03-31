@@ -67,9 +67,9 @@ The following served on the Examining Committee for this thesis. The decision of
   \noindent
 \begin{tabbing}
 Internal-External Member: \=  \kill % using longest text to define tab length
-External Examiner: \>  Rei Safavi-Naini \\ 
-\> Professor, Dept. of Computer Science,\\
-\> University of Calgary \\
+External Examiner: \>  Liqun Chen \\ 
+\> Professor, Dept. of Computer Science and Electronic Engineering,\\
+\> University of Surrey \\
 \end{tabbing} 
   \bigskip
   
@@ -140,7 +140,7 @@ I understand that my thesis may be made electronically available to the public.
 % ---------------
 \addcontentsline{toc}{chapter}{Statement of Contributions}
 \begin{center}\textbf{Statement of Contributions}\end{center}
-
+I am the sole author of Chapters~\ref{ch:Intro}, \ref{ch:zupply-design}, \ref{ch:zupply_implementation}, and~\ref{ch:conclusion}. Chapters~\ref{ch:preliminaries}, \ref{ch:lit_review}, \ref{ch:additive-fft}, \ref{ch:polaris}, \ref{ch:zupply-design}, \ref{ch:zupply_implementation} include material from both published and unpublished papers that I have authored or co-authored. Specific contributions and collaborations are clearly indicated at the beginning of each chapter.
 \cleardoublepage
 \phantomsection    % allows hyperref to link to the correct page
 % A B S T R A C T
@@ -149,12 +149,8 @@ I understand that my thesis may be made electronically available to the public.
 \begin{center}\textbf{Abstract}\end{center}
 
 Zero-Knowledge Succinct Non-Interactive Arguments of Knowledge (zkSNARKs) are gaining widespread adoption across various applications. Despite significant progress in developing post-quantum secure zkSNARKs, current schemes still encounter notable challenges, particularly regarding computational complexity.
-
 This thesis proposes utilizing the Cantor special basis to enhance post-quantum secure zkSNARKs operating over binary extension fields. By adopting this basis, we optimize the additive fast Fourier transform (FFT) algorithm employed in Aurora, a plausible post-quantum secure zkSNARK, replacing the previously utilized Gao-Mateer FFT with the more efficient Cantor FFT. Our implementation demonstrates substantial reductions in computation time for Aurora, indicating potential performance improvements for other zkSNARK systems reliant on additive FFTs. We offer a thorough theoretical analysis of the computational complexity of the Cantor FFT algorithm, providing precise counts of required additions, multiplications, and precomputation overhead. Additionally, we examine the FFT call complexity within the Rank-1 Constraint System encoding specifically for Aurora.
-
 Furthermore, this thesis includes an extensive analysis of the algorithms within Polaris, a plausible post-quantum zkSNARK protocol, by systematically decomposing its components for detailed evaluation. Recognizing the critical need for efficient real-world implementations, we propose a concrete GKR arithmetic circuit for integration into Polaris. We also enhance the efficiency of the FRI protocol within Polaris by eliminating costly field inversion operations.
-
-
 Finally, as an illustrative example of a privacy-preserving protocol utilizing zkSNARKs, we propose a novel framework called Anonymous Authentication Token (AAT). This framework supports the unlinkable transfer of token ownership (AAT Ownership Transfer or AATOT), including the merging and dividing of tokens in an unlinkable manner. Our construction leverages zkSNARK protocols to ensure robust anonymity, unlinkability, and authentication. Building upon this foundation, we introduce Zupply, a decentralized system designed to maintain directed acyclic graphs (DAGs) of authentic data records. Zupply operates atop a permissionless blockchain equipped with smart contracts, offering a trustless environment that preserves participant anonymity and unlinkability. Simultaneously, it ensures the integrity and authenticity of data records across the entire supply chain ecosystem. We design and implement optimized arithmetic circuits within the Zupply framework to minimize proof sizes and verification costs. We concurrently explore post-quantum secure solutions to future-proof the framework against quantum computing advancements. Our implementation of Zupply utilizes C++ and Solidity, leveraging two distinct zkSNARK protocols: Groth16 and Aurora. The Groth16 zkSNARK, while vulnerable to quantum attacks, provides computational efficiency and reduced operational costs, demonstrating Zupply’s practicality for real-world decentralized supply chain management (SCM) systems. Conversely, the Aurora zkSNARK is designed to be plausibly secure against quantum-capable adversaries. We conducted a comparative analysis of computation efficiency and proof sizes between these two zkSNARK variants,
 
 
@@ -170,7 +166,14 @@ Finally, as an illustrative example of a privacy-preserving protocol utilizing z
 \addcontentsline{toc}{chapter}{Acknowledgements}
 \begin{center}\textbf{Acknowledgements}\end{center}
 
-I would like to thank all the little people who made this thesis possible.
+I would like to sincerely thank my supervisor, Professor Guang Gong, for her unwavering support and guidance throughout my PhD. Her expertise in cryptography and communications introduced me to the fascinating world of zero-knowledge proofs, an area I knew very little about before starting this journey. She gave me the freedom to explore my own research directions, while always being there to offer advice and encouragement during difficult times. Her kindness and support went beyond academics and created an environment where I could grow both professionally and personally. It has been an honor to be her student, and I will always be grateful for everything I have learned from her.
+
+I am truly grateful to Professor Liqun Chen, Professor Anwar Hasan, Professor Mahesh Tripunitara, and Professor Douglas Stebila for serving on my thesis committee. Their thoughtful feedback and valuable suggestions helped improve the quality of this work. I deeply appreciate the time and effort they dedicated to reviewing my thesis and supporting my progress.
+
+I would like to thank my parents for their unconditional love, support, and belief in me throughout every step of my life. Their sacrifices and values have shaped who I am today. Even from afar, they have always been with me, giving me strength and reminding me to keep going with honesty and perseverance. I dedicate this achievement to them with love and deep appreciation.
+
+Last but not the least, I am incredibly grateful to my girlfriend, Maryam Mottaghi, for her endless support, patience, and love during this journey. She stood by me through all the ups and downs, encouraged me when I struggled, and believed in me when I needed it most. Her presence has been a source of peace and motivation, and sharing this chapter of life with her has been a true gift.
+
 \cleardoublepage
 \phantomsection    % allows hyperref to link to the correct page
 

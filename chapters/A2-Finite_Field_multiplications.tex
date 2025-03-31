@@ -1,0 +1,121 @@
+%======================================================================
+\chapter{Multiplication of Elements in Binary Extension Field  $\mathbb{F}_{2^{256}}$}\label{a_ch:ff_mult}
+%======================================================================
+
+In this appendix we provide the approach existed in~\cite{libff} for multiplying two elements in $a,b \in \mathbb{F}_{2^{256}}$. Let
+\begin{equation}\label{eq_F_2_192}
+	\mathbb{F}_{2^{256}} := \mathbb{F}_{2}[x]/(x^{256} + x^{10} + x^{5} + x^{2} + 1)
+\end{equation}%https://www.jjj.de/mathdata/
+	define the field, where $p(x):=x^{256} + x^{10} + x^{5} + x^{2} + 1$ denotes a primitive irreducible polynomial  over $\mathbb{F}_{2}$.  Accordingly, 
+	\[
+	a(x) \cdot b(x) \bmod p(x)
+	\]
+	denotes the multiplication of $a$ and $b$ in the field $\mathbb{F}_{2^{256}}$ as defined above, where $a(x)$ and $b(x)$ are the polynomial representations of $a$ and $b$, respectively, as described below.
+
+\paragraph{Partitioning}
+Let $a,b \in \mathbb{F}_{2^{256}}$ be represented as  binary polynomials of degree $<256$
+\[
+	a(x) := a_0 + a_1x + a_2x^2 + a_3x^3 + \dots + a_{255}x^{255} \in \mathbb{F}_{2}[x], 
+\]
+\[
+	b(x) := b_0 + b_1x + b_2x^2 + b_3x^3 + \dots + b_{255}x^{255} \in \mathbb{F}_{2}[x],
+\]
+such that their polynomial product  $c(x) = a(x) \cdot b(x)$ is represented as
+\[
+c(x) := c_0 + c_1x + c_2x^2 + c_3x^3 + \dots + c_{510}x^{510} \in \mathbb{F}_{2}[x].
+\]
+Given a multiplication function $M:\{0,1\}^{64}\times\{0,1\}^{64} \rightarrow \{0,1\}^{128}$ that multiplies two 64-bit binary numbers and is instantiated by the \texttt{CLMUL} instruction on many x86 architecture CPUs~\cite{gueron2010intel}, the Karatsuba multiplication algorithm~\cite{karatsuba1962multiplication} is applied to compute the product of  $a(x)$ and $b(x)$.  To do so, each polynomial is partitioed into four 64-bit limbs \mbox{\(a'_i(x), b'_i(x)\in\{0,1\}^{64}\)} for $i=0,1,2,3$ defined as 
+\begin{align*}
+	a'_0 (x) &:= a_0 + \dots + a_{63}x^{63}, & 					a'_1 (x) &:= a_{64} +  \dots + a_{127}x^{127}, \\
+	a'_2 (x) &:= a_{128} + \dots + a_{191}x^{191}, & 	  a'_3 (x) &:= a_{192} +  \dots + a_{255}x^{255},\\
+	b'_0 (x) &:= b_0 + \dots + b_{63}x^{63}, & 				   b'_1 (x) &:= b_{64} +  \dots + b_{127}x^{127}, \\
+	b'_2 (x) &:= b_{128} + \dots + b_{191}x^{191}, &	 b'_3 (x) &:= b_{192} +  \dots + b_{255}x^{255}.
+\end{align*}
+Accordingly, $a $ and $b$ will be represented in terms of $X = x^{64}$ as
+\begin{align*}
+	a(X)  &= a'_0 + a'_1X + a'_2X^2 + a'_3X^3,\\
+	b(X)  &= b'_0 + b'_1X + b'_2X^2 + b'_3X^3.
+\end{align*}
+Accordingly,  $c$  will be
+\begin{align}\label{eq:c_X}
+	c(X) := c'_0 + c'_1X + c'_2X^2 +  \dots + c'_{6}X^{6},
+\end{align}
+where $c'_i \in \{0,1\}^{128}$ for $i=0, \dots, 6$ are overlapping 128-bit limbs in $c(X)$. 
+
+\paragraph{Polynomial Multiplication Algorithm}
+Now, we present the multiplication algorithm used in~\cite{libiop}. Given the function $M$ previously defined, let $t$ and $u$, $v$ intermediate auxilary 128-bit binary variables have the following values:
+\begin{align*}
+	t &:= M(a'_1,b'_1), \\
+	u &:= M(a'_2,b'_2), \\
+	v &:= t \oplus^{128} u,
+\end{align*}
+where $\oplus^{128}:\{0,1\}^{128}\times\{0,1\}^{128} \rightarrow \{0,1\}^{128}$ denotes the 128-bit XOR opreator. Moreover, the following values are 64-bit itermediate auxilary variables:
+\begin{align*}
+	w_0 &:= a'_0 \oplus^{64} a'_1,  &y'_0 &:= b_0 \oplus^{64} b'_1, \\
+	w_1 &:= a'_0 \oplus^{64} a'_2,  &y_1 &:= b'_0 \oplus^{64} b'_2, \\
+	w_2 &:= a'_2 \oplus^{64} a'_3,  &y_2 &:= b'_2 \oplus^{64} b'_3, \\
+	w_3 &:= a'_1 \oplus^{64} a'_3,  &y_3 &:= b'_1 \oplus^{64} b'_3, \\
+	w_4 &:= w_0 \oplus^{64} w_2,  &y_4 &:= y_0 \oplus^{64} y_4, \\
+\end{align*}
+where $\oplus^{64}:\{0,1\}^{64}\times\{0,1\}^{64} \rightarrow \{0,1\}^{64}$ denotes the 64-bit XOR opreator.
+Using these, the valuse of $c'_i$s are computed as follows:
+ \begin{align*}
+ 	c'_0 &:= M(a_0,b_0), \\
+ 	c'_6 &:= M(a_3,b_3), \\
+ 	c'_1 &:= M(w_0, y_0) \oplus^{128} c'_0 \oplus^{128} t, \\
+ 	c'_2 &:= M(w_1, y_1) \oplus^{128} c'_0 \oplus^{128} v, \\
+ 	c'_5 &:= M(w_2, y_2) \oplus^{128} c'_6 \oplus^{128} u, \\
+ 	c'_4 &:= M(w_3, y_3) \oplus^{128} c'_6 \oplus^{128} v, \\
+ 	c'_3 &:= M(w_4, y_4) \oplus^{128} c'_0 \oplus^{128} c'_1 \oplus^{128} c'_2 \oplus^{128} c'_4 \oplus^{128} c'_5 \oplus^{128} c'_6. \\
+ \end{align*}
+ 
+ Now, the overlapping $c_i$s in (\ref{eq:c_X}) are merged to represent $c(X)$ as non-overlaping  four 128-bit limbs $c''_i \in \{0,1\}^{128}$ for $i=0,\dots,3$, such that
+ \begin{align} \label{eq:c_Y}
+ c(Y) := c''_0 + c''_1Y + c''_2Y^2 +  c''_{3}Y^{3},
+\end{align}
+ where $Y = x^{128}$ and each $c''_i$ is computed as follows:
+ \begin{align*}
+ 	c''_0 &:= c'_0   \oplus^{128} (c'_1 \ll 64),\\
+ 	c''_1 &:= c'_2   \oplus^{128} (c'_1 \gg 64) \oplus^{128} (c'_3 \ll 64),\\
+ 	c''_2 &:= c'_4   \oplus^{128} (c'_3 \gg 64) \oplus^{128} (c'_5 \ll 64),\\
+ 	c''_3 &:= c'_6   \oplus^{128} (c'_5 \gg 64),\\
+ \end{align*}
+ where $\ll 64$ shifts the bits to the left by 64 positions, discarding the bits shifted out from the most significant end and inserting zeros into the least significant positions. Similarly, $\gg 64$ shifts the bits to the right by 64 positions, discarding the bits shifted out from the least significant end and inserting zeros into the most significant positions.
+\paragraph{Reduction}
+In this step, the polynomial in~(\ref{eq:c_Y}) is reduced modulo \( p(x) \). Then the final result lies in \( \mathbb{F}_{2^{256}} \), and is denoted as
+	\[
+	d(x) := a(x) \cdot b(x) \bmod p(x),
+	\]
+where \( d(x) = d_0 + d_1x + \cdots + d_{255}x^{255} \) is the polynomial representation of \( d \in \mathbb{F}_{2^{256}} \), which can alternatively be expressed using four 64-bit limbs as	
+\begin{align}
+	d(X) := d'_0 + d'_1X + d'_2X^2 + d'_3X^3,
+\end{align}
+where \( d'_i \in \{0,1\}^{64} \) for \( i = 0,1,2,3 \).
+Let us define the polynomial \( p'(x) := x^{10} + x^{5} + x^{2} + 1 \) from $p(x)$, corresponding to the 10-bit binary number \( p' = (10000100101)_2 \).
+To compute \( d(X) \), we assume the following partitioning of terms in (\ref{eq:c_Y}) into two 64-bit limbs:
+ \begin{align*}
+ 	c''_0 &:= c''_{00} + c''_{01}X,& c''_1 &:= c''_{10} + c''_{11}X,\\
+	c''_2 &:= c''_{20} + c''_{21}X,& c''_3 &:= c''_{30} + c''_{31}X,\\
+\end{align*}	
+where $c''_{i0}, c''_{i1} \in \{0,1\}^{64}$ for $i=0,1,2,3$. Now, we define the following 128-bit auxilary intermediate values
+\begin{align*}
+	z_0 &:= M(c''_{31},p), &	z_1 &:= M(c''_{30},p), \\
+	z_2 &:= M(c''_{21},p), &	z_3 &:= M(c''_{20} \oplus^{64} z_{01} ,p), \\
+\end{align*}
+where they are partitioned  into two 64-bit limbs as follows:
+ \begin{align*}
+	z_0 &:= z_{00} + z_{01}X,& z_1 &:= z_{10} + z_{11}X,\\
+	z_2 &:= z_{20} + z_{21}X,& z_3 &:= z_{30} + z_{31}X,\\
+\end{align*}	
+where $z_{i0}, z_{i1} \in \{0,1\}^{64}$ for $i=0,1,2,3$.
+ 
+ 
+Now, $d'_0, d'_1, d'_2, d'_3$ are computed as follows:
+
+ \begin{align*}
+	d'_0 &:= c''_{00} \oplus^{64} z_{30},\\
+	d'_1 &:= c''_{01} \oplus^{64} z_{20} \oplus^{64} z_{31},\\
+	d'_2 &:= c''_{10} \oplus^{64} z_{10} \oplus^{64} z_{21},\\
+	d'_3 &:= c''_{11} \oplus^{64} z_{00} \oplus^{64} z_{11}.\\
+\end{align*}
+Consequently, $d(X)$ and then $d=a.b$ are derived.
