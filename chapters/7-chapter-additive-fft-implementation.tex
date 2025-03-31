@@ -6,20 +6,20 @@
 This chapter is based on an unpublished paper. I have co-authored the paper and my main contributions are as follows:
 \begin{itemize}
 	\item Deriving the exact number of additions and multiplications in the Cantor additive fast Fourier transform (\gls{fft}) \cite{Cantor1989FFT}. 
-	\item The \CC implementation of all the Cantor additive \gls{fft} algorithm with the minimum number of additions.
-	\item The dasign and implementation of precomputations in the presented additive \gls{fft}s.
+	\item The \CC implementation of the Cantor additive \gls{fft}.
+	\item The dasign and implementation of precomputations in the presented additive \gls{fft}s and their required storage.
 	\item The \CC implementation of modified versions of the Gao-Mateer additive \gls{fft} \cite{Gao2010FFT}.
 	\item  The \gls{fft} Complexity analysis of the Aurora zero-knowledge succinct non-interactive arguments of knowledge (\gls{zksnark}) and modified the Aurora  \CC  to employ  the Cantor additive \gls{fft} instead of  the Gao-Mateer additive \gls{fft}.
 \end{itemize}
 
 \section{Introduction}
 
-The \gls{fft} over additive groups can be utilized in various \gls{zksnark} protocols operating over binary extension fields. Examples of such protocols include Ligero~\cite{Ames2017Ligero}, STARK~\cite{Ben-Sasson2018STARK}, Aurora~\cite{Aurora2019}, Fractal~\cite{Chiesa2020Fractal}, and Polaris~\cite{Polaris}. Among these \gls{zksnark}s, Fractal features the fastest verifier algorithm, Ligero boasts the fastest prover algorithm, and Aurora achieves the smallest proof size. While STARK employs algebraic intermediate representation (\gls{air}), which is designed for converting the execution trace of a program into algebraic representations (e.g., polynomials), the others rely on rank-1 constraint system (R1CS) \cite{Gong2024}, which is suited for arithmetic circuit and is preferred in cryptography related applications, as many privacy-preserving solutions rely on zero-knowledge proofs (\gls{zkp}s) of knowledge of the preimage of a leaf in a Merkle hash tree constructed by the circuit of a hash algorithm (e.g., SHA-256). Furthermore, \gls{zksnark}-based post-quantum digital signature schemes typically involve proving knowledge of the secret key for a symmetric-key encryption algorithm (e.g., AES) represented as an arithmetic circuit.
+The \gls{fft} over additive groups can be utilized in various \gls{zksnark} protocols operating over binary extension fields. Examples of such protocols include Ligero~\cite{Ames2017Ligero}, STARK~\cite{Ben-Sasson2018STARK}, Aurora~\cite{Aurora2019}, Fractal~\cite{Chiesa2020Fractal}, and Polaris~\cite{Polaris}. Among these \gls{zksnark}s, Fractal features the fastest verifier algorithm, Ligero boasts the fastest prover algorithm, and Aurora achieves the smallest proof size. While STARK employs algebraic intermediate representation (\gls{air}), which is designed for converting the execution trace of a program into algebraic representations (e.g., polynomials), the others rely on rank-1 constraint system (\gls{r1cs}) \cite{Gong2024}, which is suited for arithmetic circuit and is preferred in cryptography related applications, as many privacy-preserving solutions rely on zero-knowledge proofs (\gls{zkp}s) of knowledge of the preimage of a leaf in a Merkle hash tree constructed by the circuit of a hash algorithm (e.g., SHA-256). Furthermore, \gls{zksnark}-based post-quantum digital signature schemes typically involve proving knowledge of the secret key for a symmetric-key encryption algorithm (e.g., AES) represented as an arithmetic circuit.
 
 For this study, we select Aurora~\cite{Aurora2019} to demonstrate the performance improvements achieved by optimizing the \gls{fft} algorithm using the Cantor special basis \cite{Cantor1989FFT}. While our optimization is applicable to all the aforementioned \gls{zksnark}s, Aurora was chosen due to its small proof size, which makes it a strong candidate for post-quantum secure digital signature schemes. Accordingly, Aurora serves as the foundation of Preon~\cite{Preon2023}, a post-quantum digital signature scheme that was a first-round candidate in NIST’s post-quantum cryptography standardization process~\cite{nist_pqc_round1_signatures}.
 
 \begin{table}
-	\caption[Prover and verifier of the Aurora zkSNARK using Gao-Mateer and Cantor FFT algoritms]{ Prover and Verifier of the Aurora zkSNARK \cite{Aurora2019} over $\mathbb{F}_{2^{256}}$ based on the number of constraints $N$ and the size of the Reed-Solomon codeword domain $|L|$, using Gao-Mateer and Cantor FFTs, on an AMD Ryzen 9 9950x @ 5.7 GHz (sec).}
+	\caption[Prover and verifier of the Aurora zkSNARK using Gao-Mateer and Cantor FFT algoritms]{ Prover and Verifier of the Aurora \gls{zksnark} \cite{Aurora2019} over $\mathbb{F}_{2^{256}}$ based on the number of constraints $N$ and the size of the Reed-Solomon codeword domain $|L|$, using Gao-Mateer and Cantor FFTs, on an AMD Ryzen 9 9950x @ 5.7 GHz (sec).}
 	\label{tab:cost_analysis_intorduction}
 	\centering
 	{\small
@@ -59,18 +59,18 @@ For this study, we select Aurora~\cite{Aurora2019} to demonstrate the performanc
 	\item  For the Gao-Mateer algorithm, we also provide a detailed breakdown of its two core components: the \textsf{Expand} and \textsf{Aggregate} modules. We incorporate the Cantor special basis into the Gao-Mateer algorithm to enhance the computational and space efficiency.
 	We also introduce the precomputation techniques that substantially reduce overhead in the Cantor algorithm and two levels of precomputation in the Gao-Mateer algorithm.
 	
-	\item We propose an analysis of the \gls{fft} call complexity in the Aurora \gls{zksnark}, evaluating the number and size of each FFT/IFFT call based on the number of constraints and variables in a given R1CS, and the target security parameter. Additionally, we demonstrate how the careful selection of the shift element in the affine subspaces of Aurora enables a significant reduction in the space complexity of the precomputation in the Cantor FFT by leveraging the unique properties of the Cantor special basis.
+	\item We propose an analysis of the \gls{fft} call complexity in the Aurora \gls{zksnark}, evaluating the number and size of each \gls{fft}/\gls{ifft} call based on the number of constraints and variables in a given \gls{r1cs}, and the target security parameter. Additionally, we demonstrate how the careful selection of the shift element in the affine subspaces of Aurora enables a significant reduction in the space complexity of the precomputation in the Cantor \gls{fft} by leveraging the unique properties of the Cantor special basis.
 	
 	\item We provide a \CC  implementations of the Cantor algorithm, the Gao-Mateer algorithm which uses the Cantor special basis and, our precomputation techniques. We then provide a comprehensive comparison of these algorithms, along with their respective precomputations in Figure \ref{fig:benchmark}. 
 	
 	
-	% We adopt the Cantor special basis and our optimized FFT algorithm in the current Aurora implementation \cite{libiop}, and our optimized FFT algorithm implementation uses the same field arithmetization library (libiop \cite{libiop}) as Aurora. This ensures compatibility with the library and facilitates a fair comparison between the algorithms.
+	\item  We adopt the Cantor special basis and Cantor additive \gls{fft} algorithm in the current Aurora implementation \cite{libiop}, and our optimized \gls{fft} algorithm implementation uses the same field arithmetization library (libiop \cite{libiop}) as Aurora. This ensures compatibility with the library and facilitates a fair comparison between the algorithms.
 	% \item We discuss two levels of precomputation in the Gao-Mateer algorithm and provide a comprehensive comparison of the Cantor and Gao-Mateer algorithms, along with their respective optimizations.
 \end{itemize}
 
 
 
- The chapter is structured as follows.  Section~\ref{Sec:Cantor Implementation} presents optimizations for the Cantor algorithm, while Section~\ref{Sec:Gao-implementation} details the Gao-Mateer algorithm and its precomputations. Section~\ref{Sec:FFT_Calls_in_Aurora} analyzes FFT call complexity in Aurora, and Section~\ref{Sec:ComplexityAnalysis} compares the FFT algorithms. Finally, Section~\ref{Sec:Summary} summarizes findings.
+ The chapter is structured as follows.  Section~\ref{Sec:Cantor Implementation} presents optimizations for the Cantor algorithm, while Section~\ref{Sec:Gao-implementation} details the Gao-Mateer algorithm and its precomputations. Section~\ref{Sec:FFT_Calls_in_Aurora} analyzes \gls{fft} call complexity in Aurora, and Section~\ref{Sec:ComplexityAnalysis} compares the \gls{fft} algorithms. Finally, Section~\ref{Sec:Summary} summarizes findings.
 
 
 \section{Cantor Algorithm Building Blocks}\label{Sec:Cantor Implementation}
@@ -255,7 +255,7 @@ Cantor algorithm is implemented by Canopy modules of varying input sizes $2^p$ a
  \begin{figure}
 	     \centering
 	     \includegraphics[width=\linewidth]{Figures/Canopy.jpg}
-	     \caption[The Canopy module in the Cantor FFT algorithm]{\small Cantor FFT algorithm of length $n = 2^3$ which evaluates $f(x)\in\mathbb{F}[x]$ of degree $<8$ over $\theta$ + $W_3$, where $\theta \in \mathbb{F}_{2^k}$ and $W_3$ is the Cantor special basis.}
+	     \caption[The Canopy module in the Cantor FFT algorithm]{The Cantor \gls{fft} algorithm of length $n = 2^3$ which evaluates $f(x)\in\mathbb{F}[x]$ of degree $<8$ over $\theta$ + $W_3$, where $\theta \in \mathbb{F}_{2^k}$ and $W_3$ is the Cantor special basis.}
 	     \label{fig:Canopy}
 	 \end{figure}%\vspace{-100pt}
 
@@ -338,7 +338,7 @@ where \(\mathbb{Z}_{W_{p-1}}(\theta)\) is evaluated at each round while construc
 Algorithm~\ref{Algo:Canopy} details the steps within the \(\mathsf{Canopy}_{p, i}\) module, and Algorithm~\ref{Algo:Cantor_Implementation} describes the implementation of the Cantor algorithm based on those modules. 
 
 \subsection{Detailed Cost Analysis}
-At the $r$th iteration of the algorithm, we perform $2^{r}$ divisions by the polynomial $\mathbb{Z}_{W_{m-r-1}}(x)$. Consequently, the total number of additions resulting from polynomial division in the Cantor additive FFT is given by
+At the $r$th iteration of the algorithm, we perform $2^{r}$ divisions by the polynomial $\mathbb{Z}_{W_{m-r-1}}(x)$. Consequently, the total number of additions resulting from polynomial division in the Cantor additive \gls{fft} is given by
 
 \begin{equation*}
 	\begin{aligned}
@@ -347,7 +347,7 @@ At the $r$th iteration of the algorithm, we perform $2^{r}$ divisions by the pol
 	\end{aligned}
 \end{equation*}
 
-From Steps~\ref{Step:CantorLeftSib} and \ref{Step:CantorRightSib} of Algorithm~\ref{Algo:Polynomial Division}, we know that for the input polynomial in the $(r+1)$th iteration, we require $2 \times 2^r$ polynomial additions, each of degree less than $2^{m-r-1}$. This leads to a total of  $\sum_{r=0}^{m-1} 2\cdot 2^{r} \cdot 2^{m-r-1}=2^m m$ additions. Therefore, the total number of additions in the Cantor additive FFT is given by \[2^m m + 2^{m-1} \displaystyle{\sum_{r=0}^{m-1} 2^{\text{wt}(r)} } - m2^{m-1}= \frac{1}{2} n\log_2 n + \frac{1}{2}n \sum_{r=0}^{\log_2(n)-1} 2^{\text{wt}(r)}.\]
+From Steps~\ref{Step:CantorLeftSib} and \ref{Step:CantorRightSib} of Algorithm~\ref{Algo:Polynomial Division}, we know that for the input polynomial in the $(r+1)$th iteration, we require $2 \times 2^r$ polynomial additions, each of degree less than $2^{m-r-1}$. This leads to a total of  $\sum_{r=0}^{m-1} 2\cdot 2^{r} \cdot 2^{m-r-1}=2^m m$ additions. Therefore, the total number of additions in the Cantor additive \gls{fft} is given by \[2^m m + 2^{m-1} \displaystyle{\sum_{r=0}^{m-1} 2^{\text{wt}(r)} } - m2^{m-1}= \frac{1}{2} n\log_2 n + \frac{1}{2}n \sum_{r=0}^{\log_2(n)-1} 2^{\text{wt}(r)}.\]
 
 % \begin{equation*}
 	%     \begin{aligned}
@@ -356,12 +356,12 @@ From Steps~\ref{Step:CantorLeftSib} and \ref{Step:CantorRightSib} of Algorithm~\
 		%     \end{aligned}
 	% \end{equation*}
 
-This provides an exact count of the additions required in the Cantor additive FFT, whereas previous works, to the best of our knowledge, have only established upper bounds.
+This provides an exact count of the additions required in the Cantor additive \gls{fft}, whereas previous works, to the best of our knowledge, have only established upper bounds.
 
-On the other hand, from Step~\ref{Step:CantorLeftSib} of Algorithm~\ref{Algo:Polynomial Division}, we know that for the input polynomial in the $(r+1)$th iteration, we require $2^r \times 2^{m-r-1}= 2^{m-1}$ multiplications. Thus, the number of multiplications in the Cantor additive FFT is given by
+On the other hand, from Step~\ref{Step:CantorLeftSib} of Algorithm~\ref{Algo:Polynomial Division}, we know that for the input polynomial in the $(r+1)$th iteration, we require $2^r \times 2^{m-r-1}= 2^{m-1}$ multiplications. Thus, the number of multiplications in the Cantor additive \gls{fft} is given by
 \(\sum_{r=0}^{m-1} 2^{m-1} = \frac{1}{2} n \log_2 n .\)
 
-If the Cantor additive FFT is performed over a subspace $W_m$, due to Step~\ref{Step:CantorLeftSib} of the Algorithm~\ref{Algo:Polynomial Division}, we must account for a reduction of $\sum_{r=0}^{m-1} 2^{m-r-1}=2^m-1=n-1$ in both additions and multiplications. Thus, the costs for additions and multiplications are changed to
+If the Cantor additive \gls{fft} is performed over a subspace $W_m$, due to Step~\ref{Step:CantorLeftSib} of the Algorithm~\ref{Algo:Polynomial Division}, we must account for a reduction of $\sum_{r=0}^{m-1} 2^{m-r-1}=2^m-1=n-1$ in both additions and multiplications. Thus, the costs for additions and multiplications are changed to
 $\frac{1}{2} n\log_2 n + \frac{1}{2}n \sum_{r=0}^{\log_2(n)-1} 2^{\text{wt}(r)} -n +1$ and $\frac{1}{2} n \log_2 n-n+1$, respectively.
 % In our instantiations of the Cantor algorithm, we can precompute some values that are independent of the input polynomial and only depend on the length of the FFT algorithm (i.e., the upper bound degree for the polynomial). Therefore, these values can be precomputed once for the Cantor algorithm of length $n$ and then used for evaluations of any polynomial whose degree is $< n = 2^m$. In the next section we suggest an algorithm for the precomputation.
 
@@ -409,7 +409,7 @@ For a special case where the affine shift $\theta$ is an element of the Cantor s
 \section{Gao-Mateer Algorithm Building Blocks}\label{Sec:Gao-implementation}
 
 % Similar to the Cantor algorithm implementation, an iterative implementation of the Gao-Mateer algorithm is more efficient than a recursive approach, particularly in terms of memory usage and stack management. Thus, 
-The Gao-Mateer FFT implementation of length $n = 2^m$ consists of $2m$ iterative rounds to evaluate a polynomial $f(x) \in \mathbb{F}_{2^k}[x]$ of degree $< 2^m$ over the affine subspace $\theta + W_m$, where $\theta \in \mathbb{F}_{2^k}$ and $W_m = \langle \beta_0, \beta_1, \ldots, \beta_{m-1} \rangle$. % such that $\beta_1, \ldots, \beta_{m-1} \in \mathbb{F}_{2^k}$ are linearly independent over $\mathbb{F}_2$.
+The Gao-Mateer \gls{fft} implementation of length $n = 2^m$ consists of $2m$ iterative rounds to evaluate a polynomial $f(x) \in \mathbb{F}_{2^k}[x]$ of degree $< 2^m$ over the affine subspace $\theta + W_m$, where $\theta \in \mathbb{F}_{2^k}$ and $W_m = \langle \beta_0, \beta_1, \ldots, \beta_{m-1} \rangle$. % such that $\beta_1, \ldots, \beta_{m-1} \in \mathbb{F}_{2^k}$ are linearly independent over $\mathbb{F}_2$.
 
 We describe the Gao-Mateer algorithm through two primary modules: the \textsf{Expand} module and the \textsf{Aggregate} module.  \textsf{Expand} is an $r$-round algorithm where in each round $0 \leq r \leq m - 1$, it expands $2^r$ polynomials of degree $< 2^{m-r}$ into $2^{r+1}$ smaller polynomials of degree $<2^{m-r-1}$. Similar to our Cantor algorithm implementation, only one vector of length $2^m$ denoted as $\fbu$ is required to store all the polynomials in each round. \textsf{Aggregate} is an $r$-round algorithm that takes the output of \textsf{Expand}, and iteratively folds them over $r$ rounds, ultimately producing the evaluations of $f(x)$ on $\theta + W_m$. In the following, we start by presenting the Taylor expansion algorithm, which serves as the core component of \textsf{Expand}.
 
@@ -778,7 +778,7 @@ In the last round of the \textsf{Expand} module, $\fbu$ is rearranged in bit-rev
 		\label{fig:gao-expand-binary}
 	\end{subfigure}
 	
-	\caption[The \textsf{Expand} module in the Gao FFT algorithm]{The \textsf{Expand} module in the Gao FFT algorithm of length $n=2^3$, which evaluates a polynomial $f(x) \in \mathbb{F}[x]$ of degree $< 8$ over $\theta + W_3$, where $W_3 = \langle \beta_0, \beta_1, \beta_2 \rangle$. 
+	\caption[The \textsf{Expand} module in the Gao-Mateer FFT algorithm]{The \textsf{Expand} module in the Gao-Mateer \gls{fft} algorithm of length $n=2^3$, which evaluates a polynomial $f(x) \in \mathbb{F}[x]$ of degree $< 8$ over $\theta + W_3$, where $W_3 = \langle \beta_0, \beta_1, \beta_2 \rangle$. 
 		In Figure (a), the \textsf{Expand} module groups even and odd indices after each Taylor expansion. In contrast, Figure (b) skips these rearrangements by using one $\textsf{T}_8$ module instead of two $\textsf{T}_4$ modules in round $r=1$ then performs the bit-reversal in the final round. 
 		 Additionally, in this figure, $\beta_{0,2} = \beta_2$, and $\beta_{1,1} = (\beta_1 \beta_2^{-1})^2 -  (\beta_1 \beta_2^{-1})$. Given that $\beta_{1,0} = (\beta_0 \beta_1^{-1})^2 -  (\beta_0 \beta_1^{-1})$, we can compute $\beta_{2,0} = (\beta_{1,0} \beta_{1,1}^{-1})^2 -  (\beta_{1,0} \beta_{1,1}^{-1})$.
 	}
@@ -854,7 +854,7 @@ From Algorithm~\ref{Algo:Aggregate}, we know that at the $r$th iteration, the nu
 From Algorithm~\ref{Algo:TaylorExpansion}, we know that in the $r$th iteration, the number of additions due to the Taylor expansion is $2^{m-1}(m-r-1)$. Thus, the total number of additions required for the Taylor expansions is $\sum_{r=0}^{m-2}2^{m-1}(m-r-1) = 2^{m-2}m(m-1)$. Also, in Algorithm~\ref{Algo:Aggregate}, we know that at the $r$th iteration, the number of required additions is $2 \cdot 2^r \cdot 2^{m-r-1} =2^{m}$. Therefore, the total addition cost for the algorithm is given by
 \(2^{m-2}m(m-1) + m\cdot 2^m= \frac{1}{4}n(\log_2n)^2 + \frac{3}{4}n\log_2n. \)
 
-When performing the FFT over a subspace, at each $r$th iteration of Algorithm~\ref{Algo:Aggregate}, we have $\eta_0=0$. Thus, for Steps~\ref{Step:AlgAgreeM1} and \ref{Step:AlgAgreeM2}, we need no multiplications are required, and only one addition is needed. Consequently, we must account for a reduction of $\sum_{r=0}^{m-1} 2^{m-r-1}=2^m-1=n-1$ in both additions and multiplications. Therefore, the costs for multiplications and additions are changed to
+When performing the \gls{fft} over a subspace, at each $r$th iteration of Algorithm~\ref{Algo:Aggregate}, we have $\eta_0=0$. Thus, for Steps~\ref{Step:AlgAgreeM1} and \ref{Step:AlgAgreeM2}, we need no multiplications are required, and only one addition is needed. Consequently, we must account for a reduction of $\sum_{r=0}^{m-1} 2^{m-r-1}=2^m-1=n-1$ in both additions and multiplications. Therefore, the costs for multiplications and additions are changed to
 $\frac{3}{2} n \log_2 n -2n +2$ and  $\frac{1}{4}n(\log_2n)^2 + \frac{3}{4}n\log_2n-n+1$, respectively.
 
 \subsection{Optimization for Cantor Special Basis}\label{Sec:Gao-optimization-Cantor_basis}
@@ -905,9 +905,9 @@ Therefore, at each iteration there is no need for scaling. Also, due to the chos
 
 % The number of additions remains unchanged, as evaluated in Section~\ref{Sec:Cost-GM}. Therefore, the total addition cost for the optimized algorithm is $\frac{1}{4}n(\log_2 n)^2 + \frac{3}{4}n\log_2 n$.
 
-Furthermore, as discussed in Section~\ref{Sec:Cost-GM}, when performing the FFT over a subspace, the total multiplication and addition costs for the algorithm are $\frac{1}{2}n\log_2n - n+1$ and $\frac{1}{4}n(\log_2n)^2 + \frac{3}{4}n\log_2n - n +1$, respectively.
+Furthermore, as discussed in Section~\ref{Sec:Cost-GM}, when performing the \gls{fft} over a subspace, the total multiplication and addition costs for the algorithm are $\frac{1}{2}n\log_2n - n+1$ and $\frac{1}{4}n(\log_2n)^2 + \frac{3}{4}n\log_2n - n +1$, respectively.
 
-Thus, by using Cantor special basis in the Gao-Mateer algorithm, we can efficiently compute the additive FFT of $f(x)\in \F_{2^k}[x]$ over $\theta + W_m$ where $\F_{2^k}$ contain a subfield $\F_{2^{2^\ell}}$ with $m \leq 2^{\ell}$.
+Thus, by using Cantor special basis in the Gao-Mateer algorithm, we can efficiently compute the additive \gls{fft} of $f(x)\in \F_{2^k}[x]$ over $\theta + W_m$ where $\F_{2^k}$ contain a subfield $\F_{2^{2^\ell}}$ with $m \leq 2^{\ell}$.
 
 % Table~\ref{tab:FFTcomparisons} presents a comparison of the number of additions and multiplications required by the Cantor, Gao-Mateer, and LCH~\cite{LCH-FFT2016} FFTs with precomputation.
 
@@ -988,7 +988,7 @@ Algorithms~\ref{Algo:Gao_Precmp_lvl1} and \ref{Algo:Gao_Precmp_lvl2} summarize t
 \section{Aurora FFT Complexity Analysis} \label{Sec:FFT_Calls_in_Aurora}
 Given a target security parameter $\boldsymbol{\lambda}$, and subsets $H_1$ and $H_2$,
 % where size of each is determined by the number of constraints and variables of a given R1CS relation respectively,
-the size of the codeword domain (i.e., $|L|$) is determined. This size is important for the analysis of the FFT complexity of Aurora, as the input length of many FFT and IFFT instances is $|L|$. Before computing $|L|$, we need to review how the number of queries to the  codeword is determined based on the target security parameter.
+the size of the codeword domain (i.e., $|L|$) is determined. This size is important for the analysis of the \gls{fft} complexity of Aurora, as the input length of many \gls{fft} and \gls{ifft} instances is $|L|$. Before computing $|L|$, we need to review how the number of queries to the  codeword is determined based on the target security parameter.
 
 \subsection{Soundness Errors: Queries and Repetition Analysis}
 Given $\boldsymbol{\lambda}$, $\boldsymbol{\epsilon_q}$ and $\boldsymbol{\epsilon_i}$ represent query and interactive soundness errors such that
@@ -997,39 +997,39 @@ Given $\boldsymbol{\lambda}$, $\boldsymbol{\epsilon_q}$ and $\boldsymbol{\epsilo
 \)
 where $2^{-\boldsymbol{\lambda} - 1}$ is allocated to each. According to \cite[Theorem 4]{Aurora2019}, 
 \[
-\boldsymbol{\epsilon_i} = \left(\frac{\eta + 1}{|\mathbb{F}|}\right)^{\lambda_i} + \left(\frac{|L|}{|\mathbb{F}|}\right)^{\lambda'_i} + \epsilon^{\text{FRI}}_i,\text{ and } \boldsymbol{\epsilon_q} = \epsilon^{\text{FRI}}_q,
+\boldsymbol{\epsilon_i} = \left(\frac{d_1 + 1}{|\mathbb{F}|}\right)^{\lambda_i} + \left(\frac{|L|}{|\mathbb{F}|}\right)^{\lambda'_i} + \epsilon^{\text{FRI}}_i,\text{ and } \boldsymbol{\epsilon_q} = \epsilon^{\text{FRI}}_q,
 \]
-where $ \left(\frac{\eta + 1}{|\mathbb{F}|}\right)^{\lambda_i}$ and $\left(\frac{|L|}{|\mathbb{F}|}\right)^{\lambda'_i}$ denote the lincheck and LDT soundness errors respectively. $\epsilon^{\text{FRI}}_i$ and   $\epsilon^{\text{FRI}}_q$ denote the interactive and query soundness errors in FRI, respectively. Each term in $\boldsymbol{\epsilon_i}$ gets $2^{-\boldsymbol{\lambda} - 3}$ and $\boldsymbol{\epsilon_q}$ gets $2^{-\boldsymbol{\lambda} - 1}$ soundness error bound. 
-The codeword is queried during FRI. 
+where $ \left(\frac{d_1 + 1}{|\mathbb{F}|}\right)^{\lambda_i}$ and $\left(\frac{|L|}{|\mathbb{F}|}\right)^{\lambda'_i}$ denote the lincheck and LDT soundness errors respectively. $\epsilon^{\text{FRI}}_i$ and   $\epsilon^{\text{FRI}}_q$ denote the interactive and query soundness errors in \gls{fri}, respectively. Each term in $\boldsymbol{\epsilon_i}$ gets $2^{-\boldsymbol{\lambda} - 3}$ and $\boldsymbol{\epsilon_q}$ gets $2^{-\boldsymbol{\lambda} - 1}$ soundness error bound. 
+The codeword is queried during \gls{fri}. 
 % where the number of queries is determined by $\epsilon^{\text{FRI}}_q$ and the localization parameter $\phi$. 
-Given, the target proximity parameter in (\ref{eq:proximity_parameter}), the number of query repetitions in FRI is:
+Given, the target proximity parameter in (\ref{eq:proximity_parameter}), the number of query repetitions in \gls{fri} is:
 \begin{equation}\label{eq:num_queries}
 	\lambda_q^\text{FRI} = \frac{\log(\epsilon^{\text{FRI}}_q)}{\log\left( 1 - \min\left(\delta,  \frac{1- 3\rho - 2^\phi/\sqrt{|L|}}{4} \right)  \right)}.  
 \end{equation}
 Moreover, the required lincheck and LDT repetition parameters are determined as:
 \(
-\lambda_i = \frac{-\boldsymbol{\lambda} - 3}{\log\left(\frac{\eta+1}{|\mathbb{F}|}\right)},\text{ and } \lambda'_i = \frac{-\boldsymbol{\lambda} - 3}{\log\left(\frac{|L|}{|\mathbb{F}|}\right)}.
+\lambda_i = \frac{-\boldsymbol{\lambda} - 3}{\log\left(\frac{d_1+1}{|\mathbb{F}|}\right)},\text{ and } \lambda'_i = \frac{-\boldsymbol{\lambda} - 3}{\log\left(\frac{|L|}{|\mathbb{F}|}\right)}.
 \)
 
 
 
 \subsection{Codeword Size}
-The maximum degree of the polynomial in the codeword of size $|L|$ is $d = 2t+2\texttt{b}$ (according to Table \ref{tab:codewords}), where \texttt{b} is determined by the expected number of queries to the corresponding codeword.
+The maximum degree of the polynomial in the codeword of size $|L|$ is $d = 2t+2\texttt{b}$ (according to Table \ref{tab:codewords}), where \texttt{b} is determined by the expected number of queries to the corresponding codeword, and $t = |H_1 \cup H_2| = \max(d_1, d_2+1)$.
 % , to let \texttt{b} evaluations of the polynomial over $|L|$ be randomly distributed to achieve zero-knowledge. 
-The number of queries to the codeword is $\texttt{b} = \lambda_q^\text{FRI} \cdot 2^{\phi}$, where according to (\ref{eq:num_queries}), $\lambda_q^\text{FRI}$ also relies on $|L|$. To solve this loop, we initialize $|L| = 4t/\rho$ and \texttt{b} as mentioned. Then, we check the following condition: Let $\texttt{r}=\lfloor\log(\rho|L|)/\phi\rfloor$ denote the number of reductions in FRI,  $d' = 2t + \texttt{b}-1$ (lincheck maximum degree) must be divisible by $2^{\texttt{r}\phi}$, otherwise, $d'$ must be increased to the nearest multiple of $2^{\texttt{r}\phi}$. Then, we check if the new $d' \leq \rho |L|$, otherwise, increase the dimension of $L$ by one. Again, we compute \texttt{b} and check if it is the same as it was; otherwise, we update that and again check the condition with the new $L$. This iteration is continued until the \texttt{b} remains unchanged, at which point $|L|$ is determined.
+The number of queries to the codeword is $\texttt{b} = \lambda_q^\text{FRI} \cdot 2^{\phi}$, where according to (\ref{eq:num_queries}), $\lambda_q^\text{FRI}$ also relies on $|L|$. To solve this loop, we initialize $|L| = 4t/\rho$ and \texttt{b} as mentioned. Then, we check the following condition: Let $\texttt{r}=\lfloor\log(\rho|L|)/\phi\rfloor$ denote the number of reductions in \gls{fri},  $d' = 2t + \texttt{b}-1$ (lincheck maximum degree) must be divisible by $2^{\texttt{r}\phi}$, otherwise, $d'$ must be increased to the nearest multiple of $2^{\texttt{r}\phi}$. Then, we check if the new $d' \leq \rho |L|$, otherwise, increase the dimension of $L$ by one. Again, we compute \texttt{b} and check if it is the same as it was; otherwise, we update that and again check the condition with the new $L$. This iteration is continued until the \texttt{b} remains unchanged, at which point $|L|$ is determined.
 
 \subsection{Construction of $H_1$, $H_2$, and $L$}
-Let $\{\beta_0, \beta_1, \dots, \beta_{k-1}\}$ represent basis elements of $\mathbb{F}_{2^k}$. Then, we construct subsets  $H_1=\langle \beta_0, \beta_1, \cdots \beta_{\lceil\log\eta\rceil} \rangle$ and $H_2 = \langle \beta_0, \beta_1, \cdots \beta_{
-	\lceil\log(\mu + 1)\rceil} \rangle$ and the affine subspace $L= \beta_{
+Let $\{\beta_0, \beta_1, \dots, \beta_{k-1}\}$ represent basis elements of $\mathbb{F}_{2^k}$. Then, we construct subsets  $H_1=\langle \beta_0, \beta_1, \cdots \beta_{\lceil\log{d_1}\rceil} \rangle$ and $H_2 = \langle \beta_0, \beta_1, \cdots \beta_{
+	\lceil\log(d_2 + 1)\rceil} \rangle$ and the affine subspace $L= \beta_{
 	\lceil\log(|L|)\rceil+1} + \langle \beta_0, \beta_1, \cdots \beta_{
-	\lceil\log(|L|)\rceil} \rangle$. In this way,  $L \cap (H_1 \cup H_2) = \emptyset$. If the basis elements are Cantor special basis, the Cantor FFT can be used without precomputation due to this special construction, as detailed in Section \ref{sec:cantor_precmp}.
+	\lceil\log(|L|)\rceil} \rangle$. In this way,  $L \cap (H_1 \cup H_2) = \emptyset$. If the basis elements are Cantor special basis, the Cantor \gls{fft} can be used without precomputation due to this special construction, as detailed in Section \ref{sec:cantor_precmp}.
 
 \subsection{FFT/IFFT Calls}
-Table \ref{tab:fftcalls} summarizes the FFT and IFFT calls for computing the codewords in Table \ref{tab:codewords}. Virtual oracles are used for consistency checks, and are not included in the random combination of codewords input to the FRI protocol.
+Table \ref{tab:fftcalls} summarizes the \gls{fft} and \gls{ifft} calls for computing the codewords in Table \ref{tab:codewords}. Virtual oracles are used for consistency checks, and are not included in the random combination of codewords input to the \gls{fri} protocol.
 
 \begin{table}
 	\centering
-	\caption{ The FFT and IFFT calls in the Aurora zkSNARK protocol}
+	\caption[The FFT and IFFT calls in the Aurora zkSNARK protocol]{The \gls{fft} and \gls{ifft} calls in the Aurora \gls{zksnark} protocol}
 	{
 		\label{tab:fftcalls}
 		\begin{tabularx}{\linewidth}{>{\hsize=.38\hsize}XX}
@@ -1039,25 +1039,25 @@ Table \ref{tab:fftcalls} summarizes the FFT and IFFT calls for computing the cod
 			$\lambda_i \times$ FFT of len. $|L|$ & Compute the masking oracle $\hat{\rbu}_\ell$: Evaluate the polynomial $r_\ell$ of degree $<2t+b-1$ over $L$, where $\ell \in [1,\lambda_i]$. \\
 			\midrule
 			
-			(1) IFFT of len. $\kappa + 1$\newline
-			(2) FFT of len. $\mu + 1$\newline
-			(3) IFFT of len. $\mu + 1$\newline
+			(1) IFFT of len. $d_3 + 1$\newline
+			(2) FFT of len. $d_2 + 1$\newline
+			(3) IFFT of len. $d_2 + 1$\newline
 			(4) FFT of len $|L|$
 			& Compute the oracle $\hat{\fbu}_\wbu$: \newline
-			(1) Interpolate $\vbu$ to get $f_{(1,\vbu)}$ of degree $<\kappa + 1$. \newline
+			(1) Interpolate $\vbu$ to get $f_{(1,\vbu)}$ of degree $<d_3 + 1$. \newline
 			(2) Evaluate $f_{(1,\vbu)}$ over $H_2$. \newline 
-			Then, computing $\fbu'_\wbu = {\wbu_{i-\kappa-1}[0:\mu-\kappa - 1] - \fbu_{(1,\vbu)}[\kappa+1:\mu]}$ \newline
+			Then, computing \newline $\fbu'_\wbu = {\wbu_{i-d_3-1}[0:d_2- d_3 - 1] - \fbu_{(1,\vbu)}[d_3+1:d_2]}$ \newline
 			% $f_\wbu$ of degree $<\mu - \kappa$ \newline 
-			(3) Interpolate $\fbu'_\wbu$ over $H_2$ to get $f'_\wbu$ of degree $< \mu + 1$. \newline
-			Then, divide $f'_\wbu$ by $\mathbb{Z}_{\{h_0,\dots, h_{\kappa}\}}$ to get $f_\wbu$.\newline
+			(3) Interpolate $\fbu'_\wbu$ over $H_2$ to get $f'_\wbu$ of degree $< d_2 + 1$. \newline
+			Then, divide $f'_\wbu$ by $\mathbb{Z}_{\{h_0,\dots, h_{d_3}\}}$ to get $f_\wbu$.\newline
 			(4) Evaluate $f_\wbu^*$ over $L$.
 			\\
 			\midrule
-			(1) $3 \times$ IFFT of len. $\eta$\newline
+			(1) $3 \times$ IFFT of len. $d_1$\newline
 			(2) $3 \times$ FFT of len. $|L|$
 			&
 			Compute the oracles $\hat{\fbu}_{\mathbf{Az}}$, $\hat{\fbu}_{\mathbf{Bz}}$, and $\hat{\fbu}_{\mathbf{Cz}}$:\newline
-			(1) Interpolate $\mathbf{Az}$, $\mathbf{Bz}$, and $\mathbf{Cz}$ to get $f_\mathbf{Az}$, $f_\mathbf{Bz}$, $f_\mathbf{Cz}$ of degree $<\eta$.\newline
+			(1) Interpolate $\mathbf{Az}$, $\mathbf{Bz}$, and $\mathbf{Cz}$ to get $f_\mathbf{Az}$, $f_\mathbf{Bz}$, $f_\mathbf{Cz}$ of degree $<d_1$.\newline
 			(2) Evaluate $f_\mathbf{Az}^*$, $f_\mathbf{Bz}^*$, $f_\mathbf{Cz}^*$ over $L$.
 			\\
 			\midrule
@@ -1069,7 +1069,7 @@ Table \ref{tab:fftcalls} summarizes the FFT and IFFT calls for computing the cod
 			$\lambda_i \times$ IFFT of len. $t$ & Interpolate the polynomial $p^{ABC}_{\alpha_\ell}$ in (\ref{eq:pa}), where $\ell \in [1,\lambda_i]$. 
 			\\
 			\midrule
-			FFT of len. $|L|$ & Compute the virtual oracle $\hat{\fbu}_\zbu := \hat{\fbu}_\wbu \cdot \mathbb{Z}_{\{h_0,\dots, h_{\kappa}\}} + \hat{\fbu}_{(1,\vbu)}(h_i)$ which requires 
+			FFT of len. $|L|$ & Compute the virtual oracle $\hat{\fbu}_\zbu := \hat{\fbu}_\wbu \cdot \mathbb{Z}_{\{h_0,\dots, h_{d_3}\}} + \hat{\fbu}_{(1,\vbu)}(h_i)$ which requires 
 			Evaluating $f_{(1,\vbu)}$ over $L$.
 			\\
 			\midrule
@@ -1119,7 +1119,7 @@ In this section, we provide a comprehensive comparison of the Cantor and the Gao
 	\label{tab:alg_shortnames}
 \end{table}
 
-Table \ref{tab:FFTcomparisons} presents the number of additions and multiplications for the precomputed variant of the FFT algorithms, while Table \ref{tab:precmp_comparison} compares the space requirements of each precomputation method. Figure~\ref{fig:sub_parts_normalized} illustrates the contribution of each sub-algorithm in the Gao-Mateer FFT implementation from \cite{libiop}. The basis computations, which are precomputed in GM PCL1, require fewer resources as \( m \) increases. In contrast, the computational cost of bit-reversal rearrangement and Taylor expansion grows more rapidly for larger \( m \), significantly impacting the overall FFT runtime.
+Table \ref{tab:FFTcomparisons} presents the number of additions and multiplications for the precomputed variant of the \gls{fft} algorithms, while Table \ref{tab:precmp_comparison} compares the space requirements of each precomputation method. Figure~\ref{fig:sub_parts_normalized} illustrates the contribution of each sub-algorithm in the Gao-Mateer \gls{fft} implementation from \cite{libiop}. The basis computations, which are precomputed in GM PCL1, require fewer resources as \( m \) increases. In contrast, the computational cost of bit-reversal rearrangement and Taylor expansion grows more rapidly for larger \( m \), significantly impacting the overall \gls{fft} runtime.
 
 
 \begin{table}[h]
@@ -1179,16 +1179,16 @@ Table \ref{tab:FFTcomparisons} presents the number of additions and multiplicati
 We implemented the all variants of the Cantor and Gao-Mateer algorithms in \CC except Gao-Mateer which has been implemented in the libiop library \cite{libiop}. We used the same library, libff \cite{libff}, for finite field operations as in libiop. We selected the field $\mathbb{F}_{2^{256}}$ for our experiments. Each field element is represented using four 64-bit limbs. Field multiplication is performed using 13 carry-less multiplication (\texttt{CLMUL}) instructions, commonly available on many x86 processors~\cite{gueron2010intel}, following the Karatsuba multiplication~\cite{karatsuba1962multiplication} method for multiplying 4-limb values~\cite{libiop}. This approach is provided in Appendix~\ref{a_ch:ff_mult}.
 
 The benchmarks were conducted on a system featuring an AMD Ryzen 9 9950x @ 5.7 CPU, equipped with 64 GB of DDR5 RAM. The CPU governor was set to \textit{Performance}, to ensure the CPU operates at its maximum clock speed throughout testing, thus minimizes fluctuations caused by power-saving mechanisms.
-We executed each algorithm for 1000 different random polynomials \( f(x) \in \mathbb{F}_{2^{256}}[x] \) of degree less than \( n = 2^m \), where \( 4 \leq m \leq 28 \).
+We executed each algorithm for 500 different random polynomials \( f(x) \in \mathbb{F}_{2^{256}}[x] \) of degree less than \( n = 2^m \), where \( 4 \leq m \leq 28 \).
 
-Figure~\ref{fig:benchmark} compares the runtime of the FFT algorithms. It shows that the time savings in Cantor PC are consistent across different input lengths. However, for Gao PCL1, Gao PCL2, and Gao CO PCL2, the savings become insignificant for larger $m$. The reason is that GM requires extensive memory access for Taylor expansion, the \textsf{Aggregate} module, and bit-reversal rearrangements, which suppresses the savings gained from the precomputations.  Figure~\ref{fig:sub_parts_normalized} depicts the fraction of each sub-algorithm in GM.
+Figure~\ref{fig:benchmark} compares the runtime of the \gls{fft} algorithms. It shows that the time savings in Cantor PC are consistent across different input lengths. However, for Gao PCL1, Gao PCL2, and Gao CO PCL2, the savings become insignificant for larger $m$. The reason is that GM requires extensive memory access for Taylor expansion, the \textsf{Aggregate} module, and bit-reversal rearrangements, which suppresses the savings gained from the precomputations.  Figure~\ref{fig:sub_parts_normalized} depicts the fraction of each sub-algorithm in GM.
 
 \begin{figure}
 	\centering
 	\resizebox{\textwidth}{!}{
 		\input{Plots/plot_FFT}
 	}
-	\caption[Performance comparison of variances of Gao-Mateer and Cantor FFT algorithms]{Performance comparison of variances of Gao-Mateer and Cantor additive FFT algorithms of length $n=2^m$ for $4\leq m \leq 28$. The left plot is in a logarithmic scale. }
+	\caption[Performance comparison of variances of Gao-Mateer and Cantor FFT algorithms]{Performance comparison of variances of Gao-Mateer and Cantor additive \gls{fft} algorithms of length $n=2^m$ for $4\leq m \leq 28$. The left plot is in a logarithmic scale. }
 	\label{fig:benchmark}
 \end{figure}
 
@@ -1197,10 +1197,10 @@ Figure~\ref{fig:benchmark} compares the runtime of the FFT algorithms. It shows 
 	\resizebox{.9\textwidth}{!}{
 		\input{Plots/plot_GM_parts_normalized}
 	}
-	\caption[The fraction of execution time for each sub-algorithm in the Gao-Mateer FFT algorithm]{The fraction of execution time for each sub-algorithm in the Gao-Mateer FFT algorithm over $\mathbb{F}_{2^k}$ implemented in \cite{libiop}. The execution times of the Taylor expansion and bit-reversal sub-algorithms increase more rapidly with the input size.  \textit{Initialization} is a one-time computing for copying the input polynomial to a new vector. \textit{Span} and \textit{Merging} are the \textsf{Span} function and the nested for loop in \textsf{Aggregate} Module}
+	\caption[The fraction of execution time for each sub-algorithm in the Gao-Mateer \gls{fft} algorithm]{The fraction of execution time for each sub-algorithm in the Gao-Mateer \gls{fft} algorithm over $\mathbb{F}_{2^k}$ implemented in \cite{libiop}. The execution times of the Taylor expansion and bit-reversal sub-algorithms increase more rapidly with the input size.  \textit{Initialization} is a one-time computing for copying the input polynomial to a new vector. \textit{Span} and \textit{Merging} are the \textsf{Span} function and the nested for loop in \textsf{Aggregate} Module}
 	\label{fig:sub_parts_normalized}
 \end{figure}
 
 \section{Summary} \label{Sec:Summary}
-This work demonstrates the effectiveness of leveraging the Cantor special basis to enable the use of the Cantor additive FFT algorithm in post-quantum secure zkSNARKs, with a focus on Aurora~\cite{Aurora2019}. Our implementation shows that replacing the Gao-Mateer FFT with the Cantor FFT results in a significant reduction in computation time. Furthermore, we present a detailed theoretical analysis of the computational costs of the Cantor FFT, including exact counts of additions and multiplications, and an evaluation of FFT call complexity within the encoding of the R1CS in Aurora, based on the number of constraints, variables, and the target security parameter. Additionally, we introduce optimized building blocks for the Cantor FFT implementation and propose precomputation techniques that reduce overhead in both the Cantor and Gao-Mateer FFT algorithms when the basis of the affine subspaces is predetermined.
+This work demonstrates the effectiveness of leveraging the Cantor special basis to enable the use of the Cantor additive \gls{fft} algorithm in post-quantum secure \glspl{zksnark}, with a focus on Aurora~\cite{Aurora2019}. Our implementation shows that replacing the Gao-Mateer \gls{fft} with the Cantor \gls{fft} results in a significant reduction in computation time. Furthermore, we present a detailed theoretical analysis of the computational costs of the Cantor \gls{fft}, including exact counts of additions and multiplications, and an evaluation of \gls{fft} call complexity within the encoding of the \gls{r1cs} in Aurora, based on the number of constraints, variables, and the target security parameter. Additionally, we introduce optimized building blocks for the Cantor \gls{fft} implementation and propose precomputation techniques that reduce overhead in both the Cantor and Gao-Mateer \gls{fft} algorithms when the basis of the affine subspaces is predetermined.
 

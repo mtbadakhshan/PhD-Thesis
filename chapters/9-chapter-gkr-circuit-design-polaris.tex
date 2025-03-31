@@ -5,16 +5,16 @@
 \section*{Declaration of Contributions}
 This chapter is based on~\cite{Badakhshan2025Ursa} I have co-authored the paper and my main contributions are as follows:
 \begin{itemize}
-	\item Design of the GKR circuit and wrote Section~\ref{sec:GKR-implementation}.
+	\item Design of the GKR circuit for the Polaris \gls{zksnark}.
 \end{itemize}
 
 \section{Introduction}
-The efficient implementation of the  post-quantum secure \gls{zksnark} protocols is crucial for enabling practical deployment in real-world applications. To address concerns regarding efficiency, this chapter proposes the fast implementation of Polaris by emphasizing on the optimization of GKR and FRI protocols.  In this chapter, we present an instantiation of the FRI protocol. This instantiation eliminates the field inversion operations in both the Commit phase and Query phase, expecting to show  better efficiency. Also, we present an instantiation of the GKR circuit tailored for the Polaris implementation. By designing the circuit as a  satisfiability circuit, we ensure the verifiable computation of values essential for the Polaris protocol while minimizing the number of gates. This would reduce the communication overhead, and the verifier and the prover complexities.
+The efficient implementation of the  post-quantum secure \gls{zksnark} protocols is crucial for enabling practical deployment in real-world applications. To address concerns regarding efficiency, this chapter proposes the fast implementation of Polaris by emphasizing on the optimization of GKR and \gls{fri} protocols.  In this chapter, we present an instantiation of the \gls{fri} protocol. This instantiation eliminates the field inversion operations in both the Commit phase and Query phase, expecting to show  better efficiency. Also, we present an instantiation of the GKR circuit tailored for the Polaris implementation. By designing the circuit as a  satisfiability circuit, we ensure the verifiable computation of values essential for the Polaris protocol while minimizing the number of gates. This would reduce the communication overhead, and the verifier and the prover complexities.
 
 \section{FRI Instantiation}
 \label{sec:FRI_instantiation}
 
-In the FRI protocol, let $\mathsf{r}$ be the number of rounds, let $\{\beta_0 = 1, \beta_1, \beta_2,\cdots, \beta_{191}\}$ be one of the $\mathbb{F}_2$-basis of $\mathbb{F}_{2^{192}}$ defined as:
+In the \gls{fri} protocol, let $\mathsf{r}$ be the number of rounds, let $\{\beta_0 = 1, \beta_1, \beta_2,\cdots, \beta_{191}\}$ be one of the $\mathbb{F}_2$-basis of $\mathbb{F}_{2^{192}}$ defined as:
 \begin{equation}\label{eq_F_2_192}
 	\mathbb{F}_{2^{192}} := \mathbb{F}_{2^{64}}[Y]/(Y^3 + Y + 1),
 \end{equation}
@@ -24,7 +24,7 @@ where
 \end{equation}
 \newline
 
-\noindent\textbf{Evaluation Domains.} We assume that the verifier and prover have agreed upon the evaluation domains $L_k\ (0\le k \le \mathsf{r})$, whose sizes are the powers of 2,  and $m = \log_2(|L_0|)$. Those affine subspaces are adopted in Preon \cite{chen2023preon}.  The evaluation domains are recursively defined as follows. First,
+\noindent\textbf{Evaluation Domains.} We assume that the verifier and prover have agreed upon the evaluation domains $L_k\ (0\le k \le \mathsf{r})$, whose sizes are the powers of 2,  and $m = \log_2(|L_0|)$. Those affine subspaces are adopted in Preon \cite{Preon2023}.  The evaluation domains are recursively defined as follows. First,
 \begin{equation}
 	L_0 = <\beta_{0},\beta_{1},\cdots, \beta_{m-1}> + \beta_{m}.
 \end{equation}
@@ -193,4 +193,4 @@ The summation component of the presented GKR circuit consists of $2n-1$ gates, u
 The input size to the circuit is $\nu = 4n + 3$. According to Section \ref{gkr}, the verifier's computation cost should be $O(\nu + d\log(S)) = O(n + \log(n) \cdot (n\log(n))) = O(n (\log(n))^2)$. However, in the implementation of the GKR protocol, this computation can be delegated to the prover via verifiable polynomial delegation (VPD) schemes such as Virgo \cite{Zhang2020Virgo}. Finally, the prover's computation is $O(S^3)=O((n\log(n))^3)$.
 
 \section{Conclusion}
-In this chapter, we introduced the Polaris protocol and its construction components. We presented an instantiation of the GKR circuit to minimize the number of gates, with the aim to reduce communication overhead, as well as the verifier and prover's complexities. We also explained an instantiation of the FRI protocol that eliminates the field inversion operations in both the Commit phase and Query phase, while would help to achieve better efficiency.  The complete performance benchmark and the expected improvements will be demonstrated in the upcoming full implementation of Polaris.
+In this chapter, we introduced the Polaris protocol and its construction components. We presented an instantiation of the GKR circuit to minimize the number of gates, with the aim to reduce communication overhead, as well as the verifier and prover's complexities. We also explained an instantiation of the \gls{fri} protocol that eliminates the field inversion operations in both the Commit phase and Query phase, while would help to achieve better efficiency.  The complete performance benchmark and the expected improvements will be demonstrated in the upcoming full implementation of Polaris.

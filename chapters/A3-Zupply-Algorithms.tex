@@ -53,7 +53,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% Merge %%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{algorithm}
-	\caption{\textsf{Merge} $\big($\textsc{pp}$, T_{i_{1,2}},  \text{PKsig}_{i_3} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Merge}}, \Tilde{T}_{i_3}, \texttt{Tag}_{i_{1,2}}\big)$}\label{alg:merge}
+	\caption{\textsf{Merge} $\big($\textsc{pp}$, T_{i_{1}}, T_{i_{2}},  \text{PKsig}_{i_3} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Merge}}, \Tilde{T}_{i_3}, \texttt{Tag}_{i_{1}}, \texttt{Tag}_{i_{2}} \big)$}\label{alg:merge}
 	\begin{algorithmic}[1]
 		\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}, {$\texttt{cm}_{i_2} \gets \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2}) $}
 		\If {$\texttt{cm}_{i_1}\notin \mathbf{C}_\tau$ or $\texttt{cm}_{i_2}\notin \mathbf{C}_\tau$} {}
@@ -90,7 +90,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% Divide %%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{algorithm}
-	\caption{\textsf{Divide} $\big($\textsc{pp}$, T_{i_1},  \text{PKsig}_{i_{2,3}}, q_{i_{2,3}} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Div}}, \Tilde{T}_{i_{2,3}}, \texttt{Tag}_{i_{2,3}}\big)$}\label{alg:divide}
+	\caption{\textsf{Divide} $\big($\textsc{pp}$, T_{i_1},  \text{PKsig}_{i_{2}}, \text{PKsig}_{i_{3}}, q_{i_{2}}, q_{i_{3}} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Div}}, \Tilde{T}_{i_{2}}, \Tilde{T}_{i_{3}}, \texttt{Tag}_{i_{2}}, \texttt{Tag}_{i_{3}}\big)$}\label{alg:divide}
 	\begin{algorithmic}[1]
 		\State {$\texttt{cm}_{i_1} \gets \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1}) $}
 		\If {$\texttt{cm}_{i_1}\notin \mathbf{C}_\tau$ \textbf{or} $q_{i_{1}} \neq q_{i_{2}} + q_{i_{3}}$} 

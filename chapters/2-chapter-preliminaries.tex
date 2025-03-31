@@ -3,7 +3,7 @@
 %======================================================================
 
 \section*{Declaration of Contributions}
-This chapter contains preliminary material from an unpublished work and the paper~\cite{Badakhshan2025Ursa}, both of which I co-authored. The preliminaries in those works were written in collaboration with all co-authors. In addition, this chapter includes content from~\cite{Badakhshan2024Zupply}, of which I am the sole author.
+This chapter contains preliminary material from an unpublished work and the paper~\cite{Badakhshan2025Ursa}, both of which I co-authored. The preliminaries in those works were written in collaboration with all co-authors. In addition, this chapter includes content from~\cite{Badakhshan2024Zupply}, of which I was the sole author under the supervision of Professor Gong.
 
 
 %----------------------------------------------------------------------
@@ -17,7 +17,7 @@ A polynomial of degree $n$ over a finite field $\mathbb{F}_{q}$ is an expression
 \[
 f(x) = \sum_{i=0}^{n} c_i x^i,
 \]
-where $c_i \in \mathbb{F}_{q}$ and $c_n \neq 0$. More precisely, $f(x)$ is referred to as a \textit{univariate polynomial}. The set of polynomial over $\mathbb{F}_{q}$ in the variable $x$ is denoted as $\mathbb{F}_{q}[x]$. 
+where $c_i \in \mathbb{F}_{q}$ and $c_n \neq 0$. More precisely, $f(x)$ is referred to as a \textit{univariate polynomial}. The set of polynomials over $\mathbb{F}_{q}$ in the variable $x$ is denoted as $\mathbb{F}_{q}[x]$. 
 
 The finite extension $\mathbb{F}_{q^m}$ of the field $\mathbb{F}_{q}$ forms a vector space of dimension $m$ over the field $\mathbb{F}_{q}$. Let $\mathbb{F}_2$ denote the binary field, the  finite field $\mathbb{F}_{2^{256}}$ is defined as
 \begin{equation}\label{eq:F_2_256}
@@ -62,7 +62,7 @@ Furthermore, if $m < k-1$ and $\theta$ is any linear combination of $\{\beta_{m+
 
 \subsection{Rank-1 Constraint System} \label{sec:prel_r1cs}
 
-Zero-knowledge proof (\gls{zkp}) system toolchains, such as \cite{Groth2016, Aurora2019, Chiesa2020Fractal, Ames2017Ligero} that generate arithmetic or boolean circuits from high-level programming languages, usually use rank-1 constraint systems (\gls{r1cs}s), which is so straightforward that it can be used to create efficient argument systems. \gls{r1cs} has also proven to be reliable in real-world applications, such as Zcash \cite{zcash-proc}. We provide the definition of \gls{r1cs} in the following:
+Zero-knowledge proof (\gls{zkp}) system toolchains, such as \cite{Groth2016, Aurora2019, Chiesa2020Fractal, Ames2017Ligero} that generate arithmetic or boolean circuits from high-level programming languages, usually use rank-1 constraint systems (\gls{r1cs}s), which is so straightforward that it can be used to create efficient argument systems. \gls{r1cs} has also proven to be reliable in real-world applications, such as Zerocash \cite{zcash-proc}. We provide the definition of \gls{r1cs} in the following:
 
 \begin{definition}[rank-1 constraint system (\gls{r1cs})] \label{def:R1CS}
 	Let $d_1$, $d_2$, and $d_3$ be positive integers where denote the number of constraints, the number of variables, and the number of public inputs respectively. The \gls{r1cs} relation consists of matrices $\mathbf{A},\mathbf{B},\mathbf{C} \in \mathbb{F}^{d_1\times (d_2+1)}$ and public inputs $\vec{{v}} \in \mathbb{F}^{d_3}$. A vector $\vec{{w}} \in \mathbb{F}^{d_2-d_3}$, denoting private (auxiliary) inputs, satisfies the system if
@@ -83,7 +83,7 @@ In this thesis, we define a notation for the \gls{r1cs} parameter as
 \(
 (\mathbb{F}, d_1, d_2, d_3, \mathbf{A}, \mathbf{B}, \mathbf{C}),
 \)
-where the public input \(\vec{v}\) has not been set yet. Therefore, this does not constitute an \gls{r1cs} instance. Instead, it only specifies the constraint system, which may be derived from an arithmetic or Boolean circuit. In the following, we will explain arithmetic and Boolean citcuits and how an they can be compiled to \gls{r1cs} instances.
+where the public input \(\vec{v}\) has not been set yet. Therefore, this does not constitute an \gls{r1cs} instance or relation. Instead, it only specifies the constraint system, which may be derived from an arithmetic or Boolean circuit. In the following, we will explain arithmetic and Boolean citcuits and how an they can be compiled to \gls{r1cs} instances.
 
 
 \subsubsection{Arithmetic and Boolean Circuits}
@@ -178,8 +178,8 @@ Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable securit
 	\label{def:Collision-resistance hash function}
 	A hash function $\mathcal{H}: \{0, 1\}^\ast \rightarrow \{0,1\}^{O(\boldsymbol{\lambda})}$ exhibits the following properties:
 	\begin{itemize}
-		\item \textit{Collision Resistance}: It is infeasible for any PPT adversary $\mathcal{A}$ to find two distinct inputs $x$, $y$ such that $\mathcal{H}(x) = \mathcal{H}(y)$  \cite{katz2020introduction}.
-		\item \textit{Preimage Resistance}: It is infeasible for any PPT adversary $\mathcal{A}$ to find any input $x$ given $\mathcal{H}(x)$.
+		\item \textit{Collision Resistance}: It is infeasible for any probabilistic polynomial time (\gls{ppt}) adversary $\mathcal{A}$ to find two distinct inputs $x$, $y$ such that $\mathcal{H}(x) = \mathcal{H}(y)$  \cite{katz2020introduction}.
+		\item \textit{Preimage Resistance}: It is infeasible for any \gls{ppt} adversary $\mathcal{A}$ to find any input $x$ given $\mathcal{H}(x)$.
 	\end{itemize} 
 	% is \textit{collision resistance} if for all PPT adversaries $\mathcal{A}$, there is a negligible probability that $\mathcal{A}$ can find two distinct inputs $x$, $y$ such that $\mathcal{H}(x) = \mathcal{H}(y)$ \cite{katz2020introduction}. And it is \textit{preimage resistance} if for all PPT adversaries $\mathcal{A}$, there is a negligible probability that $\mathcal{A}$ can find inputs $x$ given $\mathcal{H}(x)$.
 \end{definition}
@@ -189,7 +189,7 @@ Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable securit
 	A statistically-hiding commitment scheme  $\{\mathsf{COMM}_\rho:\{0,1\}^* \rightarrow \{0, 1\}^{O(\boldsymbol{\lambda})} \}_\rho$ \cite{zcash-proc} where $\rho$ denotes the commitment trapdoor, should hold the following two properties \cite{katz2020introduction, zcash-proc}:
 	\begin{itemize}
 		\item \textit{Statistically Hiding}: The commitment reveals nothing about the committed value for \textit{every} adversary. 
-		\item \textit{Computationally Binding}: It is impossible for all \textit{PPT adversaries} to output commitment that can be opened in two different ways.
+		\item \textit{Computationally Binding}: It is impossible for all \gls{ppt} \textit{adversaries} to output commitment that can be opened in two different ways.
 	\end{itemize}
 \end{definition}
 
@@ -250,7 +250,7 @@ Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable securit
 
 \section{Proof Systems}
 
-The construction of zero-knowledge proof (\gls{zkp}) protocols is based on the interactive proof system (\gls{ip}) introduced in 1985 by Goldwasser, Micali, and Rackoff in~\cite{Goldwasser1985}.  This section includes the introduction of \gls{ip}, \gls{zkp} property, non-interactive proves. 
+The construction of zero-knowledge proof (\gls{zkp}) protocols is based on the interactive proof system (\gls{ip}) introduced in 1985 by Goldwasser, Micali, and Rackoff in~\cite{Goldwasser1985}.  This section includes the introduction of \gls{ip}, \gls{zkp} property, and non-interactive proofs. 
 
 \subsection{Interactive Proof System}\label{sec:Prel_IP}
 
@@ -273,7 +273,7 @@ Since  $V$ is probabilistic, its messages may depend on its internal randomness,
 Let $(P,V)$ denote an \gls{ip} which includes a computationally unbounded $P$ and a \gls{ppt} $V$. Let \( \langle P, V(r_V) \rangle (x) \in \{0,1\} \) denote the output of the verifier \( V \) when interacting with a \textit{deterministic} prover \( P \), where \( r_V \) represents the internal randomness of \( V \). 
 
 \begin{definition}\label{def:IP-Completeness-Soundness}
-	An \gls{ip} \( (P, V) \) for a language \( L \), given a public input \( x \in \{0,1\}^n \), is said to have \textit{completeness error} \( \delta_c \) and \textit{soundness error} \( \delta_s \) if it satisfies the following conditions:
+	An \gls{ip} \( (P, V(r_V)) \) for a language \( L \), given a public input \( x \in \{0,1\}^n \), is said to have \textit{completeness error} \( \delta_c \) and \textit{soundness error} \( \delta_s \) if it satisfies the following conditions:
 %	\vspace{-1\baselineskip} % Reduce spacing before enumerate
 	\begin{enumerate}[leftmargin=2em]
 		\item \textbf{Completeness}: For any \( x \in L \), the prover \( P \) convinces \( V \) with probability
@@ -306,7 +306,7 @@ A zero-knowledge proof (\gls{zkp}) system for verifying whether a common input \
 
 \subsubsection{Auxilary Input Tapes}
 Before defining \gls{zkp} systems, we introduce a secret tape for each interactive Turing machine described in Section~\ref{sec:Prel_IP}, called the \textit{read-only auxiliary input tape}. These tapes represent prior information available to \( P \) and \( V \) and may depend on the common input \( x \), whose membership in \( L \) is to be verified by \( V \) through the \gls{ip} protocol~\cite{Goldreich2001Book}. Let \( w \) denote the auxiliary input for \( P \) and \( z \) denote the auxiliary input for \( V \). The input \( w \) may contain information that helps the prover efficiently perform its tasks. For example, for a language \( L \in \mathcal{NP} \), \( w \) may be the witness for \( x \in L \). 
-On the other hand, \( z \) represents additional information about \( x \) that may be used by a dishonest verifier \( V^* \) to extract knowledge (e.g., beyond the mere fact that \( x \in L \)) through interaction with \( P \). A \gls{zkp} system must guarantee that whatever knowledge \( V^* \) can extract from \( x \), \( z \), and interaction with \( P \), can also be extracted from \( x \) and \( z \) alone, without any interaction with \( P \).  
+On the other hand, \( z \) represents additional information about \( x \) that may be used by a dishonest verifier \( V^* \) to extract knowledge (e.g., beyond the mere fact that \( x \in L \)) through interaction with \( P \). A \gls{zkp} system must guarantee that whatever the knowledge \( V^* \) can extract from \( x \), \( z \), and interaction with \( P \), can also be extracted from \( x \) and \( z \) alone, without any interaction with \( P \).  
 
 \subsubsection{Computational Indistinguishability and Simulation Paradigm}  
 The required property of \gls{zkp} systems is defined through the \textit{simulation paradigm}. Let the view of any verifier $V^*$ during its interaction with the prover $P$ be denoted as  
@@ -351,11 +351,11 @@ Namely, for all sufficiently long $x \in L$, every $w \in  W_L(x)$, and $z \in \
 \end{definition}
 
 \subsubsection{Zero-Knowledge Proofs for \texorpdfstring{$\mathcal{NP}$}{NP} Languages}
-Let $R$ be a binary relation for a language $L \in \mathcal{NP}$, where:
+Let $\mathcal{R}$ be a binary relation for a language $L \in \mathcal{NP}$, where:
 \[
-L = \{x \mid \exists w \text{ such that } (x, w) \in R \}.
+L = \{x \mid \exists w \text{ such that } (x, w) \in \mathcal{R} \}.
 \]
-Moreover, there exists a \gls{ppt} algorithm that decides membership in $R$. Any language $L \in \mathcal{NP}$ is polynomial-time reducible to an $\mathcal{NP}$-complete language, such as the Graph 3-Colorability (\gls{g3c}) problem. Goldreich, Micali, and Wigderson~\cite{Goldreich1991zk-np} presented a zero-knowledge \gls{ip} protocol for \gls{g3c} under the assumption of a secure \textit{bit commitment scheme}, which can be instantiated using any one-way function.  Shortly afterward, Brassard and Crépeau~\cite{Brassard1986ZKBoolean} developed a zero-knowledge \gls{ip} protocol for Boolean circuit satisfiability, another well-known $\mathcal{NP}$-complete problem. Since any language $L \in \mathcal{NP}$ can be reduced to $\mathcal{NP}$-complete, we state the following theorem based on \cite[Theorem 4.4.11]{Goldreich2001Book}:
+Moreover, there exists a \gls{ppt} algorithm that decides membership in $\mathcal{R}$. Any language $L \in \mathcal{NP}$ is polynomial-time reducible to an $\mathcal{NP}$-complete language, such as the Graph 3-Colorability (\gls{g3c}) problem. Goldreich, Micali, and Wigderson~\cite{Goldreich1991zk-np} presented a zero-knowledge \gls{ip} protocol for \gls{g3c} under the assumption of a secure \textit{bit commitment scheme}, which can be instantiated using any one-way function.  Shortly afterward, Brassard and Crépeau~\cite{Brassard1986ZKBoolean} developed a zero-knowledge \gls{ip} protocol for Boolean circuit satisfiability, another well-known $\mathcal{NP}$-complete problem. Since any language $L \in \mathcal{NP}$ can be reduced to $\mathcal{NP}$-complete, we state the following theorem based on \cite[Theorem 4.4.11]{Goldreich2001Book}:
 
 \begin{theorem}
 	If a commitment scheme exists as defined in Definition~\ref{def:Statistically-hiding commitment}, then every language $L \in \mathcal{NP}$ admits a zero-knowledge \gls{ip} system.
@@ -398,13 +398,13 @@ Let \( R: \{0,1\}^* \rightarrow \{0,1\}^\kappa \) be a function that maps a bina
 
 
 \subsubsection{Fiat-Shamir Transformation}
-As mentioned earlier, any private-coin \gls{ip} can be transformed into a public-coin \gls{ip}, where \( V \) only sends public random bit strings. The Fiat-Shamir transformation replaces \( V \)'s random bits with values derived from the random oracle \( R \). Given that \( x \) is the common public input to the \gls{ip}, the \( i \)th random value, denoted as \( r_i \), which would have been sent by \( V \), is instead computed as 
+As mentioned earlier, any private-coin \gls{ip} can be transformed into a public-coin \gls{ip}, where \( V \) only sends public random bit strings. The Fiat-Shamir transformation introduced in~\cite{Fiat1987} replaces \( V \)'s random bits with values derived from the random oracle \( R \). Given that \( x \) is the common public input to the \gls{ip}, the \( i \)th random value, denoted as \( r_i \), which would have been sent by \( V \), is instead computed as 
 \(
 r_i = R(q_i),
 \)
 where 
 \[
-q_i = (x, i, r_i, p_1, \dots, p_{i-1}) 
+q_i = (x, i, r_{i-1}, p_1, \dots, p_{i-1}) 
 \]
 is the query to the random oracle \( R \), where $p_i$ is the $P$'s $i$th message in the interaction with $V$. This eliminates any interaction with \( V \). Consequently, \( P \) can provide the transcript of the entire protocol, replacing the verifier's random bits with the corresponding outputs from \( R \). As a result, this transcript is also \textit{publicly verifiable}, meaning that anyone who sees the transcript can verify whether \( x \) belongs to \( L \). Throughout this thesis, such a publicly verifiable transcript is referred to as a \textit{proof} and is denoted by $\pi$.
 
@@ -420,7 +420,7 @@ In~\cite{Kilian1992}, Kilian introduced the notion of a \textit{notarized envelo
 \subsubsection{SNARG of Knowledge} 
 The prover $P$ in a \gls{snarg} system proves that there exists a witness $w$ for the  ``$x \in L$''  statement (the statement is true), where $L\in \mathcal{NP}$. However, it is not enough in many applications. Usually, $P$ must prove that she knows that witness too (argument of knowledge).  The \gls{snarg}s in which $P$ is able to prove that she knows the witness are called succinct non-interactive argument of knowledge (\gls{snark}). In \cite{Bitansky2012}, Bitansky et al. proved that if and only if  extractable collision-resistant hash (\gls{ecrh}) functions exist, verifier of \gls{snark}s will exist.  The prover can use an \textit{extractable} polynomial commitment to shorten the proofs, while extractability ensures that the prover \textit{knows} the polynomial constructed from the witnesses \cite{Thaler2022Proofs}. \gls{snark}s can be modified so that a verifier does not learn anything about the witness by converting that to a zero-knowlege succinct non-interactive argument of knowledge (\gls{zksnark}).  
 
-In summary, \gls{zksnark} is a non-interactive zero-knowledge (NIZK) argument of knowledge that has succinct  proof size and the proofs are publicly verifiable. Here, we provide a formal definition of \gls{zksnark} algorithms and properties, which will be referenced throughout this thesis:
+In summary, \gls{zksnark} is a non-interactive zero-knowledge (NIZK) argument of knowledge that has succinct  proof size and the proofs are publicly verifiable. Here, we provide a formal definition of algorithms and properties of the \gls{zksnark} protocol, which will be referenced throughout this thesis:
 
 \begin{definition}[zkSNARK Algorithms]
 	\label{def:Algorithms in a zkSNARK scheme}
@@ -445,17 +445,17 @@ Depending on the commitment scheme used in the \gls{zksnark} construction, the $
 	\begin{itemize}
 		\item \textit{Perfect Completeness}: A prover $P$ who knows a witness $w$ for $x\in \mathcal{L}_\mathbbm{x}$ can convince a verifier $V$ with probablility $1$.
 		
-		\item \textit{Soundness}: If  $x \notin \mathcal{L}_\mathbbm{x}$, a dishonest PPT prover $P^*$ can convince a verifier with probability less than $\delta_s < \mathsf{negl}(\boldsymbol{\lambda})$.
+		\item \textit{Soundness}: If  $x \notin \mathcal{L}_\mathbbm{x}$, a dishonest \gls{ppt} prover $P^*$ can convince a verifier with probability less than $\delta_s < \mathsf{negl}(\boldsymbol{\lambda})$.
 		
 		% Reference: https://www.cs.princeton.edu/courses/archive/fall07/cos433/lec15.pdf
 		% https://crypto.stanford.edu/cs355/19sp/lec5.pdf
-		\item \textit{Knowledge Soundness (proof of knowledge) with error $\delta_k$}: For every dishonest \gls{ppt} prover $P^*$ and every problem statement $\mathbbm{x}$ and $x$, if there exist a \gls{ppt} extractor $\mathcal{E}_\mathbbm{x}$ algorithm, the probability of $\mathcal{E}_\mathbbm{x}$ extracting the witness $w$ given oracle access to $\mathcal{O}^{P^*}$, must be at least as high as the success probability of $P^*$ in convincing the verifier.
+		\item \textit{Knowledge Soundness (proof of knowledge) with error $\delta_k$}: For every dishonest \gls{ppt} prover $P^*$ and every problem statement $\mathbbm{x}$ and public input $x$, if there exist a \gls{ppt} extractor $\mathcal{E}_\mathbbm{x}$ algorithm, the probability of $\mathcal{E}_\mathbbm{x}$ extracting the witness $w$ given oracle access to $\mathcal{O}^{P^*}$, must be at least as high as the success probability of $P^*$ in convincing the verifier.
 		\begin{align*}
-			\Pr\left[(x, w) \in \mathcal{R}_\mathbbm{x}: w \leftarrow \mathcal{E}_\mathbbm{x}^{\mathcal{O}^{P^*}(\bar{m})}(x)\right] \geq \\
+			\Pr\left[(x, w) \in \mathcal{R}_\mathbbm{x}: w \leftarrow \mathcal{E}_\mathbbm{x}^{\mathcal{O}^{P^*}}(x)\right] \geq \\
 			\Pr \left[ \langle P^*, V \rangle (x) = 1 \right] - \delta_k
 		\end{align*}
 		
-		Where the oracle access to $P^*$ is denoted as $\mathcal{E}_{\mathcal{O}^{P^*}(\bar{m})}$ and $\delta_k < \mathsf{negl}(\boldsymbol{\lambda})$.
+		Where the oracle access to $P^*$ is denoted as $\mathcal{E}_{\mathcal{O}^{P^*}}$ and $\delta_k < \mathsf{negl}(\boldsymbol{\lambda})$.
 		
 		\item \textit{Succinctness}: The size of a publicly verifiable proof $\pi$  and the verification algorithm $\mathsf{Verify}(\text{vk}_\mathbbm{x}, x, \pi)$ run-time is at most linear in the size of the instance $x$ ($O_{\boldsymbol{\lambda}}(|x|)$).
 	
@@ -465,13 +465,14 @@ Depending on the commitment scheme used in the \gls{zksnark} construction, the $
 	
 \end{definition}
 
-Different \gls{zksnark} constructions result in varying proof sizes. For instance, Groth's scheme~\cite{Groth2016} generates constant-size proofs, while the Aurora \gls{zksnark}\cite{Aurora2019}, which we discuss in Section\ref{sec:prel_aurora}, produces proofs whose sizes grow linearly with the instance size.
+Different \gls{zksnark} constructions result in varying proof sizes. For instance, Groth's scheme~\cite{Groth2016} generates constant-size proofs, while the Aurora \gls{zksnark}\cite{Aurora2019}, which is discussed in Section\ref{sec:prel_aurora}, produces proofs whose sizes grow linearly with the instance size.
 
 \subsection{Trusted vs. Transparent Setup zkSNARKs}
 
 The extractable polynomial commitment scheme underlying a \gls{zksnark} determines whether the protocol requires a trusted or transparent setup. Protocols using polynomial commitments such as the KZG scheme, proposed by Kate, Zaverucha, and Goldberg~\cite{KZG2010}, require a one-time trusted setup to generate a structured common reference string (\gls{crs}). In contrast, polynomial commitment schemes like Bulletproofs~\cite{Bulletproofs2018} do not require such a trusted setup. However, the security of both KZG commitments and Bulletproofs relies fundamentally on the discrete logarithm assumption.
 
-Conversely, polynomial commitment schemes based on interactive oracle proofs (\gls{iop}) of proximity, such as \gls{fri}~\cite{FRI2018}, enable transparent setups. These schemes avoid reliance on the discrete logarithm assumption and other cryptographic assumptions known to be vulnerable to quantum computing attacks. Instead, their security relies on the existence and security properties of cryptographic hash functions (\glspl{crh}). This transparent polynomial commitment scheme is detailed further in Section~\ref{sec:prel_FRI}.
+Conversely, polynomial commitment schemes based on \gls{rs} interactive oracle proofs (\gls{iop}) of proximity, such as \gls{fri}~\cite{FRI2018}, enable transparent setups. These schemes avoid reliance on the discrete logarithm assumption and other cryptographic assumptions known to be vulnerable to quantum computing attacks. Instead, their security relies on the existence and security properties of cryptographic hash functions (\glspl{crh}). T
+%his transparent polynomial commitment scheme is detailed further in Section~\ref{sec:prel_FRI}.
 
 
 
@@ -595,9 +596,7 @@ If verifier accepts, it means that the degree of the original polynomial $f_0(X)
 \subsection{Aurora zkSNARK Protocol}\label{sec:prel_aurora}
 
 
-Aurora~\cite{Aurora2019} is a \gls{zksnark} protocol for \gls{r1cs} relations. It encodes an \gls{r1cs} instance into entries of Reed-Solomon (\gls{rs}) codewords and employs an interactive oracle proof (\gls{iop}) framework, which leverages the \gls{fri}~\cite{FRI2018} to perform a sumcheck proof on these entries. \gls{fri} is employed to verify that the given \gls{rs} code is close to a low-degree polynomial, or low degree testing (\gls{ldt}). It progressively reduces the size of the codeword based on a localization parameter $\eta$.
-
-Aurora ensures the zero-knowledge property for its univariate sumcheck protocol and \gls{ldt}, and consequently for the entire protocol, by employing the technique introduced in~\cite{Ben-Sasson2016Zero-Knowledge}.
+Aurora~\cite{Aurora2019} is a \gls{zksnark} protocol for \gls{r1cs} relations. It encodes an \gls{r1cs} instance into entries of Reed-Solomon (\gls{rs}) codewords and employs an interactive oracle proof (\gls{iop}) framework, which leverages the \gls{fri}~\cite{FRI2018} to perform a sumcheck proof on these entries. \gls{fri} is employed to verify that the given codeword is close to a low-degree polynomial, or low degree testing (\gls{ldt}). It progressively reduces the size of the codeword based on a localization parameter $\eta$. Aurora ensures the zero-knowledge property for its univariate sumcheck protocol and \gls{ldt}, and consequently for the entire protocol, by employing the technique introduced in~\cite{Ben-Sasson2016Zero-Knowledge}.
 
 % Let $\eta$, $\mu+1$, and $\kappa+1$ be powers of two (without loss of generality). 
 %\subsubsection{Step 0: Protocol Setup}
@@ -617,30 +616,32 @@ At the beginning of the protocol, the prover $P$ and verifier $V$ establish a fi
 %\subsubsection{Step 4: Low-Degree Test}
 
 
-First, the prover computes the low degree extension (LDE) of the unique polynomial of degree $\kappa+1$
+First, the prover computes the low degree extension (LDE) of the unique polynomial of degree $d_3+1$
 \begin{equation*}
 	f_{(1,\vbu)}(h_i) = \begin{cases}
 		1 & \text{for $i = 0$},\\
-		\vbu_{i-1} &  \text{for $i \in [1,\kappa]$}.
+		\vbu_{i-1} &  \text{for $i \in [1, d_3]$}.
 	\end{cases}
 \end{equation*}
 Accordingly, the prover computes RS codewords listed in Table \ref{tab:codewords}, where $L$ denotes the codeword domain. To achieve zero-knowledge against query bound $\texttt{b}$ malicious verifier, the degree of non-masking polynomials in Table \ref{tab:codewords} is incremented by \texttt{b} to enable sampling the polynomials at random while it evaluates to pre-determined values in $H_1 \cup H_2$. Accordingly, any set of \texttt{b} evaluations of the polynomials outside of $H_1 \cup H_2$ are independently and uniformly distributed in $\mathbb{F}$. Hence, the codeword domain is chosen such that  $L \cap (H_1 \cup H_2) = \emptyset$. 
 
-Aurora consists of $\lambda_i$ rounds of \textit{lincheck} protocol, where in round $\ell \in [1,\lambda_i]$ the verifier sends four random numbers represented as $\alpha_\ell, s^A_\ell, s^B_\ell, s^C_\ell  \in_R \mathbb{F}$, then both prover and verifier compute the polynomials
+Aurora consists of $\lambda_i$ rounds of \textit{lincheck} protocol, where in round $\ell = 1, \dots \lambda_i$ the verifier sends four random numbers represented as $\alpha_\ell, s^A_\ell, s^B_\ell, s^C_\ell  \in_R \mathbb{F}$, then both prover and verifier compute the polynomials
 \begin{equation}\label{eq:pa}
 	p_{\alpha_\ell}(h_i) = \begin{cases}
-		{\alpha_\ell} ^ {i+1} & \text{for $i \in [0,\eta-1]$}\\
-		0          & \text{for $ i  \in [\eta,  \mu]$}% (if $\mu \geq \eta$ )},
+		{\alpha_\ell} ^ {i+1} & \text{for $i = 0, \dots, d_1-1 $}\\
+		0          & \text{for $ i  = d_1,  \dots, d_2$ (if $d_2 \geq d_1$)},
 \end{cases}
-\text{, and }
+\end{equation}
+and 
+\begin{equation}
 p^{ABC}_{\alpha_\ell}(h_j) = 
 \sum_{M\in \{A, B, C\}} s^A_\ell p^{M}_{\alpha_\ell}(h_j),% (if $\eta \geq \mu + 1$ )}.
 \end{equation}
 where
 \begin{equation}\label{eq:paABC}
 p^{M}_{\alpha_\ell}(h_j) =  \begin{cases}
-\sum_{i\in[0,\eta-1]} M_{i,j}{\alpha_\ell} ^ {i+1} & \text{for $j \in [0,\mu]$},\\
-0          & \text{for $ j  \in [\mu+1,  \eta]$}.% (if $\eta \geq \mu + 1$ )}.
+\sum_{i = 0 \dots d_1-1} M_{i,j}{\alpha_\ell} ^ {i+1} & \text{for $j = 0, \dots, d_2$},\\
+0          & \text{for $ j  = d_2+1, \dots,  d_1$  (if $d_1 \geq d_2 + 1$ )}.
 \end{cases}
 \end{equation}
 
@@ -649,7 +650,7 @@ p^{M}_{\alpha_\ell}(h_j) =  \begin{cases}
 \caption[Codewords generated by the Aurora prover algorithm]{Codewords generated by prover. 
 % given an R1CS instance to prove the knowledge of $\wbu$ which satisfies the instance. 
 % $\hat{\fbu}_\zbu := \hat{\fbu}_\wbu \cdot \mathbb{Z}_{\{h_0,\dots, h_{\kappa}\}} + \hat{\fbu}_{(1,\vbu)}(h_i)$ is a virtual oracle which is not computed explicitly. 
-$\lambda'_i$ denote the number of repetitions of LDT. The mechanism for randomizing polynomials, denoted as $^*$, is omitted here for the sake of simplicity.}
+$\lambda'_i$ denote the number of repetitions of \gls{ldt}. The mechanism for randomizing polynomials, denoted as $^*$, is omitted here for the sake of simplicity.}
 \label{tab:codewords}
 { 
 \begin{tabularx}{\linewidth}{>{\hsize=.33\hsize}XX}
@@ -659,13 +660,13 @@ $\lambda'_i$ denote the number of repetitions of LDT. The mechanism for randomiz
 %  $\hat{\mbu} \in \text{RS}[L, \frac{2t+\texttt{b}-1}{|L|}]$  & 
 % {$\hat{\mbu} := m|_L$, where $m$ is a masking polynomial of degree $2t+\texttt{b}-1$ such that  $m(X) = \mathbb{Z}_{H_1\cup H_2}(X)\cdot h(X) + g(X)$, where $h(X)$ and $g(X)$ are random polynomials of degree }.\\     
 \midrule
-$\hat{\fbu}_\wbu \in \text{RS}[L, \frac{\mu-\kappa+\texttt{b}}{|L|}]$  & 
-{$\hat{\fbu}_\wbu := f^*_\wbu|_L$, where $f^*_\wbu$ is a random polynomial of degree $< \mu - \kappa +\texttt{b}$ such that for $\kappa < i\leq \mu$, \(f_{\wbu}(h_i) = ({\wbu_{i-\kappa-1} - f_{(1,\vbu)}(h_i)})/{\mathbb{Z}_{\{h_0,\dots, h_{\kappa}\}}} \)}.\\     
+$\hat{\fbu}_\wbu \in \text{RS}[L, \frac{d_2-d_3+\texttt{b}}{|L|}]$  & 
+{$\hat{\fbu}_\wbu := f^*_\wbu|_L$, where $f^*_\wbu$ is a random polynomial of degree $< d_2 - d_3 +\texttt{b}$ such that for $d_3 < i\leq d_2$, \(f_{\wbu}(h_i) = ({\wbu_{i-d_3-1} - f_{(1,\vbu)}(h_i)})/{\mathbb{Z}_{\{h_0,\dots, h_{d_3}\}}} \)}.\\     
 \midrule
-$\hat{\fbu}_{\mathbf{Az}} \in \text{RS}[L, \frac{\eta+\texttt{b}}{|L|}]$,\newline
-$\hat{\fbu}_{\mathbf{Bz}} \in \text{RS}[L, \frac{\eta+\texttt{b}}{|L|}]$, \newline
-$\hat{\fbu}_{\mathbf{Cz}} \in \text{RS}[L, \frac{\eta+\texttt{b}}{|L|}]$ & 
-$\hat{\fbu}_{\mathbf{Mz}} := f^*_{\mathbf{Mz}}|_L$ for $\mathbf{M} \in \{\mathbf{A}, \mathbf{B}, \mathbf{C}\}$, where $f^*_{\mathbf{Mz}}$ is a random polynomial of degree $< \eta + \texttt{b}$ such that for $i \in [0,\eta-1]$, \(f_{\mathbf{Mz}}(h_i) = \mathbf{Mz}_i\).
+$\hat{\fbu}_{\mathbf{Az}} \in \text{RS}[L, \frac{d_1+\texttt{b}}{|L|}]$,\newline
+$\hat{\fbu}_{\mathbf{Bz}} \in \text{RS}[L, \frac{d_1+\texttt{b}}{|L|}]$, \newline
+$\hat{\fbu}_{\mathbf{Cz}} \in \text{RS}[L, \frac{d_1+\texttt{b}}{|L|}]$ & 
+$\hat{\fbu}_{\mathbf{Mz}} := f^*_{\mathbf{Mz}}|_L$ for $\mathbf{M} \in \{\mathbf{A}, \mathbf{B}, \mathbf{C}\}$, where $f^*_{\mathbf{Mz}}$ is a random polynomial of degree $< d_1 + \texttt{b}$ such that for $i  = 0, \dots, d_1-1$, \(f_{\mathbf{Mz}}(h_i) = \mathbf{Mz}_i\).
 \\
 \midrule
 
@@ -691,17 +692,17 @@ $+ \mathbb{Z}_{H_1\cup H_2} \cdot h(X)$
 % where $g_\ell(X)$ is a random polynomial of degree $<t-1$.
 % \\
 \midrule
-$\hat{\rbu}'_\ell \in_R  \text{RS}[L, \frac{2t+2\texttt{b}}{|L|}]$ & For $\ell\in [1,\lambda'_i]$, $\hat{\rbu}_\ell$ is a random masking codeword for LDT
+$\hat{\rbu}'_\ell \in_R  \text{RS}[L, \frac{2t+2\texttt{b}}{|L|}]$ & For $\ell\in [1,\lambda'_i]$, $\hat{\rbu}_\ell$ is a random masking codeword for \gls{ldt}
 \\
 \bottomrule
 \end{tabularx}
 }
 \end{table}
-The prover then proceeds to prove the consistency of the known witness with the R1CS instance. This is achieved by reducing the random combination of the codewords to a univariate sumcheck protocol, equivalent to a low-degree testing (LDT) which is realized using the FRI of proximity parameter 
+The prover then proceeds to prove the consistency of the known witness with the \gls{r1cs} instance. This is achieved by reducing the random combination of the codewords to a univariate sumcheck protocol, equivalent to a \gls{ldt} which is realized using the \gls{fri} of proximity parameter 
 \begin{equation}\label{eq:proximity_parameter}
 \delta = \min\left( \frac{1-2\rho}{2}, \frac{1-\rho}{3}, 1-\rho \right).
 \end{equation}
-Furthermore, the transformation described in \cite{Ben-Sasson2016IOP} is employed to compile the described interactive protocol into a zkSNARK. In Section \ref{Sec:FFT_Calls_in_Aurora}, we will discuss the FFT complexity of Aurora which includes the size of the codeword domain $|L|$, and the number of input lengths FFT/IFFT calls. For example, the prover calls FFT and IFFT algorithms to compute the codewords in Table \ref{tab:codewords} and both prover and verifier call  IFFT  to interpolate the polynomials $p_\alpha$ and $p^{ABC}_\alpha$. 
+Furthermore, the transformation described in \cite{Ben-Sasson2016IOP} is employed to compile the described interactive protocol into a \gls{zksnark}. In Section \ref{Sec:FFT_Calls_in_Aurora}, we will discuss the \gls{fft} complexity of Aurora which includes the size of the codeword domain $|L|$, and the number of input lengths \gls{fft}/\gls{ifft} calls. For example, the prover calls \gls{fft} and \gls{ifft} algorithms to compute the codewords in Table \ref{tab:codewords} and both prover and verifier call  \gls{ifft}  to interpolate the polynomials $p_\alpha$ and $p^{ABC}_\alpha$. 
 
 
 
@@ -719,7 +720,7 @@ Furthermore, the transformation described in \cite{Ben-Sasson2016IOP} is employe
 	% 4. check citations
 	% } \\
 
-Polaris \cite{Polaris} is a zkSNARK protocol without a trusted setup that has quasi-linear time complexity for the prover and polylogarithmic proof size. Its verification time is relative to the size of the arithmetic circuit representing the statement to be proven. It achieves this efficiency by encoding the R1CS instance as a univariate polynomial in a quadratic arithmetic program (QAP) \cite{GGPR13}. The main source of Polaris' efficiency is an arithmetic layered circuit design that allows the verifier to delegate query computations to the prover and verify the results using the GKR protocol \cite{GKR2008}. 
+Polaris \cite{Polaris} is a \gls{zksnark} protocol without a trusted setup that has quasi-linear time complexity for the prover and polylogarithmic proof size. Its verification time is relative to the size of the arithmetic circuit representing the statement to be proven. It achieves this efficiency by encoding the \gls{r1cs} instance as a univariate polynomial in a quadratic arithmetic program (QAP) \cite{GGPR13}. The main source of Polaris' efficiency is an arithmetic layered circuit design that allows the verifier to delegate query computations to the prover and verify the results using the GKR protocol \cite{GKR2008}. 
 Polaris combines univariate polynomial encoding described in Section \ref{univariate_pol} with univariate sumcheck protocol in Aurora~\cite{Aurora2019}.
 By accomplishing this, the protocol constructs an interactive proof that is complete and sound, and then extends it to incorporate zero-knowledge and non-interativeness using Fiat-Shamir protocol \cite{Fiat1987}. Figure \ref{fig:polaris-blocks} below shows the building blocks of the Polaris protocol.
 
@@ -734,9 +735,9 @@ By accomplishing this, the protocol constructs an interactive proof that is comp
 
 \subsubsection{R1CS Instance}%\label{r1cs}
 % Let the language $\mathcal{L} \subset \{0, 1\}^*$ correspond to $\mathcal{R}$. Such that, for each instance $\mathbbm{x} \in \mathcal{L}$,  $\mathcal{R}_\mathbbm{x}=\{w:(\mathbbm{x},w)\in\mathcal{R}\}$. Let $\mathcal{R}_\mathcal{L}$ denote the corresponding language of valid instance-witness pairs, i.e., $\mathcal{R}_\mathcal{L}=\{(\mathbbm{x},w):\mathbbm{x}\in\mathcal{L} \text{ and } w\in\mathcal{R}_\mathbbm{x}\}$. 
-Following Definition \ref{def:R1CS} The R1CS instance can be represented as a tuple $\mathbbm{x} = (\mathbb{F},A,B,C,\vec{v},m,n)$, where $\mathbb{F}$ is the finite field, $A,B$ are input matrices and $C$ is the output matrix of degree $m \times m$ from the R1CS construction. $\vec{v}$ represents the vector containing the instance's public parameter. There are at most $n$ non-zero entries in each matrix. \\
+\sloppy Following Definition \ref{def:R1CS} The R1CS instance can be represented as a tuple $\mathbbm{x} = (\mathbb{F},A,B,C,\vec{v},m,n)$, where $m:=d_1=d_2+1$, $\mathbb{F}$ is the finite field, $A,B$ are input matrices and $C$ is the output matrix of degree $m \times m$ from the R1CS construction. $\vec{v}$ represents the vector containing the instance's public parameter. There are at most $n$ non-zero entries in each matrix. \\
 
-An R1CS relation $\mathcal{R}_{\mathrm{R1CS}}$ is said to be satisfiable if there exists a witness $\vec{w} \in \mathbb{F}^{m - |v| - 1}$ consisting of the circuit's private input and wire values such that
+An \gls{r1cs} relation $\mathcal{R}_{\mathrm{R1CS}}$ is said to be satisfiable if there exists a witness $\vec{w} \in \mathbb{F}^{m - |v| - 1}$ consisting of the circuit's private input and wire values such that
 \begin{equation*}
 	(A\vec{z}) \circ (B\vec{z}) = C\vec{z},
 \end{equation*}

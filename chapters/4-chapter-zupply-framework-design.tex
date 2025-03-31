@@ -144,7 +144,7 @@ $\mathbf{T}_\tau = \{T_1, \dots, T_{|\mathbf{T}_\tau|}\}$ denotes the time-order
 $\mathbf{X}_\tau = \{\texttt{eol}_1, \dots, \texttt{eol}_{|\mathbf{X}_\tau|}\}$ is the time-ordered set of published \gls{eol} of the obsoleted tokens. %We denote obsoleted token set at time $\tau$ as $\mathbf{O}_\tau$. Obsoleted tokens set is a subset of authentication tokens set $\mathbf{O}_\tau\subseteq \mathbf{T}_\tau$ for any $\tau$. 
 
 
-\subsubsection{Commitment to \gls{aat}}
+\subsubsection{Commitment to Anonymous Authentication Token}
 $\mathbf{C}_\tau = \{\texttt{cm}_1, \dots, \texttt{cm}_{|\mathbf{C}_\tau|}\}$ is the time-ordered set of commitments to $\mathbf{T}_\tau$. So, the corresponding commitment to  $T_i$ is denoted as $\texttt{cm}_i := \mathsf{COMM}_{\rho_i}(\Tilde{T_i})$. Figure \ref{fig:zupply-token} illustrates the diagram of committing to an \gls{aat}.
 
 
@@ -291,7 +291,7 @@ This section presents the \gls{np}-statements related to \gls{zkp}s employed in 
 
 
 \subsubsection{Authenticity proof ($\pi_\textsf{Auth}$)}
-Whenever an entity wants to upload a data record on DCS, the entity (prover) proves they own a commitment \texttt{cm} in the \textsf{MHT}. The \gls{np} problems associated with this proof are explained as follows:
+Whenever an entity wants to upload a data record on \gls{dcs}, the entity (prover) proves they own a commitment \texttt{cm} in the \textsf{MHT}. The \gls{np} problems associated with this proof are explained as follows:
 
     
 \begin{itemize}
@@ -752,7 +752,7 @@ The Zupply framework is designed to ensure the integrity and authenticity of a p
 
 This section describes how the Zupply framework can be employed in its main application i.e., \gls{scm}. Entities in our framework refer to participants in a supply chain — including producers, distributors, and retailers — who upload data records related to products. These entities have three primary objectives in this ecosystem: verifying the authenticity of previously uploaded data records, preserving the integrity of their data records over time, and maintaining their anonymity. Figure \ref{fig:enter-label} illustrates all three components of the Zupply framework in an example supply chain.
 
-The initial entity in the supply chain, referred to as $e_{0}$ (e.g., a supplier of raw materials), creates an \gls{aat}, denoted as $T^{e_{0}}_{j_1}$. To accomplish this, $e_{0}$ executes the $\mathsf{Init}$ function, passing the product quantity ($q_{j_1}$) as an argument. Consequently, a new token, $T^{e_{0}}_{j_1}$, is generated, and its commitment, defined as $\texttt{cm}^{e_{0}}_{j_1} := \mathsf{COMM}_{\rho_{j_1}}(T^{e_{0}}_{j_1})$, is transmitted to the blockchain through a transaction termed $\texttt{tx}^{e_{0}}_\mathsf{Init}$. Then updates its localized version of the \textsf{MHT}, and also updates the root $\texttt{rt}_\tau$ on the smart contract ($\mathcal{C}_Z$). The smart contract verifies the correctness of the new root accordingly (as explained in Section \ref{sec:MerkleTreeStructure}). Following this, entity $e_0$ can begin uploading data records to the DCS by utilizing the $\mathsf{Upload}$ function. This function employs a public parameters, referred to as $\textsc{pp}$, to establish a \gls{zkp}, proving the ownership of an authentication token in \textsf{MHT}. Moreover, each data record is signed using a private key, denoted as \( \text{SKsig}^{e_{0}}_{{j_1}} \). $\text{SKsig}_{i}$ and its corresponding $\text{PKsig}_{i}$ are included in \( T^{e_{0}}_{j_1} \) (see Section \ref{sec:zupply-terms-and-concepts}). This ensures the authenticity and integrity of the data.
+The initial entity in the supply chain, referred to as $e_{0}$ (e.g., a supplier of raw materials), creates an \gls{aat}, denoted as $T^{e_{0}}_{j_1}$. To accomplish this, $e_{0}$ executes the $\mathsf{Init}$ function, passing the product quantity ($q_{j_1}$) as an argument. Consequently, a new token, $T^{e_{0}}_{j_1}$, is generated, and its commitment, defined as $\texttt{cm}^{e_{0}}_{j_1} := \mathsf{COMM}_{\rho_{j_1}}(T^{e_{0}}_{j_1})$, is transmitted to the blockchain through a transaction termed $\texttt{tx}^{e_{0}}_\mathsf{Init}$. Then updates its localized version of the \textsf{MHT}, and also updates the root $\texttt{rt}_\tau$ on the smart contract ($\mathcal{C}_Z$). The smart contract verifies the correctness of the new root accordingly (as explained in Section \ref{sec:MerkleTreeStructure}). Following this, entity $e_0$ can begin uploading data records to the \gls{dcs} by utilizing the $\mathsf{Upload}$ function. This function employs a public parameters, referred to as $\textsc{pp}$, to establish a \gls{zkp}, proving the ownership of an authentication token in \textsf{MHT}. Moreover, each data record is signed using a private key, denoted as \( \text{SKsig}^{e_{0}}_{{j_1}} \). $\text{SKsig}_{i}$ and its corresponding $\text{PKsig}_{i}$ are included in \( T^{e_{0}}_{j_1} \) (see Section \ref{sec:zupply-terms-and-concepts}). This ensures the authenticity and integrity of the data.
 
 
 % , which its corresponding public key \( \text{PKsig}^{e_{0}}_{{j_1}} \) is included in \( T^{e_{0}}_{j_1} \). This ensures the authenticity and integrity of the data.
