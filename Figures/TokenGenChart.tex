@@ -9,13 +9,13 @@
 \tikzstyle{arrow} = [thick,->,>=stealth]
 
 \begin{tikzpicture} [node distance=5cm]
-  \node (crh1) [crh] {\Large $\mathcal{H}$ };
-  \node (crh2) [crh, left of=crh1, xshift=-2cm] {\Large \textsf{COMM}};
-  \node (rho) [value, below of=crh1, yshift=3.5cm] {\LARGE $\rho$};
-  \node (PKsig) [value, below of=crh2, yshift=2.5cm] {\LARGE PKsig};
-  \node (q) [value, left of=PKsig, xshift=3cm, yshift=1cm] {\LARGE $q$};
-  \node (eol) [value, above of=crh1, yshift=-3cm] {\LARGE \texttt{eol}};
-  \node (cm) [value, above of=crh2, yshift=-3cm] {\LARGE \texttt{cm}};
+  \node (crh1) [crh] { $\mathcal{H}$ };
+  \node (crh2) [crh, left of=crh1, xshift=-2cm] { \textsf{COMM}};
+  \node (rho) [value, below of=crh1, yshift=3.5cm] { $\rho$};
+  \node (PKsig) [value, below of=crh2, yshift=2.5cm] { PKsig};
+  \node (q) [value, left of=PKsig, xshift=3cm, yshift=1cm] { $q$};
+  \node (eol) [value, above of=crh1, yshift=-3cm] { \texttt{eol}};
+  \node (cm) [value, above of=crh2, yshift=-3cm] { \texttt{cm}};
   
 
   \draw [arrow] (rho) -- (crh1);

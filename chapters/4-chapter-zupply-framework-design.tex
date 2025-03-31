@@ -3,7 +3,7 @@
 %======================================================================
 
 \section*{Declaration of Contributions}
-This chapter is based on \cite{Badakhshan2024Zupply}. I am the sole author of this chapter.
+This chapter is based on \cite{Badakhshan2024Zupply}. I am the sole author of this chapter under the supervision of Professor Guang Gong.
 
 
 
@@ -130,14 +130,17 @@ This section introduces the notations and symbols for data structures employed b
 \subsubsection{Entities}
 \label{sec:Entities}
 The set of all entities in Zupply is $\mathbf{E}_\tau = \{e_1, \dots, e_{|\mathbf{E}_\tau|}\}$. Each entity $e_i$, possesses a blockchain addresses denoted as $\text{BPAddr}^{e_i}$.  
-This scheme operates without a central manager, placing all entities at an equal level of authority.
+This scheme operates without a central manager, placing all entities at an equal level of authority. Each entity runs the Zuppy Node (\textsc{Z-Node}).
 
 \subsubsection{Anonymous Authentication Token (\gls{aat})}
-$\mathbf{T}_\tau = \{T_1, \dots, T_{|\mathbf{T}_\tau|}\}$ denotes the time-ordered set of \gls{aat}s, where each is represented as $T_i := (\Tilde{T}_i, \text{SKsig}_{i})$. Here $\Tilde{T}_i := (q_i, \text{PKsig}_{i}, \rho_i)$ denotes a partial \gls{aat}. Let $q_i \in \{0, 1\}^{N_q}$ keep track of the quantity of products. It should be kept unchanged unless two supply chains are merged or one supply chain is divided into two sub supply chains. $\text{SKsig}_{i}$ corresponds to $\text{PKsig}_{i}$. The owner of the \gls{aat} $T_i$ uses $\text{SKsig}_{i}$ to sign the data records uploaded by them. It is important not to confuse $\text{PKsig}_{i}$, which represents the public key associated with the token $T_i$, with the public keys related to the entity's $\text{BPAddr}$. 
-Moreover, $\rho_i \in_R \{0, 1\}^{N_\rho}$ plays a crucial role in preventing the token's owner from re-transferring the \gls{aat} after transferring its ownership to the new owner(s). This is achieved by publishing the end-of-life (EoL) of the \gls{aat}, denoted as $\texttt{eol}_i = \mathcal{H}(\rho_i)$, on the blockchain. %Here, $\mathcal{H}$ represents a collision-resistant hash function. 
 
-\subsubsection{End of Life (\gls{eol})}
-In an \gls{aat}, $\rho_i \in_R \{0, 1\}^{N_\rho}$ prevents the owner of the \gls{aat} from re-transferring it after it has already been transferred by publishing the end-of-life (\gls{eol}), denoted as $\texttt{eol}_i = \mathcal{H}(\rho_i)$, on the blockchain.
+For each \gls{aat} $T_i$  the keys $\text{SKsig}_{i}$ and $\text{PKsig}_{i}$ are generated using the key generation algorithm $\mathcal{K}_\mathsf{sig}$ based on a public key scheme, as defined in Definition~\ref{def:Strongly-unforgeable digital signature}.  Then, each \gls{aat} is represented as $T_i := (\Tilde{T}_i, \text{SKsig}_{i})$. Here $\Tilde{T}_i := (q_i, \text{PKsig}_{i}, \rho_i)$ denotes a partial \gls{aat}. Let $q_i \in \{0, 1\}^{N_q}$ keep track of the quantity of products, where ${N_q}$ is a  pre-determined security parameter which denotes the bit-length of quantity values in \glspl{aat}. It should be kept unchanged unless two supply chains are merged or one supply chain is divided into two sub supply chains. 
+
+The owner of the \gls{aat} $T_i$ uses $\text{SKsig}_{i}$ to sign the data records uploaded by them. It is important not to confuse $\text{PKsig}_{i}$, which represents the public key associated with the token $T_i$, with the public keys related to the entity's $\text{BPAddr}$. 
+Moreover, $\rho_i \in_R \{0, 1\}^{N_\rho}$, where ${N_\rho}$ is a  pre-determined security parameter which denotes the bit-length of $\rho$ values in \glspl{aat}, plays a crucial role in preventing the token's owner from re-transferring the \gls{aat} after transferring its ownership to the new owner(s). This is achieved by publishing the end-of-life (\gls{eol}) of the \gls{aat}, denoted as $\texttt{eol}_i = \mathcal{H}(\rho_i)$, on the blockchain. %Here, $\mathcal{H}$ represents a collision-resistant hash function. 
+%\subsubsection{End of Life (\gls{eol})}
+%In an \gls{aat}, $\rho_i \in_R \{0, 1\}^{N_\rho}$ prevents the owner of the \gls{aat} from re-transferring it after it has already been transferred by publishing the end-of-life (\gls{eol}), denoted as $\texttt{eol}_i = \mathcal{H}(\rho_i)$, on the blockchain.
+$\mathbf{T}_\tau = \{T_1, \dots, T_{|\mathbf{T}_\tau|}\}$ denotes the time-ordered set of \gls{aat}s  and 
 $\mathbf{X}_\tau = \{\texttt{eol}_1, \dots, \texttt{eol}_{|\mathbf{X}_\tau|}\}$ is the time-ordered set of published \gls{eol} of the obsoleted tokens. %We denote obsoleted token set at time $\tau$ as $\mathbf{O}_\tau$. Obsoleted tokens set is a subset of authentication tokens set $\mathbf{O}_\tau\subseteq \mathbf{T}_\tau$ for any $\tau$. 
 
 
@@ -149,7 +152,7 @@ $\mathbf{C}_\tau = \{\texttt{cm}_1, \dots, \texttt{cm}_{|\mathbf{C}_\tau|}\}$ is
 
 \begin{figure}
 	\centering
-	\includestandalone[width=.6\linewidth]{Figures/TokenGenChart}
+	\includestandalone{Figures/TokenGenChart}
 	\caption[Commitment to an Anonymous Authenticated Token]{The process of committing to an \gls{aat} and its corresponding \gls{eol}.}
 	\label{fig:zupply-token}
 \end{figure}
@@ -184,7 +187,7 @@ We can model the blockchain as an immutable, public, decentralized ledger, denot
 Wherever data records are concerned, the protocol employs the \textit{proof-of-inclusion (\gls{pi})} mechanism provided by the blockchain to prove the correctness of the value $\texttt{rt}_\tau$ used in off-chain proofs. The PI of $\texttt{rt}_\tau$ in ledger $\mathbf{L}_\tau$ at time $\tau$ is represented as $\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt})$. This proof ensures that the auditors can  verify  $\texttt{rt}$ employed for off-chain authentication.  
 
 \subsubsection{Transactions}
-Each transaction  $\texttt{tx}$ $\in$ $\{ \texttt{tx}_\textsf{Init},$ $\texttt{tx}_\textsf{Trans},$ $\texttt{tx}_\textsf{Merge},$ $\texttt{tx}_\textsf{Div} \}$ invokes a specific function in $\mathcal{C}_Z$. Each $\texttt{tx}$ contains one or two \texttt{cm}s, and whenever it finalizes on the blockchain,  its corresponding \texttt{cm}s are added to \textsf{MHT} locally and updates $\texttt{rt}_\tau$  on the blockchain. For a transactions that transfers the ownership of \gls{aat}(s), $\texttt{tx} \in \{$$\texttt{tx}_\textsf{Trans}$, $\texttt{tx}_\textsf{Merge}$, $\texttt{tx}_\textsf{Div}$ $\}$, the transaction contains the \gls{eol} of expired \gls{aat}(s) whose commitment(s) are stored on $\mathsf{MHT}$, and a \gls{zkp} of owning them. These proofs are denoted as $\pi_\mathbbm{x} \in \{\pi_\textsf{Trans}, \pi_\textsf{Merge}, \pi_\textsf{Div} \}$. 
+Each transaction  $\texttt{tx}$ $\in$ $\{ \texttt{tx}_\textsf{Init},$ $\texttt{tx}_\textsf{Trans},$ $\texttt{tx}_\textsf{Merge},$ $\texttt{tx}_\textsf{Div} \}$ invokes a specific function in $\mathcal{C}_Z$. Each $\texttt{tx}$ contains one or two \texttt{cm}s, and whenever it finalizes on the blockchain,  its corresponding \texttt{cm}s are added to \textsf{MHT} locally and updates $\texttt{rt}_\tau$  on the blockchain. For a transactions that transfers the ownership of \gls{aat}(s), $\texttt{tx} \in \{$$\texttt{tx}_\textsf{Trans}$, $\texttt{tx}_\textsf{Merge}$, $\texttt{tx}_\textsf{Div}$ $\}$, the transaction contains the \gls{eol} of \gls{aat}(s) whose commitment(s) are stored on $\mathsf{MHT}$, and a \gls{zkp} of owning them. These proofs are denoted as $\pi_\mathbbm{x} \in \{\pi_\textsf{Trans}, \pi_\textsf{Merge}, \pi_\textsf{Div} \}$. The \gls{eol} should not be included in $\mathbf{X}_\tau$ prior to issuing the transaction. Only after the transaction is finalized by $\mathcal{C}_Z$, the smart contract updates $\mathbf{X}_\tau$ by adding the \gls{eol} to it.
 % The transactions also contain the \textsf{BP} address of the transaction issuer, denoted as $\mathsf{BPAddr}^{e_i}$, which belongs to the entity $e_i$. 
 The time-ordered set of transactions on blockchain is denoted as $\mathbf{TX}_\tau = \{\texttt{tx}_1, \dots, \texttt{tx}_{|\mathbf{TX}_\tau|}\}$.
 

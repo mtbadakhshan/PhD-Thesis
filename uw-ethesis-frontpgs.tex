@@ -38,11 +38,11 @@
         in \\
         Electrical and Computer Engineering \\
 
-        \vspace*{1.5cm}
+        \vspace*{2cm}
 
         Waterloo, Ontario, Canada, 2025 \\
 
-        \vspace*{1.0cm}
+        \vspace*{1.5cm}
 
         \copyright\ Mohammadtaghi Badakhshan 2025 \\
         \end{center}
@@ -67,7 +67,7 @@ The following served on the Examining Committee for this thesis. The decision of
   \noindent
 \begin{tabbing}
 Internal-External Member: \=  \kill % using longest text to define tab length
-External Examiner: \>  Liqun Chen \\ 
+External Examiner: \>  Dr. Liqun Chen \\ 
 \> Professor, Dept. of Computer Science and Electronic Engineering,\\
 \> University of Surrey \\
 \end{tabbing} 
@@ -76,7 +76,7 @@ External Examiner: \>  Liqun Chen \\
   \noindent
 \begin{tabbing}
 Internal-External Member: \=  \kill % using longest text to define tab length
-Supervisor: \> Guang Gong \\
+Supervisor: \> Dr. Guang Gong \\
 \> Professor, Dept. of Electrical and Computer Engineering,\\
 \> University of Waterloo \\
 
@@ -86,7 +86,7 @@ Supervisor: \> Guang Gong \\
   \noindent
   \begin{tabbing}
 Internal-External Member: \=  \kill % using longest text to define tab length
-Internal Member: \> Anwar Hasan\\
+Internal Member: \> Dr. Anwar Hasan\\
 \> Professor, Dept. of Electrical and Computer Engineering,\\
 \> University of Waterloo \\
 \end{tabbing}
@@ -95,7 +95,7 @@ Internal Member: \> Anwar Hasan\\
   \noindent
   \begin{tabbing}
 Internal-External Member: \=  \kill % using longest text to define tab length
-Internal Member: \>  Mahesh Tripunitara  \\
+Internal Member: \>  Dr. Mahesh Tripunitara  \\
 \> Professor, Dept. of Electrical and Computer Engineering,\\
 \> University of Waterloo \\
 \end{tabbing}
@@ -105,7 +105,7 @@ Internal Member: \>  Mahesh Tripunitara  \\
   \noindent
 \begin{tabbing}
 Internal-External Member: \=  \kill % using longest text to define tab length
-Internal-External Member: \>  Douglas Stebila  \\
+Internal-External Member: \>  Dr. Douglas Stebila  \\
 \> Professor, Dept. of Combinatorics and Optimization,\\ \> University of Waterloo \\
 \end{tabbing}
   \bigskip
@@ -140,7 +140,30 @@ I understand that my thesis may be made electronically available to the public.
 % ---------------
 \addcontentsline{toc}{chapter}{Statement of Contributions}
 \begin{center}\textbf{Statement of Contributions}\end{center}
-I am the sole author of Chapters~\ref{ch:Intro}, \ref{ch:zupply-design}, \ref{ch:zupply_implementation}, and~\ref{ch:conclusion}. Chapters~\ref{ch:preliminaries}, \ref{ch:lit_review}, \ref{ch:additive-fft}, \ref{ch:polaris}, \ref{ch:zupply-design}, \ref{ch:zupply_implementation} include material from both published and unpublished papers that I have authored or co-authored. Specific contributions and collaborations are clearly indicated at the beginning of each chapter.
+%Mohammadtaghi Badakhshan is the sole author of Chapters~\ref{ch:Intro}, \ref{ch:zupply-design}, and~\ref{ch:conclusion} which were written under the supervision of Professor Guang Gong, but are still under review, or were not written for any publication, or have not yet been edited for future submission.   
+
+This thesis includes work from three peer-reviewed and accepted or published papers, as well as two manuscripts intended for future publication. Below are the titles, authors, and venues of each manuscript, followed by the contributions of the thesis author and the corresponding sections of the thesis that were derived from each manuscript:
+
+\noindent (1) Mohammadtaghi Badakhshan, Susanta Samanta, Guang Gong, ``Accelerating Post-Quantum Secure zkSNARKs through Optimizing Additive FFT,'' \textit{Unpublished}.\ \\
+The preliminary material and literature review from this manuscript appear in Chapters~\ref{ch:preliminaries} and~\ref{ch:lit_review}, specifically in the following sections: \ref{sec:prel_finite_field}, \ref{sec:prel_affine_sub_space}, \ref{sec:prel_vanishing}, \ref{sec:vec_rep}, \ref{sec:prel_dft}, \ref{sec:prel_aurora}, and \ref{sec:prel_AFFT} in Chapter~\ref{ch:preliminaries}, and Section~\ref{sec:lit_additive_fft} in Chapter~\ref{ch:lit_review}. These sections have been adapted and extended to fit the context of the thesis.
+Additionally, Chapter~\ref{ch:additive-fft} is based on this manuscript. The specific contributions of Mohammadtaghi Badakhshan to this work are detailed at the beginning of that chapter.
+
+\noindent (2) Mohammadtaghi Badakhshan, Guiwen Luo, Tanmayi Jandhyala, Guang Gong, ``Ursa Minor: The Implementation Framework for Polaris,'' \textit{Arithmetic of Finite Fields}, 2025. (Ref. \cite{Badakhshan2025Ursa}).\\
+The preliminary material from this paper is reflected in Sections~\ref{gkr},\ref{sec:prel_FRI}, and\ref{sec:prel_polaris} of Chapter~\ref{ch:preliminaries}. Furthermore, Chapter~\ref{ch:polaris} is based on this paper. Mohammadtaghi Badakhshan was responsible for all aspects related to the GKR circuit presented in the paper.
+
+\noindent (3) Mohammadtaghi Badakhshan, Guang Gong, ``Zupply: Anonymously Maintained Decentralized DAG Data Record Over Public Blockchains,'' \textit{TechRxiv}, 2024.(Ref. \cite{Badakhshan2024Zupply}). \\
+The preliminary material and literature review from this manuscript are reflected in Sections~\ref{sec:prel_r1cs} and~\ref{sec:prel_Cryptographic Primitives} of Chapter~\ref{ch:preliminaries}, as well as in portions of Sections~\ref{sec:lit_Blockchain_based_preserving_protocols} and \ref{sec:lit_SCM} of Chapter~\ref{ch:lit_review}.
+Additionally, Chapter~\ref{ch:zupply-design}, Section~\ref{sec:zupply_primitive_and_parameters}, and the implementation using the Groth16 zkSNARK over the BN254 curve in Chapter~\ref{ch:zupply_implementation} are based on this manuscript. Mohammadtaghi Badakhshan designed and implemented the framework presented in the manuscript and authored it under the supervision of Professor Guang Gong.
+
+\noindent (4) Mohammadtaghi Badakhshan, Guang Gong, ``Privacy-Preserving Ownership Transfer: Challenges and An Outlined Solution Based on Zero-Knowledge Proofs,'' \textit{IEEE 9th World Forum on Internet of Things}. 2023. (Ref. \cite{Badakhshan2023Outline}).\\
+Portions of Sections~\ref{sec:lit_Blockchain_based_preserving_protocols} and \ref{sec:lit_SCM} in Chapter~\ref{ch:lit_review} are derived from this paper. Mohammadtaghi Badakhshan authored the paper under the supervision of Professor Guang Gong.
+
+\noindent (5) Mohammadtaghi Badakhshan, Guang Gong, ``Evaluating the Integration of {Aurora} {zkSNARK} in the {Zupply} Framework,'' \textit{IEEE/ACM 6th International Workshop on Engineering and Cybersecurity of Critical Systems (EnCyCriS)}. 2025. (Ref. \cite{Badakhshan2025AuroraZupply}).\\
+Section~\ref{sec:Zupply Arithmetic Circuits}, as well as the implementation of the Zupply framework using Groth16 over BLS12-381 and using the Aurora zkSNARK, along with the comparative analysis presented in Chapter~\ref{ch:zupply_implementation}, are derived from this paper. Mohammadtaghi Badakhshan carried out the design, implementation, and authorship of the paper under the supervision of Professor Guang Gong.
+
+%Chapters~\ref{ch:Intro}, \ref{ch:lit_review}, \ref{ch:additive-fft}, \ref{ch:polaris}, \ref{ch:zupply-design}, \ref{ch:zupply_implementation} include material from published papers \cite{Badakhshan2023Outline,Badakhshan2025AuroraZupply,Badakhshan2025Ursa} and two unpublished papers \cite{Badakhshan2024Zupply} and a paper on a
+%
+%I authored with my supervisor, Professor Gong or co-authored with more than two authors. Specific contributions and collaborations are clearly indicated at the beginning of each chapter.
 \cleardoublepage
 \phantomsection    % allows hyperref to link to the correct page
 % A B S T R A C T
@@ -148,10 +171,11 @@ I am the sole author of Chapters~\ref{ch:Intro}, \ref{ch:zupply-design}, \ref{ch
 \addcontentsline{toc}{chapter}{Abstract}
 \begin{center}\textbf{Abstract}\end{center}
 
-Zero-Knowledge Succinct Non-Interactive Arguments of Knowledge (zkSNARKs) are gaining widespread adoption across various applications. Despite significant progress in developing post-quantum secure zkSNARKs, current schemes still encounter notable challenges, particularly regarding computational complexity.
-This thesis proposes utilizing the Cantor special basis to enhance post-quantum secure zkSNARKs operating over binary extension fields. By adopting this basis, we optimize the additive fast Fourier transform (FFT) algorithm employed in Aurora, a plausible post-quantum secure zkSNARK, replacing the previously utilized Gao-Mateer FFT with the more efficient Cantor FFT. Our implementation demonstrates substantial reductions in computation time for Aurora, indicating potential performance improvements for other zkSNARK systems reliant on additive FFTs. We offer a thorough theoretical analysis of the computational complexity of the Cantor FFT algorithm, providing precise counts of required additions, multiplications, and precomputation overhead. Additionally, we examine the FFT call complexity within the Rank-1 Constraint System encoding specifically for Aurora.
-Furthermore, this thesis includes an extensive analysis of the algorithms within Polaris, a plausible post-quantum zkSNARK protocol, by systematically decomposing its components for detailed evaluation. Recognizing the critical need for efficient real-world implementations, we propose a concrete GKR arithmetic circuit for integration into Polaris. We also enhance the efficiency of the FRI protocol within Polaris by eliminating costly field inversion operations.
-Finally, as an illustrative example of a privacy-preserving protocol utilizing zkSNARKs, we propose a novel framework called Anonymous Authentication Token (AAT). This framework supports the unlinkable transfer of token ownership (AAT Ownership Transfer or AATOT), including the merging and dividing of tokens in an unlinkable manner. Our construction leverages zkSNARK protocols to ensure robust anonymity, unlinkability, and authentication. Building upon this foundation, we introduce Zupply, a decentralized system designed to maintain directed acyclic graphs (DAGs) of authentic data records. Zupply operates atop a permissionless blockchain equipped with smart contracts, offering a trustless environment that preserves participant anonymity and unlinkability. Simultaneously, it ensures the integrity and authenticity of data records across the entire supply chain ecosystem. We design and implement optimized arithmetic circuits within the Zupply framework to minimize proof sizes and verification costs. We concurrently explore post-quantum secure solutions to future-proof the framework against quantum computing advancements. Our implementation of Zupply utilizes C++ and Solidity, leveraging two distinct zkSNARK protocols: Groth16 and Aurora. The Groth16 zkSNARK, while vulnerable to quantum attacks, provides computational efficiency and reduced operational costs, demonstrating Zupply’s practicality for real-world decentralized supply chain management (SCM) systems. Conversely, the Aurora zkSNARK is designed to be plausibly secure against quantum-capable adversaries. We conducted a comparative analysis of computation efficiency and proof sizes between these two zkSNARK variants,
+Zero-knowledge succinct non-interactive arguments of knowledge (zkSNARKs) are gaining widespread adoption across various applications. Despite significant progress in developing post-quantum secure zkSNARKs, current schemes still encounter notable challenges, particularly regarding computational complexity.
+This thesis proposes utilizing the Cantor special basis (Cantor, 1989) to enhance post-quantum secure zkSNARKs operating over binary extension fields. By adopting this basis, the additive fast Fourier transform (FFT) algorithm employed in Aurora (Ben-Sasson et al., 2019), a plausible post-quantum secure zkSNARK, is optimized by replacing the previously utilized Gao-Mateer FFT (Gao and Mateer, 2010) with the more efficient Cantor FFT  (Cantor, 1989). The implementation demonstrates substantial reductions in computation time for Aurora, indicating potential performance improvements for other zkSNARK systems reliant on additive FFTs. A thorough theoretical analysis of the computational complexity of the Cantor FFT algorithm is provided, including precise counts of required additions, multiplications, and precomputation overhead. Additionally, the FFT call complexity within the rank-1 constraint system (R1CS) encoding is examined for Aurora.
+Furthermore, this thesis includes an extensive analysis of the algorithms within Polaris (Fu and Gong, 2022), a plausible post-quantum zkSNARK protocol, by systematically decomposing its components for detailed evaluation. To address the critical need for efficient real-world implementations, a concrete GKR (Goldwasser et al., 2008) arithmetic circuit is proposed for integration into Polaris. Additionally, the efficiency of the FRI protocol (Ben-Sasson et al., 2018) within Polaris is enhanced by eliminating costly field inversion operations.
+
+Finally, as an illustrative example of a privacy-preserving protocol utilizing zkSNARKs, a novel Anonymous Authentication Token (AAT) scheme is proposed. This scheme supports the unlinkable transfer of token ownership (AAT Ownership Transfer or AATOT), including the merging and dividing of tokens in an unlinkable manner. The construction leverages zkSNARK protocols to ensure anonymity, unlinkability, and authentication. Building upon this foundation, the Zupply framework is introduced, a decentralized system designed to maintain directed acyclic graphs (DAGs) of authentic data records. Zupply operates atop a permissionless blockchain equipped with smart contracts, offering a trustless environment that preserves participant anonymity and unlinkability. At the same time, the integrity and authenticity of data records are ensured across the entire supply chain ecosystem. Optimized arithmetic circuits are designed and implemented within the Zupply framework to minimize proof sizes and verification costs. Post-quantum secure solutions are concurrently explored to future-proof the framework against quantum computing advancements. The implementation of Zupply is carried out in C++ and Solidity, utilizing two distinct zkSNARK protocols: Groth16 and Aurora. The Groth16 zkSNARK, while vulnerable to quantum attacks, provides computational efficiency and reduced operational costs, thereby demonstrating Zupply’s practicality for real-world decentralized supply chain management (SCM) systems. In contrast, the Aurora zkSNARK is designed to be plausibly secure against quantum-capable adversaries. A comparative analysis of computation efficiency and proof sizes between these two zkSNARK variants is conducted.
 
 
 

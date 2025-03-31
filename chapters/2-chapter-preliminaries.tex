@@ -10,7 +10,7 @@ This chapter contains preliminary material from an unpublished work and the pape
 \section{Algebraic Foundations}
 %----------------------------------------------------------------------
 
-\subsection{Finite Fields}
+\subsection{Finite Fields}\label{sec:prel_finite_field}
 Let $\mathbb{F}$ denote a finite field and $\mathbb{F}_q$ denote the finite field with $q$ elements, where $q=p^k$ for a prime $p$ and a positive integer $k$. The elements of a finite field with characteristic $p$ can be represented as vectors over $\mathbb{F}_p$. In other words, there exists a vector space isomorphism from $\mathbb{F}_{p^k}$ to $\mathbb{F}_p^k$ defined by $$x=(x_0\alpha_0+x_1\alpha_1+ \cdots +x_{k-1}\alpha_{k-1}) \mapsto (x_0,x_1, \ldots,x_{k-1}),$$ where $\{\alpha_{0},\alpha_{1},\ldots,\alpha_{k-1}\}$ is a basis of $\mathbb{F}_{p^k}$ over $\mathbb{F}_p$ \cite{samanta2023thesis}.
 
 A polynomial of degree $n$ over a finite field $\mathbb{F}_{q}$ is an expression in an indeterminate $x$ of the form
@@ -49,7 +49,7 @@ The trace function satisfies the following properties, which are relevant to our
 % \begin{definition}
 	
 	% \end{definition}
-\subsection{Affine Subspace}
+\subsection{Affine Subspace} \label{sec:prel_affine_sub_space}
 % \paragraph{Affine Subspace}
 Let us define the subspace $W_m$ of $\mathbb{F}_{2^k}$ as the linear combinations of $\{\beta_0, \beta_1, \ldots, \beta_{m-1}\}$. We order the elements of the subspace $W_m$ by $\{\eta_0=0, \eta_1, \eta_2, \dots, \eta_{2^m-1}\}$ where
 \[
@@ -60,7 +60,7 @@ Note that for any $0 \leq m < k$, we can decompose the elements of $W_{m+1}$ int
 
 Furthermore, if $m < k-1$ and $\theta$ is any linear combination of $\{\beta_{m+1}, \beta_{m+2}, \ldots, \beta_{k-1}\}$, then we can decompose the elements of $\theta + W_{m+1}$ into two pairwise disjoint affine subspaces $\theta + W_m$ and $\beta_{m} + \theta + W_m$.
 
-\subsection{Rank-1 Constraint System}
+\subsection{Rank-1 Constraint System} \label{sec:prel_r1cs}
 
 Zero-knowledge proof (\gls{zkp}) system toolchains, such as \cite{Groth2016, Aurora2019, Chiesa2020Fractal, Ames2017Ligero} that generate arithmetic or boolean circuits from high-level programming languages, usually use rank-1 constraint systems (\gls{r1cs}s), which is so straightforward that it can be used to create efficient argument systems. \gls{r1cs} has also proven to be reliable in real-world applications, such as Zcash \cite{zcash-proc}. We provide the definition of \gls{r1cs} in the following:
 
@@ -113,7 +113,7 @@ In the conversion of a circuit to an \gls{r1cs} representation, only \texttt{MUL
 
 
 
-\subsection{Vanishing Polynomial}
+\subsection{Vanishing Polynomial} \label{sec:prel_vanishing}
 \begin{definition}
 	The polynomial $\mathbb{Z}_{W_{m}}(x)= \prod_{a\in W_m}^{} (x-a)$ which is a linearized polynomial given by $\mathbb{Z}_{W_{m}}(x) = \sum_{i=0}^{m} c_i x^{2^i}, c_i \in \F_{2^k}$. This polynomial is called the \textit{vanishing polynomial} for the subspace $W_m$.
 \end{definition}
@@ -147,7 +147,7 @@ Now, since $W_{m+1}= W_m \cup (\beta_{m}+W_m)$, we have
 For any univariate polynomial $f(x) = \sum_{i=0}^{n-1}c_ix^i, c_i\in \F$, where $\deg(f) < n = 2^m$, the coefficients are represented as a vector of $n$ elements, ordered from the constant term to the highest degree term. Namely, $$\fbu = (c_0, ..., c_{n-1}), c_i \in \mathbb{F}_{2^k}$$ represents the polynomial $f(x)$, where $\deg(f)<n$.
 
 
-\subsection{Additive Discrete Fourier Transform}
+\subsection{Additive Discrete Fourier Transform} \label{sec:prel_dft}
 Now we will discuss the evaluation of a univariate polynomial $f(x)$ over the subspace $W_m$.
 
 \begin{definition}
@@ -706,7 +706,7 @@ Furthermore, the transformation described in \cite{Ben-Sasson2016IOP} is employe
 
 
 
-\subsection{Polaris zkSNARK Protocol}
+\subsection{Polaris zkSNARK Protocol} \label{sec:prel_polaris}
 
 % \textcolor{blue}{
 	% Checklist:
@@ -907,7 +907,7 @@ To obtain the full zero-knowledge protocol, we replace relevant components with 
 %----------------------------------------------------------------------
 
 
-\section{Additive Fast Fourier Transform}
+\section{Additive Fast Fourier Transform}\label{sec:prel_AFFT}
 
 \subsection{Cantor Additive FFT}
 \label{sec: Preliminaries - Cantor Algorithm}

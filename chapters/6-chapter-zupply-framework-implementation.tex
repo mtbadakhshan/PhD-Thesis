@@ -3,7 +3,7 @@
 %======================================================================
 
 \section*{Declaration of Contributions}
-This chapter is based on~\cite{Badakhshan2024Zupply} and~\cite{Badakhshan2025AuroraZupply}. I am the sole author of this chapter.
+This chapter is based on~\cite{Badakhshan2024Zupply} and~\cite{Badakhshan2025AuroraZupply}. I am the sole author of this chapter under the supervision of Professor Guang Gong.
 
 \section{Introduction}
 
@@ -93,7 +93,7 @@ The \textsf{Merge} circuit is similar to the \textsf{Trans} circuit, but it merg
 The \textsf{Div} circuit is the opposite of the \textsf{Merge} circuit. It generates the \gls{zkp} $\pi_\textsf{Div}$, which proves that a known existing \gls{aat} in \textsf{MHT} with root $\texttt{rt}$ divides into two new \gls{aat}s. The \texttt{eol} of the divided token and the commitments to the two new \gls{aat}s are public inputs to this circuit. This circuit ensures consistency in the product quantity before and after division, so that the sum of the $q$ values in the new tokens equals the $q$ value in the original \gls{aat}.
 
 
-\section{Cryptographic Primitives and Parameters}
+\section{Cryptographic Primitives and Parameters} \label{sec:zupply_primitive_and_parameters}
 In this section, we present the instantiation of each building block  of the Zupply framework, considering a 128-bit security level. 
 
 \subsection{Blockchain platform }

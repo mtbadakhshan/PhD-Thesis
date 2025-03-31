@@ -3,7 +3,7 @@
 %======================================================================
 
 \section*{Declaration of Contributions}
-Section~\ref{sec:lit_additive_fft} of this chapter includes material from an unpublished work that I co-authored. Additionally, other sections incorporate content from~\cite{Badakhshan2024Zupply, Badakhshan2023Outline, Badakhshan2025AuroraZupply}, all of which I authored independently.
+Section~\ref{sec:lit_additive_fft} of this chapter includes material from an unpublished work that I am a co-author. Additionally, other sections incorporate content from published works ~\cite{Badakhshan2023Outline, Badakhshan2025AuroraZupply} and an unpublished pre-print~\cite{Badakhshan2024Zupply}, all of which I authored under the supervision of Professor Guang Gong.
 
 %\section{Post Quantum Secure zkSNARKs}
 %
@@ -33,7 +33,7 @@ In 2014, Lin, Chung, and Han~\cite{LCH-basis2014} designed a new polynomial basi
 
 %----------------------------------------------------------------------
 
-\section{Blockchain Based Privacy Preserving Protocols}
+\section{Blockchain Based Privacy Preserving Protocols} \label{sec:lit_Blockchain_based_preserving_protocols}
 
 Bitcoin \cite{nakamoto2008bitcoin} is the first blockchain platform provides an authenticated tamper-proof record of transactions maintained in a peer-to-peer network. Transactions on Bitcoin are linked together. Many research works such as \cite{Reid2013, Ron2013, Meiklejohn2016} showed that analyzing the transaction graphs, values, and dates of transactions helps to retrieve information that leads to attribute ownership of Bitcoin addresses. Consequently, the identity of the owners could be revealed easier than was expected. Researchers have proposed privacy-focused solutions, such as CoinJoin \cite{coinjoin}, in response to privacy concerns. However, these solutions do not necessarily provide complete privacy guarantees.
 
@@ -55,7 +55,7 @@ ZeeStar \cite{ZeeStar} provides more applicability than Hawk \cite{Hawk}. Howeve
 
 Narula et. al \cite{zkLedger2018} proposed zkLedger which is a private but also audiable transaction ledger. Their focus is on banks that want their transactions be encrypted; but, let regulators have an insight into bank assets and trades. Auditor can query the bank and have a verifiable proof that the answer actually is true. zkLedger leverages Peterson commitment \cite{petersen1997convert} for committing values. Peterson commitment enables linear functions over transaction values. For example, ratios, percentages, sums, averages, etc. zkLedger leverages zero-knowledge proofs to ensure that banks have valid transactions, i.e., they had consent to transfer the asset, they had enough asset to transfer, and the assets are neither created or destroyed.
 
-\section{Supply Chain Management}
+\section{Supply Chain Management} \label{sec:lit_SCM}
 
 A supply chain management (\gls{scm}) is a system used by a business and its suppliers to make and deliver certain products to the customers. An \gls{scm} consists of different components such as inventory management, transportation and logistics, and supply chain analytics. In \gls{scm} schemes, it is necessary to monitor the history of each product to gain visibility of the product's flow from producers to consumers. 
 At each stage, entities possessing the product must have access to its history to trace its origins. This traceability ensures the product's quality and compliance with ethical standards \cite{SUN2019658, Guo2015, Ackerman2014, Regattieri2007Traceability}. 
@@ -70,7 +70,7 @@ Traditional \gls{scm} systems have encountered numerous challenges, particularly
 
 Supply chains' data records have a sequential format since they represent the conditions of a product over time. Furthermore, two distinct supply chains might merge due to various reasons, such as using the same warehouse, the same transportation, or assembly in the manufacturing stage. In contrast, a single supply chain can be divided into two or more sub supply chains for reasons like the distribution of a product to different locations. Consequently, directed acyclic graphs (\glspl{dag}) are an optimal data structure for storing supply chain data records. For instance, a food supply chain can be seen as a \gls{dag}, where each node in the \gls{dag} signifies a data record captured by an entity responsible for moving, storing, or processing batches of food over a period of time. 
 
-\subsection{Blockchain in Supply Chain Management}
+\subsection{Blockchain in Supply Chain Management} \label{sec:lit_bc_in_scm}
 
 Applying blockchain technologies to secure \gls{scm} is a promising approach. Blockchain removes the need for trusting third parties; Moreover, the potential benefits that blockchain and \gls{iot} can give to \gls{scm}, such as traceability, transparency, less paper works and less code of conduct violation and fraud~\cite{Aich2019}.  Blockchain platforms can be divided into two categories: permissioned and permissionless blockchains. 
 
@@ -88,7 +88,7 @@ Salah et al. \cite{Salah2019} proposed an \gls{scm} solution based on the Ethere
 Toyoda et al. \cite{Toyoda2017} proposed a novel product ownership management system (POMS). They have implemented POMS on a Ethereum smart contract. In their proposed approach, the manufacturer assign Electronic Product Code (EPC) to each product and write that into the \gls{rfid} tag attached to the product. The product's EPC is registered on the smart contract. Furthermore, functions such as product owner transformation, incentivising entities to follow POMS protocol, and unauthorized party prevention are enabled by their smart contract. Toyoda et al. claimed PMOS system makes counterfeiters' efforts to clone real tags ineffective. 
 
 
-\subsection{Blockchain Based Privacy Presetving Solutions for Supply Chain Management}
+\subsection{Blockchain Based Privacy Presetving Solutions for Supply Chain Management}\label{sec:lit_pp_bc_scm}
 
 Privacy, especially against public exposure, is crucial in \gls{scm} applications. It encompasses entities' anonymity—ensuring that auditors reviewing the history of a product cannot identify the creator of a specific data record unless the entity chooses to reveal its identity. Additionally, privacy involves unlinkability among entities, meaning that businesses desire to keep their partners and the supply chains they are involved in confidential. Our analysis reveals that all of the privacy preserving SCM solutions reviewed are not practical to be employed as SCM systems on public blockchains. 
 
