@@ -206,7 +206,7 @@ The time-ordered set of transactions on blockchain is denoted as $\mathbf{TX}_\t
 The time-ordered set of data records is denoted as $\mathbf{D}_\tau = \{d_1, \dots, d_{|\mathbf{D}_\tau|}\}$. Data records are stored on a \gls{dcs}. 
 The \gls{cid} of a data record $d_n$ in the \gls{dcs} is denoted as $\textsc{cid}_n$.
 The set of all \gls{cid}s is $\mathbf{CID}_\tau = \{\textsc{cid}_1, \dots, \textsc{cid}_{|\mathbf{CID}_\tau|}\}$. 
-$\mathsf{DCS}(\textsc{cid}_n) \rightarrow d_n$ denotes a query to the \gls{dcs} to get the data record corresponded  \textsc{cid}.
+$\mathsf{DCS}(\textsc{cid}_n) \rightarrow d_n$ denotes a query to the \gls{dcs} to get the data record corresponding to the  \textsc{cid}.
 % We can query the DCS to get the data record corresponded to each \textsc{cid}. The query is denoted as  $\mathsf{DCS}(\textsc{cid}_n) \rightarrow d_n$. %since each data record is corresponded to a content identifier, $|\mathbf{D}_\tau| = |\mathbf{CID}_\tau|$.
 % Each data record $d_n$ is linked to two predecessor data records $d_p$ and $d_q$, where $p,q < n$. 
 Each data record $d_n$ contains references to its predecessor, $d_p$ and $d_q$, where $p,q < n$, in the array $d_n.\mathsf{pred}$ if applicable. Specifically, $d_n.\mathsf{pred}[b] \in \mathbf{CID}_\tau$ for ${b = 0, 1}$; although one or both entries of the array may be $\emptyset$.
@@ -264,7 +264,7 @@ In the $\pi_\textsf{Auth}$, $\text{PKsig}$ is used as a public input. $\pi_\text
 	\begin{enumerate}
 		\item  a valid zero-knowledge proof of ($\pi_\texttt{Auth}$) of owning a \textit{valid \gls{aat}} $T_{i}$ (Definition \ref{def:Valid Authentication Token}).
 		\item a valid signature $\sigma$ is created using the secret key $\text{SKsig}_{i}$, ensuring that both it and its corresponding public key $\text{PKsig}_{i}$ are included in $T_{i}$.
-		\item valid tag(s) if and only if the predecessor data record is signed by different key(s) and $d_{n}.\text{pred} \neq \emptyset$
+		\item valid tag(s) if and only if the predecessor data record is signed by different key(s) and $d_{n}.\text{pred} \neq \emptyset$.
 	\end{enumerate}
 \end{definition}
 
@@ -275,7 +275,7 @@ In the $\pi_\textsf{Auth}$, $\text{PKsig}$ is used as a public input. $\pi_\text
 		\item $\mathsf{MHT}.\mathsf{Verify}(\texttt{rt}_{\tau}, \texttt{rt}^\text{new}, \texttt{cm}, \mathsf{ind}, \mathsf{path}_\mathsf{ind}) = 1$, where The root of \textsf{MHT} was $\texttt{rt}_{\tau}$ before $\texttt{tx}$. For $\textsf{Div}$ transaction (i.e., $\texttt{tx}= \texttt{tx}_\textsf{Div}$) the transition of the root is examined in two rounds of running $\mathsf{MHT}.\mathsf{Verify}$ algorithm: $\texttt{rt}_\tau \rightarrow \texttt{rt}^\text{new}_1 \rightarrow \texttt{rt}^\text{new}_2$. 
 		
 		
-		\item $\texttt{eol} \notin  \mathbf{X}_\tau$. Where $\texttt{tx}_\mathsf{Trans}$ and $\texttt{tx}_\mathsf{Div}$ contain one and $\texttt{tx}_\mathsf{Merge}$ contains two \texttt{eol}s. This value represents the \gls{aat} that is expired during the owner transferring algorithms.
+		\item $\texttt{eol} \notin  \mathbf{X}_\tau$, where $\texttt{tx}_\mathsf{Trans}$ and $\texttt{tx}_\mathsf{Div}$ contain one and $\texttt{tx}_\mathsf{Merge}$ contains two \texttt{eol}s. This value represents the \gls{aat} that is expired during the owner transferring algorithms.
 		
 		\item $\mathsf{Verify}(\text{vk}_\mathbbm{x}, x_\mathbbm{x}, \pi_\mathbbm{x}) = 1$ for $\mathbbm{x} \in \{\mathsf{Trans}$, $\mathsf{Merge}$, $\mathsf{Div} \}$
 		
@@ -297,10 +297,9 @@ Whenever an entity wants to upload a data record on \gls{dcs}, the entity (prove
 \begin{itemize}
 
     \item $\texttt{cm}_i =\mathsf{COMM}_{\rho_i}(\Tilde{T}_i)$
-	\item $\texttt{path}_i$ is a valid path from leaf  $\texttt{cm}_i$ to root $\texttt{rt}_\tau$.
+	\item $\texttt{path}_i$ is a valid path from leaf  $\texttt{cm}_i$ to root $\texttt{rt}_\tau$,
 \end{itemize}
-
-Where $\Tilde{T}_i = (q_i, \text{PKsig}_i, \rho_i)$. To prove that the used \texttt{rt} is a valid value stored on $\mathcal{C}_Z$, the entity provides the \gls{pi} $\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt})$.
+where $\Tilde{T}_i = (q_i, \text{PKsig}_i, \rho_i)$. To prove that the used \texttt{rt} is a valid value stored on $\mathcal{C}_Z$, the entity provides the \gls{pi} $\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt})$.
 
 
 
@@ -313,41 +312,41 @@ When an entity wishes to transfer the ownership of an \gls{aat} ($T_{i_1}$), it 
 	\item $\texttt{cm}_{i_1} = \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1})$
 	\item $\texttt{path}_{{i_1}}$ is a valid path from leaf  $\texttt{cm}_{\texttt{cm}_{i_1}}$ to root $\texttt{rt}_\tau$
 	\item $\texttt{cm}_{i_2} = \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2})$
-	\item $q_{i_1} = q_{i_2} $
+	\item $q_{i_1} = q_{i_2} $,
 \end{itemize}
-Where  $\Tilde{T}_{i_1} = (q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1})$, $\Tilde{T}_{i_2} = (q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2})$, and $x_\mathsf{Trans} = (\texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}_\tau)$ denotes the public inputs.
+where  $\Tilde{T}_{i_1} = (q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1})$, $\Tilde{T}_{i_2} = (q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2})$, and $x_\mathsf{Trans} = (\texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}_\tau)$ denotes the public inputs.
 
 \subsubsection{Mergeability proof ($\pi_\textsf{Merge}$)}
 An entity may merge two \gls{aat}s $T_{i_1}$ and $T_{i_2}$ to create $T_{i_3}$. The entity proves that the quantity in $T_{i_3}$ is the same as the summation of quantities in $T_{i_1}$ and $T_{i_2}$ (i.e., $q_{i_1} + q_{i_2} = q_{i_3}$).  The \gls{zkp} $\pi_\mathsf{Merge}$ follows the same approach as $\pi_\mathsf{Trans}$. The \gls{np} problems associated with this proof are explained as follows:
 \begin{itemize}
-    \item $\texttt{eol}_{i_1} = \mathcal{H}(\rho_{i_1} )$ and $\texttt{eol}_{i_2} = \mathcal{H}(\rho_{i_2} )$
-	\item $\texttt{cm}_{i_1} = \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1})$, $\texttt{cm}_{i_2} = \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2})$
+    \item $\texttt{eol}_{i_1} = \mathcal{H}(\rho_{i_1} )$ and $\texttt{eol}_{i_2} = \mathcal{H}(\rho_{i_2} )$,
+	\item $\texttt{cm}_{i_1} = \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1})$, $\texttt{cm}_{i_2} = \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2})$,
 
 	\item $\texttt{path}_{{i_1}}$ and $\texttt{path}_{{i_2}}$  are valid paths respectively from leaf  $\texttt{cm}_{\texttt{cm}_{i_1}}$  and 
-      $\texttt{cm}_{\texttt{cm}_{i_2}}$ to root $\texttt{rt}_\tau$.
+      $\texttt{cm}_{\texttt{cm}_{i_2}}$ to root $\texttt{rt}_\tau$,
 
-    \item $\texttt{cm}_{i_3} = \mathsf{COMM}_{\rho_{i_3}}(\Tilde{T}_{i_3})$
-	\item $q_{i_1} + q_{i_2} = q_{i_3} $
+    \item $\texttt{cm}_{i_3} = \mathsf{COMM}_{\rho_{i_3}}(\Tilde{T}_{i_3})$,
+	\item $q_{i_1} + q_{i_2} = q_{i_3} $,
     
 \end{itemize}
-Where  $\Tilde{T}_{i_1} = (q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1})$, $\Tilde{T}_{i_2} = (q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2})$ and $\Tilde{T}_{i_3} = (q_{i_3}, \text{PKsig}_{i_3}, \rho_{i_3})$.
-The public input to the proof is denoted as $x_\mathsf{Merge} = (\texttt{eol}_{i_{1,2}}, \texttt{cm}_{i_3}, \texttt{rt}_\tau)$.
+where  $\Tilde{T}_{i_1} = (q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1})$, $\Tilde{T}_{i_2} = (q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2})$ and $\Tilde{T}_{i_3} = (q_{i_3}, \text{PKsig}_{i_3}, \rho_{i_3})$.
+The public input to the proof is denoted as $x_\mathsf{Merge} = (\texttt{eol}_{i_{1}}, \texttt{eol}_{i_{2}}, \texttt{cm}_{i_3}, \texttt{rt}_\tau)$.
 
 
 \subsubsection{Divisibility proof ($\pi_\textsf{Div}$)}
 An entity can divide an \gls{aat} $T_{i_1}$ into two new ${T}_{i_2}$ and ${T}_{i_3}$. The approach of creating \gls{zkp} $\pi_\textsf{Div}$ follows the same approaches in $\pi_\textsf{Trans}$ and $\pi_\textsf{Merge}$. The \gls{np} problems associated with this proof are explained as follows:
 
 \begin{itemize}
-    \item $\texttt{eol}_{i_1} = \mathcal{H}(\rho_{i_1} )$
-	\item $\texttt{cm}_{i_1} = \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1})$
-	\item $\texttt{path}_{{i_1}}$ is a valid path from leaf  $\texttt{cm}_{\texttt{cm}_{i_1}}$ to root $\texttt{rt}_\tau$
+    \item $\texttt{eol}_{i_1} = \mathcal{H}(\rho_{i_1} )$,
+	\item $\texttt{cm}_{i_1} = \mathsf{COMM}_{\rho_{i_1}}(\Tilde{T}_{i_1})$,
+	\item $\texttt{path}_{{i_1}}$ is a valid path from leaf  $\texttt{cm}_{\texttt{cm}_{i_1}}$ to root $\texttt{rt}_\tau$,
 
 
     \item $\texttt{cm}_{i_2} = \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2})$ and $\texttt{cm}_{i_3} = \mathsf{COMM}_{\rho_{i_3}}(\Tilde{T}_{i_3})$
-	\item $q_{i_1} = q_{i_2} + q_{i_3}$
+	\item $q_{i_1} = q_{i_2} + q_{i_3}$,
     
 \end{itemize}
-Where  $\Tilde{T}_{i_1} = (q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1})$, $\Tilde{T}_{i_2} = (q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2})$ and $\Tilde{T}_{i_3} = (q_{i_3}, \text{PKsig}_{i_3}, \rho_{i_3})$. The public input is denoted as $x_\mathsf{Div} =\big(\texttt{eol}_{i_1}, \texttt{cm}_{i_{2,3}}, \texttt{rt}_\tau \big)$.
+where  $\Tilde{T}_{i_1} = (q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1})$, $\Tilde{T}_{i_2} = (q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2})$ and $\Tilde{T}_{i_3} = (q_{i_3}, \text{PKsig}_{i_3}, \rho_{i_3})$. The public input is denoted as $x_\mathsf{Div} =\big(\texttt{eol}_{i_1}, \texttt{cm}_{i_{2}}, \texttt{cm}_{i_{3}}, \texttt{rt}_\tau \big)$.
 
 \section{Zupply Algorithms and Protocols}
 \label{sec:Zupply Algorithms}
@@ -397,7 +396,7 @@ Initiates a \gls{dag}. The algorithm gets $q_{i_1}$, which will be maintained in
  \[
  \texttt{tx}_{\mathsf{Init}} := (\texttt{cm}_{i_1}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}})
  \]
- to the blockchain. The pseudocode for \textsf{Init} is provided in Algorithm~\ref{alg:Init} is provided in Algorithm~\ref{alg:trans} in Appendix \ref{a_ch:zupply_algorithms}.
+ to the blockchain. The pseudocode for \textsf{Init} is provided in Algorithm~\ref{alg:Init} is provided in Appendix \ref{a_ch:zupply_algorithms}.
 
 
 
@@ -407,7 +406,7 @@ This algorithm takes an existing \gls{aat} $T_{i_1}$ and renders it obsolete by 
 Subsequently, the algorithm constructs a new partial \gls{aat}, denoted $\Tilde{T}_{i_2}$, by sampling a fresh random value $\rho_{i_2}$ and assigning it the same quantity as in $T_{i_1}$. The public key $\text{PKsig}_{i_2}$ is used to bind the new token to its intended recipient, in accordance with the \textsf{OT-Protocol} described in Section~\ref{sec:Ownership Transfer}. The algorithm commits to $\Tilde{T}_{i_2}$ and includes the resulting commitment in the transaction.
 The transaction also includes a \gls{zkp} demonstrating:
 (1)  knowledge of $T_{i_1}$ whose commitment is included in the \textsf{MHT}, without revealing the commitment itself,
-(2) consistency of this committment with the published $\texttt{eol}_{i_1}$,
+(2) consistency of this commitment with the published $\texttt{eol}_{i_1}$,
 (3) knowledge of the preimage of the new commitment ($\texttt{cm}_{i_2}$) to $\Tilde{T}_{i_2}$, and
 (4) equality of the quantity values in $T_{i_1}$ and $\Tilde{T}_{i_2}$.
 Accordingly, the contents of the transaction $\texttt{tx}_{\textsf{Trans}}$ are defined as:
@@ -750,14 +749,14 @@ In this section, we discuss the applicability of the Zupply framework in real-wo
 
 The Zupply framework is designed to ensure the integrity and authenticity of a product's historical data, represented as a \gls{dag}. 
 
-This section describes how the Zupply framework can be employed in its main application i.e., \gls{scm}. Entities in our framework refer to participants in a supply chain — including producers, distributors, and retailers — who upload data records related to products. These entities have three primary objectives in this ecosystem: verifying the authenticity of previously uploaded data records, preserving the integrity of their data records over time, and maintaining their anonymity. Figure \ref{fig:enter-label} illustrates all three components of the Zupply framework in an example supply chain.
+This section describes how the Zupply framework can be employed in its main application i.e. \gls{scm}. Entities in our framework refer to participants in a supply chain — including producers, distributors, and retailers — who upload data records related to products. These entities have three primary objectives in this ecosystem: verifying the authenticity of previously uploaded data records, preserving the integrity of their data records over time, and maintaining their anonymity. Figure \ref{fig:enter-label} illustrates all three components of the Zupply framework in an example supply chain.
 
 The initial entity in the supply chain, referred to as $e_{0}$ (e.g., a supplier of raw materials), creates an \gls{aat}, denoted as $T^{e_{0}}_{j_1}$. To accomplish this, $e_{0}$ executes the $\mathsf{Init}$ function, passing the product quantity ($q_{j_1}$) as an argument. Consequently, a new token, $T^{e_{0}}_{j_1}$, is generated, and its commitment, defined as $\texttt{cm}^{e_{0}}_{j_1} := \mathsf{COMM}_{\rho_{j_1}}(T^{e_{0}}_{j_1})$, is transmitted to the blockchain through a transaction termed $\texttt{tx}^{e_{0}}_\mathsf{Init}$. Then updates its localized version of the \textsf{MHT}, and also updates the root $\texttt{rt}_\tau$ on the smart contract ($\mathcal{C}_Z$). The smart contract verifies the correctness of the new root accordingly (as explained in Section \ref{sec:MerkleTreeStructure}). Following this, entity $e_0$ can begin uploading data records to the \gls{dcs} by utilizing the $\mathsf{Upload}$ function. This function employs a public parameters, referred to as $\textsc{pp}$, to establish a \gls{zkp}, proving the ownership of an authentication token in \textsf{MHT}. Moreover, each data record is signed using a private key, denoted as \( \text{SKsig}^{e_{0}}_{{j_1}} \). $\text{SKsig}_{i}$ and its corresponding $\text{PKsig}_{i}$ are included in \( T^{e_{0}}_{j_1} \) (see Section \ref{sec:zupply-terms-and-concepts}). This ensures the authenticity and integrity of the data.
 
 
 % , which its corresponding public key \( \text{PKsig}^{e_{0}}_{{j_1}} \) is included in \( T^{e_{0}}_{j_1} \). This ensures the authenticity and integrity of the data.
 
-In supply chains, a product is transferred among various entities, and each entity needs to transfer the ownership of the products they possess. If the entity $e_{0}$ wants to give a batch of products to the next entity $e_{1}$ and the corresponding \gls{aat} to the batch is $T^{e_{0}}_{j_1}$, the entity executes $\mathsf{Trans}$ algorithm, passing the \gls{aat} as one of its arguments. The algorithm generates a new $\Tilde{T}^{e_{1}}_{j_2}$ for the batch and passes it to $e_{1}$ in a secure off chain channel and submits transaction $\texttt{tx}^{e_{0}}_\mathsf{Trans}$ to the blockchain (the \gls{aat} ownership transfer protocol, i.e., \textsf{OT-Protocol}, is presented in Section \ref{sec:Ownership Transfer}). According to the \textsf{OT-Protocol}, $e_{0}$ cannot use $\Tilde{T}^{e_{1}}_{j_2}$ to upload data records since it does not know the corresponding $\text{SKsig}^{e_{1}}_{j_2}$. The transaction $\texttt{tx}^{e_{0}}_\mathsf{Trans}$ contains a \gls{zkp} of four things: (1) knowing the pre-image of the $\texttt{cm}_{j_1}^{e_{0}}$ which is in the \textsf{MHT} without revealing $\texttt{cm}_{j_1}^{e_{0}}$, (2) the included $\texttt{eol}$ in the transaction is related to  $\texttt{cm}_{j_1}^{e_{0}}$, (3) the proof of knowledge of $\Tilde{T}^{e_{1}}_{j_2}$ related to $\texttt{cm}^{e_{1}}_{j_2} := \mathsf{COMM}_\rho(T^{e_{i_2}}_{j_2})$ included in the transaction (4) the quantity $q_{j_2}=q_{j_1}$ does not change.
+In supply chains, a product is transferred among various entities, and each entity needs to transfer the ownership of the products they possess. If the entity $e_{0}$ wants to give a batch of products to the next entity $e_{1}$ and the corresponding \gls{aat} to the batch is $T^{e_{0}}_{j_1}$, the entity executes $\mathsf{Trans}$ algorithm, passing the \gls{aat} as one of its arguments. The algorithm generates a new $\Tilde{T}^{e_{1}}_{j_2}$ for the batch and passes it to $e_{1}$ in a secure off chain channel and submits transaction $\texttt{tx}^{e_{0}}_\mathsf{Trans}$ to the blockchain (the \gls{aat} ownership transfer protocol, i.e. \textsf{OT-Protocol}, is presented in Section \ref{sec:Ownership Transfer}). According to the \textsf{OT-Protocol}, $e_{0}$ cannot use $\Tilde{T}^{e_{1}}_{j_2}$ to upload data records since it does not know the corresponding $\text{SKsig}^{e_{1}}_{j_2}$. The transaction $\texttt{tx}^{e_{0}}_\mathsf{Trans}$ contains a \gls{zkp} of four things: (1) knowing the pre-image of the $\texttt{cm}_{j_1}^{e_{0}}$ which is in the \textsf{MHT} without revealing $\texttt{cm}_{j_1}^{e_{0}}$, (2) the included $\texttt{eol}$ in the transaction is related to  $\texttt{cm}_{j_1}^{e_{0}}$, (3) the proof of knowledge of $\Tilde{T}^{e_{1}}_{j_2}$ related to $\texttt{cm}^{e_{1}}_{j_2} := \mathsf{COMM}_\rho(T^{e_{i_2}}_{j_2})$ included in the transaction (4) the quantity $q_{j_2}=q_{j_1}$ does not change.
 
 In the Zupply framework, entities can split a single authentication token into two using the \textsf{Div} algorithm. For instance, ${e_{1}}$ receives a batch from ${e_{0}}$ and decides to divide it into two smaller batches. One batch is sent to entity ${e_{2}}$, while the other is transferred to a different supply chain. Importantly, both supply chains should be able to access the product's history prior to this division. Additionally, entities have the ability to merge two of their authentication tokens into one using the \textsf{Merge} algorithm. For example, ${e_{2}}$ receives some products from a different supply chain and seeks to batch them together before passing them to ${e_{3}}$. Furthermore, auditors should have the capability to access and review the data records pertaining to both merged supply chains. These functionalities allow for the merging and dividing of data sequences associated with the \gls{aat}s, thereby enabling the maintenance of data in a \gls{dag} structure within the framework.
 
@@ -767,7 +766,7 @@ In the Zupply framework, entities can split a single authentication token into t
 \label{App:Business Contracts}
 
 
-Employing smart contract-enabled blockchain platforms for managing \gls{aat} in the Zupply framework can enable business smart contracts that employ Zupply smart contract $\mathcal{C}_Z$ as a lower layer of their operations. Business smart contracts can provide financial security for entities so they will not rely on a trusted third party for their payments. One example of a business contract is transferring funds upon delivering a product (i.e., transferring an \gls{aat}). Here, we are going to present an example of a business contract $\mathcal{C}_B$ that checks whether a specific \texttt{cm} is uploaded to $\mathcal{C}_Z$ or not. Then, it transfers the funds that were locked in $\mathcal{C}_B$.
+Employing smart contract-enabled blockchain platforms for managing \gls{aat} in the Zupply framework can enable business smart contracts that employ Zupply smart contract $\mathcal{C}_Z$ as a lower layer of their operations. Business smart contracts can provide financial security for entities so they will not rely on a trusted third party for their payments. One example of a business contract is transferring funds upon delivering a product (i.e. transferring an \gls{aat}). Here, we are going to present an example of a business contract $\mathcal{C}_B$ that checks whether a specific \texttt{cm} is uploaded to $\mathcal{C}_Z$ or not. Then, it transfers the funds that were locked in $\mathcal{C}_B$.
 
 In this example, $e_1$ wants to send a product to $e_3$ via $e_2$. $e_2$ uploads data collected from the product till it transfers that to $e_3$. Later on, $e_3$ is going to continue uploading data records related to the product. $e_2$ wants a guaranteed payment by the time the product is delivered to $e_3$. Therefore, any entity who is responsible for the payment ($e_1$ in this example) can lock some funds in $\mathcal{C}_B$. The funds will be transferred to $e_2$ if the entity uploads an \gls{aat} commitment \texttt{cm}, which has been determined at the time of locking the funds to $\mathcal{C}_B$.
 
@@ -809,4 +808,7 @@ This chapter proposed a novel anonymous authentication token (\gls{aat}) framewo
 
 
 
-Zupply adopted a stricter adversary model that previous methods, in which the underlying blockchain platform does not preserve the anonymity of the transaction issuer (adversary's access to $\mathcal{O}^\mathsf{Attr}$). Moreover, transactions scale independently of participant count, Zupply requires no centralized servers or layer-1 changes, and let auditors focus only on relevant records. In contrast, zkLedger \cite{zkLedger2018}has to involve all entities per transaction, Mesh \cite{altawy2019mesh} lacks unlinkability and needs a central server, and DECOUPLES \cite{Maouchi2019DECOUPLES} modifies the base blockchain. 
+%Zupply adopted a stronger adversary model that previous methods, in which the underlying blockchain platform does not preserve the anonymity of the transaction issuer (adversary's access to $\mathcal{O}^\mathsf{Attr}$). 
+
+Compared with previous methods,  which overlooked the fact that the underlying blockchain platform does not preserve the anonymity of transaction issuers (adversary's access to $\mathcal{O}^\mathsf{Attr}$)  Zupply incorporates a \gls{zkp}-based privacy-preserving mechanism to ensure both the anonymity of transaction issuers and secure ownership transfer within transactions.
+Moreover, transactions scale independently of participant count, Zupply requires no centralized servers or layer-1 changes, and let auditors focus only on relevant records. In contrast, zkLedger \cite{zkLedger2018}has to involve all entities per transaction, Mesh \cite{altawy2019mesh} lacks unlinkability and needs a central server, and DECOUPLES \cite{Maouchi2019DECOUPLES} modifies the base blockchain. 

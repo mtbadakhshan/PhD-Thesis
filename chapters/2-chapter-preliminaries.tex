@@ -83,7 +83,7 @@ In this thesis, we define a notation for the \gls{r1cs} parameter as
 \(
 (\mathbb{F}, d_1, d_2, d_3, \mathbf{A}, \mathbf{B}, \mathbf{C}),
 \)
-where the public input \(\vec{v}\) has not been set yet. Therefore, this does not constitute an \gls{r1cs} instance or relation. Instead, it only specifies the constraint system, which may be derived from an arithmetic or Boolean circuit. In the following, we will explain arithmetic and Boolean citcuits and how an they can be compiled to \gls{r1cs} instances.
+where the public input \(\vec{v}\) has not been set yet. Therefore, this does not constitute an \gls{r1cs} instance or relation. Instead, it only specifies the constraint system, which may be derived from an arithmetic or Boolean circuit. In the following, we will explain arithmetic and Boolean circuits and how they can be compiled to \gls{r1cs} instances.
 
 
 \subsubsection{Arithmetic and Boolean Circuits}
@@ -160,11 +160,11 @@ Now we will discuss the evaluation of a univariate polynomial $f(x)$ over the su
 
 \subsection{Reed-Solomon Code}
 
-Reed-Solomon (\gls{rs}) code is proposed in 1960  \cite{rs-code}. It is a block-based error-correcting code that has several applications in digital communications and storage. Let the evaluation domain $L$  be a subset of $\mathbb{F}$. $\text{\gls{rs}}[\mathbb{F}, L, \rho]$ is the set of all codewords $\hat{\fbu}:L\rightarrow \mathbb{F}$ defined as follows: 
+Reed-Solomon (\gls{rs}) code was proposed in 1960  \cite{rs-code}. It is a block-based error-correcting code that has several applications in digital communications and storage. Let the evaluation domain $L$  be a subset of $\mathbb{F}$. $\text{\gls{rs}}[\mathbb{F}, L, \rho]$ is the set of all codewords $\hat{\fbu}:L\rightarrow \mathbb{F}$ defined as follows: 
 
 
 \begin{definition}[Reed-Solomon code]\label{RScode} Let $L\subseteq\mathbb{F}$ and $\rho \in [0,1]$ denote the codeword domain and the rate parameter respectively. $\text{\gls{rs}}[\mathbb{F}, L, \rho]$ is the set of all codewords $\hat{\fbu}:L\rightarrow\mathbb{F}$ 
-	that are the evaluation of polynomials over \(L\) with degree \( < \rho|L| \).
+	that are evaluations of polynomials over \(L\) with degree \( < \rho|L| \).
 \end{definition}
 
 %{\color{red} Low-Degree-Testing}
@@ -172,13 +172,13 @@ Reed-Solomon (\gls{rs}) code is proposed in 1960  \cite{rs-code}. It is a block-
 \section{Cryptographic Primitives}
 \label{sec:prel_Cryptographic Primitives}
 
-Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable security parameter in our scheme. A negligible function $\mathsf{negl}(\boldsymbol{\lambda})$ is a negligible in $\boldsymbol{\lambda}$. Namely, for every polynomial $p$, there exists an $\boldsymbol{\lambda}_0$, such that for   all $\boldsymbol{\lambda} > \boldsymbol{\lambda}_0$ it holds that $\mathsf{negl}(\boldsymbol{\lambda})<\frac{1}{p(\boldsymbol{\lambda})}$. With the security parameter and the negligible function in place, we define the cryptographic primitives:
+Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable security parameter in our scheme. A negligible function $\mathsf{negl}(\boldsymbol{\lambda})$ is  negligible in $\boldsymbol{\lambda}$. Namely, for every polynomial $p$, there exists a $\boldsymbol{\lambda}_0$, such that for   all $\boldsymbol{\lambda} > \boldsymbol{\lambda}_0$ it holds that $\mathsf{negl}(\boldsymbol{\lambda})<\frac{1}{p(\boldsymbol{\lambda})}$. With the security parameter and the negligible function in place, we now define the cryptographic primitives:
 
 \begin{definition}[Collision and Preimage Resistance Hash Function]
 	\label{def:Collision-resistance hash function}
-	A hash function $\mathcal{H}: \{0, 1\}^\ast \rightarrow \{0,1\}^{O(\boldsymbol{\lambda})}$ exhibits the following properties:
+	A hash function $\mathcal{H}: \{0, 1\}^\ast \rightarrow \{0,1\}^{O(\boldsymbol{\lambda})}$ satisfies the following properties:
 	\begin{itemize}
-		\item \textit{Collision Resistance}: It is infeasible for any probabilistic polynomial time (\gls{ppt}) adversary $\mathcal{A}$ to find two distinct inputs $x$, $y$ such that $\mathcal{H}(x) = \mathcal{H}(y)$  \cite{katz2020introduction}.
+		\item \textit{Collision Resistance}: It is infeasible for any probabilistic polynomial time (\gls{ppt}) adversary $\mathcal{A}$ to find two distinct inputs $x$, $y$, such that $\mathcal{H}(x) = \mathcal{H}(y)$  \cite{katz2020introduction}.
 		\item \textit{Preimage Resistance}: It is infeasible for any \gls{ppt} adversary $\mathcal{A}$ to find any input $x$ given $\mathcal{H}(x)$.
 	\end{itemize} 
 	% is \textit{collision resistance} if for all PPT adversaries $\mathcal{A}$, there is a negligible probability that $\mathcal{A}$ can find two distinct inputs $x$, $y$ such that $\mathcal{H}(x) = \mathcal{H}(y)$ \cite{katz2020introduction}. And it is \textit{preimage resistance} if for all PPT adversaries $\mathcal{A}$, there is a negligible probability that $\mathcal{A}$ can find inputs $x$ given $\mathcal{H}(x)$.
@@ -189,7 +189,7 @@ Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable securit
 	A statistically-hiding commitment scheme  $\{\mathsf{COMM}_\rho:\{0,1\}^* \rightarrow \{0, 1\}^{O(\boldsymbol{\lambda})} \}_\rho$ \cite{zcash-proc} where $\rho$ denotes the commitment trapdoor, should hold the following two properties \cite{katz2020introduction, zcash-proc}:
 	\begin{itemize}
 		\item \textit{Statistically Hiding}: The commitment reveals nothing about the committed value for \textit{every} adversary. 
-		\item \textit{Computationally Binding}: It is impossible for all \gls{ppt} \textit{adversaries} to output commitment that can be opened in two different ways.
+		\item \textit{Computationally Binding}: It is impossible for all \gls{ppt} \textit{adversaries} to output a commitment that can be opened in two different ways.
 	\end{itemize}
 \end{definition}
 
@@ -206,7 +206,7 @@ Let $\boldsymbol{\lambda} > 0$ be an integer and represent an adjustable securit
 		\item $\mathcal{G}_\mathsf{sig}(1^{\boldsymbol{\lambda}}) \rightarrow \textsc{pp}_\mathsf{sig}$. Given a security parameter, outputs public parameters $\textsc{pp}_\mathsf{sig}$ for the digital signature scheme.
 		\item $\mathcal{K}_\mathsf{sig}(\textsc{pp}_\mathsf{sig}) \rightarrow (\text{PKsig}, \text{SKsig})$. Given public parameters $\textsc{pp}_\mathsf{sig}$, outputs a public key and a secret key for a single user.
 		\item $\mathcal{S}_\mathsf{sig}(\text{SKsig}, m) \rightarrow \sigma$. Given a secret key $\text{SKsig}$ and a message $m$, signs $m$ and outputs the signature $\sigma$.
-		\item $\mathcal{V}_\mathsf{sig}(\text{PKsig}, m, \sigma) \rightarrow \{0, 1\}$. Given a public key $\text{PKsig}$, message $m$, and a signature $\sigma$, outputs $1$ if the signature $\sigma$ is valid for message $m$. Otherwise, outputs $0$.
+		\item $\mathcal{V}_\mathsf{sig}(\text{PKsig}, m, \sigma) \rightarrow \{0, 1\}$. Given a public key $\text{PKsig}$, message $m$, and a signature $\sigma$, outputs $1$ if the signature $\sigma$ is valid for message $m$; otherwise, outputs $0$.
 	\end{itemize}
 	The signature scheme $\mathsf{Sig}$ satisfies the following security property:
 	\begin{itemize}
@@ -254,7 +254,7 @@ The construction of zero-knowledge proof (\gls{zkp}) protocols is based on the i
 
 \subsection{Interactive Proof System}\label{sec:Prel_IP}
 
- An \gls{ip} consists of  an interactive pair of a computationally unbounded prover ($P$) and a probabilistic polynomial time (\gls{ppt})  verifier ($V$).  Goldwasser et. al.~\cite{Goldwasser1985} modeled each of $P$ and $V$ as an \textit{interactive Turing machines}, which is a Turing machine with a read-only input tape, a read/write work tape, a read-only communication tape, a write-only communication tape, and a read-only random tape, where the random tape contains an infinit sequnce of random bits. $P$  and $V$ share the same input tape denoted as $x$. The write-only communication tape of $P$ is the read-only communication tape of $V$ and vice versa. In the original description of the interactive pair of Turing machines presented in~\cite{Goldwasser1985}, $V$ is initially active, after which $P$ and $V$ alternate their activation. However, in the scenarios discussed later, $P$ initiates the interaction by sharing a commitment to certain values. Each machine uses input tape, work tape, communication tapes and random tapes during its $i$th active stage, then it writes its $i$th message on its write-only communication tape and becomes deactive. $V$ may terminate the protocol and either accept or reject the input $x$ in its $k$th active stage. Here we provide a definition of \gls{ip}:
+ An \gls{ip} consists of  an interactive pair of a computationally unbounded prover ($P$) and a probabilistic polynomial time (\gls{ppt})  verifier ($V$).  Goldwasser et. al.~\cite{Goldwasser1985} modeled each of $P$ and $V$ as an \textit{interactive Turing machines}, which is a Turing machine with a read-only input tape, a read/write work tape, a read-only communication tape, a write-only communication tape, and a read-only random tape, where the random tape contains an infinit sequence of random bits. $P$  and $V$ share the same input tape denoted as $x$. The write-only communication tape of $P$ is the read-only communication tape of $V$ and vice versa. In the original description of the interactive pair of Turing machines presented in~\cite{Goldwasser1985}, $V$ is initially active, after which $P$ and $V$ alternate their activation. However, in the scenarios discussed later, $P$ initiates the interaction by sharing a commitment to certain values. Each machine uses an input tape, work tape, communication tapes and random tapes during its $i$th active stage, then it writes its $i$th message on its write-only communication tape and becomes deactive. $V$ may terminate the protocol and either accept or reject the input $x$ in its $k$th active stage. Here we provide a definition of \gls{ip}:
   
 \begin{definition}[Interactive Proof System]\label{def:Interactive Proof System}
 	Let \( L \in \{0,1\}^* \) be a language, and let \( P \) and \( V \) be an interactive pair of Turing machines. We say that \( P \) and \( V \) form an \gls{ip} for \( L \) if \( P \) is computationally unbounded, \( V \) is \gls{ppt}, and a common input \( x \in \{0,1\}^n \), with sufficiently large \( n \), is given to both \( P \) and \( V \). They must satisfy the following properties:
@@ -302,7 +302,7 @@ Definition \ref{def:IP-Completeness-Soundness} requires \textit{statistical} (or
 
 \subsection{Zero-knowledge Proof and Proof of Knowledge System}
 
-A zero-knowledge proof (\gls{zkp}) system for verifying whether a common input \( x \) belongs to a language \( L \) is an augmented \gls{ip} in which the verifier is convinced of \( x \)'s membership in \( L \) without gaining any additional knowledge beyond \( x \in L \). The prover in \gls{zkp} systems is also prababilistic, meaning that we assume a read-only random tape, denoted as $r_P$ for the prover machine. 
+A zero-knowledge proof (\gls{zkp}) system for verifying whether a common input \( x \) belongs to a language \( L \) is an augmented \gls{ip} in which the verifier is convinced of \( x \)'s membership in \( L \) without gaining any additional knowledge beyond \( x \in L \). The prover in \gls{zkp} systems is also probabilistic, meaning that we assume a read-only random tape, denoted as $r_P$ for the prover machine. 
 
 \subsubsection{Auxilary Input Tapes}
 Before defining \gls{zkp} systems, we introduce a secret tape for each interactive Turing machine described in Section~\ref{sec:Prel_IP}, called the \textit{read-only auxiliary input tape}. These tapes represent prior information available to \( P \) and \( V \) and may depend on the common input \( x \), whose membership in \( L \) is to be verified by \( V \) through the \gls{ip} protocol~\cite{Goldreich2001Book}. Let \( w \) denote the auxiliary input for \( P \) and \( z \) denote the auxiliary input for \( V \). The input \( w \) may contain information that helps the prover efficiently perform its tasks. For example, for a language \( L \in \mathcal{NP} \), \( w \) may be the witness for \( x \in L \). 
@@ -321,7 +321,7 @@ where $p_i$ denotes the prover's $i$th message.
 
 Let $\{X_i\}_{i \in I}$ denote a sequence of random variables, also known as an \textit{ensemble}, indexed by $I$, where each $X_i$ is a random variable \cite{Goldreich2001Book}.  Let present the definition of computational indistinguishability, following \cite[Definition 3.2.2]{Goldreich2001Book}:
 \begin{definition}[Computational Indistinguishability]\label{def:polytime_ind}	
-	Two ensembles $\{X_s\}_{s\in S}$ and $\{Y_s\}_{s\in S}$ are  computationally indistinguishable if for any \gls{ppt} distinguisher algorithm $D$, and all suffucuently long $s \in S$,
+	Two ensembles $\{X_s\}_{s\in S}$ and $\{Y_s\}_{s\in S}$ are  computationally indistinguishable if for any \gls{ppt} distinguisher algorithm $D$, and all sufficiently long $s \in S$,
 	\[
 	\abs{\Pr[D(X_s, s) = 1] - \Pr[D(Y_s, s) = 1]} < \mathsf{negl}(s).
 	\]
@@ -418,7 +418,7 @@ In statistically sound \gls{ip}s of languages in $\mathcal{NP}$, the communicati
 In~\cite{Kilian1992}, Kilian introduced the notion of a \textit{notarized envelope} to allow the prover to avoid revealing a random subset of committed bits. This approach enables the prover to reuse the same commitment to the bits across multiple rounds, rather than generating new commitments for each new permutation of bits, all while preserving the zero-knowledge property discussed in Section \ref{sec:prel_zero_knowledge_property}. Kilian, showed that this approach can be constructed via  collision-resistant hash (\gls{crh}) functions, as defined in Definition \ref{def:Collision-resistance hash function}. This construction facilitates a \textit{succinct} interactive argument system, reducing communication overhead and significantly improving the verifier's efficiency compared to traditional $\mathcal{NP}$ verification methods. Namely, the membership of $x \in L$, where $L \in \mathcal{NP}$ can be verified by $V$ in logarithm the time originally is required for  $\mathcal{NP}$ verification. By applying Fiat-Shamir transformation~\cite{Fiat1987}, discussed in Section \ref{sec:prel_non_interactive},  we can have a succinct non-interactive argument (\gls{snarg}) system. To further reduce the proof size, the prover can commit to a polynomial constructed from witness values using a hiding and binding polynomial commitment scheme, rather than committing to each witness individually~\cite{Thaler2022Proofs}.
 
 \subsubsection{SNARG of Knowledge} 
-The prover $P$ in a \gls{snarg} system proves that there exists a witness $w$ for the  ``$x \in L$''  statement (the statement is true), where $L\in \mathcal{NP}$. However, it is not enough in many applications. Usually, $P$ must prove that she knows that witness too (argument of knowledge).  The \gls{snarg}s in which $P$ is able to prove that she knows the witness are called succinct non-interactive argument of knowledge (\gls{snark}). In \cite{Bitansky2012}, Bitansky et al. proved that if and only if  extractable collision-resistant hash (\gls{ecrh}) functions exist, verifier of \gls{snark}s will exist.  The prover can use an \textit{extractable} polynomial commitment to shorten the proofs, while extractability ensures that the prover \textit{knows} the polynomial constructed from the witnesses \cite{Thaler2022Proofs}. \gls{snark}s can be modified so that a verifier does not learn anything about the witness by converting that to a zero-knowlege succinct non-interactive argument of knowledge (\gls{zksnark}).  
+The prover $P$ in a \gls{snarg} system proves that there exists a witness $w$ for the  ``$x \in L$''  statement (the statement is true), where $L\in \mathcal{NP}$. However, it is not enough in many applications. Usually, $P$ must prove that she knows that witness too (argument of knowledge).  The \gls{snarg}s in which $P$ is able to prove that she knows the witness are called succinct non-interactive argument of knowledge (\gls{snark}). In \cite{Bitansky2012}, Bitansky et al. proved that if and only if  extractable collision-resistant hash (\gls{ecrh}) functions exist, verifier of \gls{snark}s will exist.  The prover can use an \textit{extractable} polynomial commitment to shorten the proofs, while extractability ensures that the prover \textit{knows} the polynomial constructed from the witnesses \cite{Thaler2022Proofs}. \gls{snark}s can be modified so that a verifier does not learn anything about the witness by converting that to a zero-knowledge succinct non-interactive argument of knowledge (\gls{zksnark}).  
 
 In summary, \gls{zksnark} is a non-interactive zero-knowledge (NIZK) argument of knowledge that has succinct  proof size and the proofs are publicly verifiable. Here, we provide a formal definition of algorithms and properties of the \gls{zksnark} protocol, which will be referenced throughout this thesis:
 
@@ -443,7 +443,7 @@ Depending on the commitment scheme used in the \gls{zksnark} construction, the $
 	 \gls{zksnark} satisfies the following properties:
 	
 	\begin{itemize}
-		\item \textit{Perfect Completeness}: A prover $P$ who knows a witness $w$ for $x\in \mathcal{L}_\mathbbm{x}$ can convince a verifier $V$ with probablility $1$.
+		\item \textit{Perfect Completeness}: A prover $P$ who knows a witness $w$ for $x\in \mathcal{L}_\mathbbm{x}$ can convince a verifier $V$ with probability $1$.
 		
 		\item \textit{Soundness}: If  $x \notin \mathcal{L}_\mathbbm{x}$, a dishonest \gls{ppt} prover $P^*$ can convince a verifier with probability less than $\delta_s < \mathsf{negl}(\boldsymbol{\lambda})$.
 		

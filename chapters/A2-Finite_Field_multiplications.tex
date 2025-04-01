@@ -43,13 +43,13 @@ Accordingly,  $c$  will be
 where $c'_i \in \{0,1\}^{128}$ for $i=0, \dots, 6$ are overlapping 128-bit limbs in $c(X)$. 
 
 \paragraph{Polynomial Multiplication Algorithm}
-Now, we present the multiplication algorithm used in~\cite{libiop}. Given the function $M$ previously defined, let $t$ and $u$, $v$ intermediate auxilary 128-bit binary variables have the following values:
+Now, we present the multiplication algorithm used in~\cite{libiop}. Given the function $M$ previously defined, let $t$ and $u$, $v$ intermediate auxiliary 128-bit binary variables have the following values:
 \begin{align*}
 	t &:= M(a'_1,b'_1), \\
 	u &:= M(a'_2,b'_2), \\
 	v &:= t \oplus^{128} u,
 \end{align*}
-where $\oplus^{128}:\{0,1\}^{128}\times\{0,1\}^{128} \rightarrow \{0,1\}^{128}$ denotes the 128-bit XOR opreator. Moreover, the following values are 64-bit itermediate auxilary variables:
+where $\oplus^{128}:\{0,1\}^{128}\times\{0,1\}^{128} \rightarrow \{0,1\}^{128}$ denotes the 128-bit XOR opreator. Moreover, the following values are 64-bit itermediate auxiliary variables:
 \begin{align*}
 	w_0 &:= a'_0 \oplus^{64} a'_1,  &y'_0 &:= b_0 \oplus^{64} b'_1, \\
 	w_1 &:= a'_0 \oplus^{64} a'_2,  &y_1 &:= b'_0 \oplus^{64} b'_2, \\
@@ -97,7 +97,7 @@ To compute \( d(X) \), we assume the following partitioning of terms in (\ref{eq
  	c''_0 &:= c''_{00} + c''_{01}X,& c''_1 &:= c''_{10} + c''_{11}X,\\
 	c''_2 &:= c''_{20} + c''_{21}X,& c''_3 &:= c''_{30} + c''_{31}X,\\
 \end{align*}	
-where $c''_{i0}, c''_{i1} \in \{0,1\}^{64}$ for $i=0,1,2,3$. Now, we define the following 128-bit auxilary intermediate values
+where $c''_{i0}, c''_{i1} \in \{0,1\}^{64}$ for $i=0,1,2,3$. Now, we define the following 128-bit auxiliary intermediate values
 \begin{align*}
 	z_0 &:= M(c''_{31},p), &	z_1 &:= M(c''_{30},p), \\
 	z_2 &:= M(c''_{21},p), &	z_3 &:= M(c''_{20} \oplus^{64} z_{01} ,p), \\

@@ -7,7 +7,7 @@ This chapter is based on an unpublished paper. I have co-authored the paper and 
 \begin{itemize}
 	\item Deriving the exact number of additions and multiplications in the Cantor additive fast Fourier transform (\gls{fft}) \cite{Cantor1989FFT}. 
 	\item The \CC implementation of the Cantor additive \gls{fft}.
-	\item The dasign and implementation of precomputations in the presented additive \gls{fft}s and their required storage.
+	\item The design and implementation of precomputations in the presented additive \gls{fft}s and their required storage.
 	\item The \CC implementation of modified versions of the Gao-Mateer additive \gls{fft} \cite{Gao2010FFT}.
 	\item  The \gls{fft} Complexity analysis of the Aurora zero-knowledge succinct non-interactive arguments of knowledge (\gls{zksnark}) and modified the Aurora  \CC  to employ  the Cantor additive \gls{fft} instead of  the Gao-Mateer additive \gls{fft}.
 \end{itemize}
@@ -19,7 +19,7 @@ The \gls{fft} over additive groups can be utilized in various \gls{zksnark} prot
 For this study, we select Aurora~\cite{Aurora2019} to demonstrate the performance improvements achieved by optimizing the \gls{fft} algorithm using the Cantor special basis \cite{Cantor1989FFT}. While our optimization is applicable to all the aforementioned \gls{zksnark}s, Aurora was chosen due to its small proof size, which makes it a strong candidate for post-quantum secure digital signature schemes. Accordingly, Aurora serves as the foundation of Preon~\cite{Preon2023}, a post-quantum digital signature scheme that was a first-round candidate in NIST’s post-quantum cryptography standardization process~\cite{nist_pqc_round1_signatures}.
 
 \begin{table}
-	\caption[Prover and verifier of the Aurora zkSNARK using Gao-Mateer and Cantor FFT algoritms]{ Prover and Verifier of the Aurora \gls{zksnark} \cite{Aurora2019} over $\mathbb{F}_{2^{256}}$ based on the number of constraints $N$ and the size of the Reed-Solomon codeword domain $|L|$, using Gao-Mateer and Cantor FFTs, on an AMD Ryzen 9 9950x @ 5.7 GHz (sec).}
+	\caption[Prover and verifier of the Aurora zkSNARK using Gao-Mateer and Cantor FFT algorithms]{ Prover and Verifier of the Aurora \gls{zksnark} \cite{Aurora2019} over $\mathbb{F}_{2^{256}}$ based on the number of constraints $N$ and the size of the Reed-Solomon codeword domain $|L|$, using Gao-Mateer and Cantor FFTs, on an AMD Ryzen 9 9950x @ 5.7 GHz (sec).}
 	\label{tab:cost_analysis_intorduction}
 	\centering
 	{\small
@@ -363,12 +363,12 @@ On the other hand, from Step~\ref{Step:CantorLeftSib} of Algorithm~\ref{Algo:Pol
 
 If the Cantor additive \gls{fft} is performed over a subspace $W_m$, due to Step~\ref{Step:CantorLeftSib} of the Algorithm~\ref{Algo:Polynomial Division}, we must account for a reduction of $\sum_{r=0}^{m-1} 2^{m-r-1}=2^m-1=n-1$ in both additions and multiplications. Thus, the costs for additions and multiplications are changed to
 $\frac{1}{2} n\log_2 n + \frac{1}{2}n \sum_{r=0}^{\log_2(n)-1} 2^{\text{wt}(r)} -n +1$ and $\frac{1}{2} n \log_2 n-n+1$, respectively.
-% In our instantiations of the Cantor algorithm, we can precompute some values that are independent of the input polynomial and only depend on the length of the FFT algorithm (i.e., the upper bound degree for the polynomial). Therefore, these values can be precomputed once for the Cantor algorithm of length $n$ and then used for evaluations of any polynomial whose degree is $< n = 2^m$. In the next section we suggest an algorithm for the precomputation.
+% In our instantiations of the Cantor algorithm, we can precompute some values that are independent of the input polynomial and only depend on the length of the FFT algorithm (i.e.,, the upper bound degree for the polynomial). Therefore, these values can be precomputed once for the Cantor algorithm of length $n$ and then used for evaluations of any polynomial whose degree is $< n = 2^m$. In the next section we suggest an algorithm for the precomputation.
 
 \subsection{Precomputation} \label{sec:cantor_precmp}
-% To avoid wasting computational power by recomputing certain values when the FFT algorithm is used to evaluate polynomials of the same degree over and over again, over the same evaluation set (i.e., $\theta + W_m$), we present our precomputation algorithm, which is executed once and stores the reused values in memory.
+% To avoid wasting computational power by recomputing certain values when the FFT algorithm is used to evaluate polynomials of the same degree over and over again, over the same evaluation set (i.e.,, $\theta + W_m$), we present our precomputation algorithm, which is executed once and stores the reused values in memory.
 
-% In our instantiations of the Cantor algorithm, we can precompute some values that are independent of the input polynomial and only depend on the length of the FFT algorithm (i.e., the upper bound degree for the polynomial). Therefore, these values can be precomputed once for the Cantor algorithm of length $n$ and then used for evaluations of any polynomial whose degree is $< n = 2^m$. In this section, we suggest an algorithm for the precomputation.
+% In our instantiations of the Cantor algorithm, we can precompute some values that are independent of the input polynomial and only depend on the length of the FFT algorithm (i.e.,, the upper bound degree for the polynomial). Therefore, these values can be precomputed once for the Cantor algorithm of length $n$ and then used for evaluations of any polynomial whose degree is $< n = 2^m$. In this section, we suggest an algorithm for the precomputation.
 
 The computations of $\mathbb{Z}_{W_{p-1}}(\theta_{i, r})$ for each \(\mathsf{Canopy}_{p, i}\), denoted as $\psi_{i, r}$ in Line \ref{line:canopy-psi} of Algorithm \ref{Algo:Canopy}, and the computation of the vanishing polynomials in Line \ref{line:cantor-vanishing} of Algorithm \ref{Algo:Cantor_Implementation}, do not depend on the input polynomial. 
 The storage required to store the precomputed values for the Cantor algorithm of length $n = 2^m$ is 
@@ -574,11 +574,11 @@ Define a recursive process that splits the sequence of indices $\set{0, 1, \ldot
 	
 	Consider the sequence $\set{0, 1, \ldots, 2^{k+1} - 1}$ of $2^{k+1}$ elements. This sequence can be split into two groups based on the least significant bit (LSB):
 	\begin{itemize}
-		\item Even-index group $E$: Indices where the LSB is 0, i.e., 
+		\item Even-index group $E$: Indices where the LSB is 0, i.e.,
 		\[
 		E = \set{0, 2, 4, \ldots, 2^{k+1} - 2}.
 		\]
-		\item Odd-index group $O$: Indices where the LSB is 1, i.e., 
+		\item Odd-index group $O$: Indices where the LSB is 1, i.e.,
 		\[
 		O = \set{1, 3, 5, \ldots, 2^{k+1} - 1}.
 		\]
@@ -1197,7 +1197,7 @@ Figure~\ref{fig:benchmark} compares the runtime of the \gls{fft} algorithms. It 
 	\resizebox{.9\textwidth}{!}{
 		\input{Plots/plot_GM_parts_normalized}
 	}
-	\caption[The fraction of execution time for each sub-algorithm in the Gao-Mateer \gls{fft} algorithm]{The fraction of execution time for each sub-algorithm in the Gao-Mateer \gls{fft} algorithm over $\mathbb{F}_{2^k}$ implemented in \cite{libiop}. The execution times of the Taylor expansion and bit-reversal sub-algorithms increase more rapidly with the input size.  \textit{Initialization} is a one-time computing for copying the input polynomial to a new vector. \textit{Span} and \textit{Merging} are the \textsf{Span} function and the nested for loop in \textsf{Aggregate} Module}
+	\caption[The fraction of execution time for each sub-algorithm in the Gao-Mateer FFT algorithm]{The fraction of execution time for each sub-algorithm in the Gao-Mateer \gls{fft} algorithm over $\mathbb{F}_{2^k}$ implemented in \cite{libiop}. The execution times of the Taylor expansion and bit-reversal sub-algorithms increase more rapidly with the input size.  \textit{Initialization} is a one-time computing for copying the input polynomial to a new vector. \textit{Span} and \textit{Merging} are the \textsf{Span} function and the nested for loop in \textsf{Aggregate} Module}
 	\label{fig:sub_parts_normalized}
 \end{figure}
 
