@@ -3,7 +3,7 @@
 %======================================================================
 
 \section*{Declaration of Contributions}
-This chapter is based on~\cite{Badakhshan2025Ursa} I have co-authored the paper and my main contributions are as follows:
+This chapter is based on~\cite{Badakhshan2025Ursa} (\copyright \hspace{.1em}2025 Springer Nature) I have co-authored the paper and my main contributions are as follows:
 \begin{itemize}
 	\item Design of the GKR circuit for the Polaris \gls{zksnark}.
 \end{itemize}
@@ -41,7 +41,7 @@ Let us define the polynomial
 and \[\beta_j^{(1)} = q_{0}(\beta_{j+1}),\ 0\le j \le m-1,\]
 then $L_1$ is defined as
 \begin{equation}
-	L_1 = q_0(L_0) = <\beta_0^{(1)}, \beta_1^{(1)}, \cdots, \beta_{m-2}^{(1)} > + \beta_{m-1}^{(1)},
+	L_1 = q_0(L_0) = <\beta_0^{(1)}, \beta_1^{(1)}, \dots, \beta_{m-2}^{(1)} > + \beta_{m-1}^{(1)},
 \end{equation}
 and the $i$-th element in $L_1$ is 
 \[L_1[i] =(i_0\cdot\beta_0^{(1)} + i_1\cdot\beta_1^{(1)}+ \cdots + i_{m-2 }\cdot\beta_{m-2}^{(1)}) + \beta_{m-1}^{(1)},\ 0\le i < 2^{m-1}. \]
@@ -190,7 +190,7 @@ Figure \ref{fig:gkr-circuit} illustrates the GKR circuit used in Polaris. For cl
 
 The summation component of the presented GKR circuit consists of $2n-1$ gates, under the assumption that it forms a balanced binary tree (i.e.,  $n$ is a power of two). If this condition is not met, the circuit will have a number of gates that is close to this figure. The consistency component of the circuit has $(n+1)\log n + 7n + 2$ gates. Consequently the size of the circuit is $S = (n+1)\log n + 9n + 1$ ($2n$ of them are multiplication and the rest are addition gates). The prover only needs to send $\mathsf{c}^{(0)}(1)$ to the verifier as the output of the circuit because the verifier assumes that the other $n+1$ gate values should be zero; therefore, $S_0 = 1$ ($S_0$ is the size of the output layer). Note that the depth of the circuit is $d = \log(n)$. According to Section \ref{gkr}, the communication cost is $O(S_0 + d\log(S))=O(\log(n) \cdot \log((n+1)\log n + 9n))$ which simplifies to $O(\log(n) \cdot \log(n \log n)) = O((\log(n))^2)$. 
 
-The input size to the circuit is $\nu = 4n + 3$. According to Section \ref{gkr}, the verifier's computation cost should be $O(\nu + d\log(S)) = O(n + \log(n) \cdot (n\log(n))) = O(n (\log(n))^2)$. However, in the implementation of the GKR protocol, this computation can be delegated to the prover via verifiable polynomial delegation (VPD) schemes such as Virgo \cite{Zhang2020Virgo}. Finally, the prover's computation is $O(S^3)=O((n\log(n))^3)$.
+The input size to the circuit is $\nu = 4n + 3$. According to Section \ref{gkr}, the verifier's computation cost $O(\nu + d\log(S)) = O(n + \log(n) \cdot \log(n\log(n))) = O(n + (\log(n))^2)$. However, in the implementation of the GKR protocol, this computation can be delegated to the prover via verifiable polynomial delegation (VPD) schemes such as Virgo \cite{Zhang2020Virgo}. Finally, the prover's computation is $O(S^3)=O((n\log(n))^3)$.
 
 \section{Conclusion}
-In this chapter, we introduced the Polaris protocol and its construction components. We presented an instantiation of the GKR circuit to minimize the number of gates, with the aim to reduce communication overhead, as well as the verifier and prover's complexities. We also explained an instantiation of the \gls{fri} protocol that eliminates the field inversion operations in both the Commit phase and Query phase, while would help to achieve better efficiency.  The complete performance benchmark and the expected improvements will be demonstrated in the upcoming full implementation of Polaris.
+In this chapter, we introduced the Polaris protocol and its construction components. We presented an instantiation of the GKR circuit to minimize the number of gates, with the aim to reduce communication overhead, as well as the verifier and prover's complexities. We also explained an instantiation of the \gls{fri} protocol that eliminates the field inversion operations in both the Commit phase and Query phase, while would help to achieve better efficiency.  A full performance benchmark and the expected improvements will be presented in future work on the complete implementation of Polaris.

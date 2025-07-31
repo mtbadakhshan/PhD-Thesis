@@ -3,7 +3,7 @@
 %======================================================================
 
 \section*{Declaration of Contributions}
-This chapter contains preliminary material from an unpublished work and the paper~\cite{Badakhshan2025Ursa}, both of which I co-authored. The preliminaries in those works were written in collaboration with all co-authors. In addition, this chapter includes content from~\cite{Badakhshan2024Zupply}, of which I was the sole author under the supervision of Professor Gong.
+This chapter contains preliminary material from an unpublished work and the paper~\cite{Badakhshan2025Ursa} (\copyright \hspace{.1em}2025 Springer Nature), both of which I co-authored. The preliminaries in those works were written in collaboration with all co-authors. In addition, this chapter includes content from~\cite{Badakhshan2024Zupply}, of which I was the sole author under the supervision of Professor Gong.
 
 
 %----------------------------------------------------------------------
@@ -65,7 +65,7 @@ Furthermore, if $m < k-1$ and $\theta$ is any linear combination of $\{\beta_{m+
 Zero-knowledge proof (\gls{zkp}) system toolchains, such as \cite{Groth2016, Aurora2019, Chiesa2020Fractal, Ames2017Ligero} that generate arithmetic or boolean circuits from high-level programming languages, usually use rank-1 constraint systems (\gls{r1cs}s), which is so straightforward that it can be used to create efficient argument systems. \gls{r1cs} has also proven to be reliable in real-world applications, such as Zerocash \cite{zcash-proc}. We provide the definition of \gls{r1cs} in the following:
 
 \begin{definition}[rank-1 constraint system (\gls{r1cs})] \label{def:R1CS}
-	Let $d_1$, $d_2$, and $d_3$ be positive integers where denote the number of constraints, the number of variables, and the number of public inputs respectively. The \gls{r1cs} relation consists of matrices $\mathbf{A},\mathbf{B},\mathbf{C} \in \mathbb{F}^{d_1\times (d_2+1)}$ and public inputs $\vec{{v}} \in \mathbb{F}^{d_3}$. A vector $\vec{{w}} \in \mathbb{F}^{d_2-d_3}$, denoting private (auxiliary) inputs, satisfies the system if
+	Let $d_1$, $d_2$, and $d_3$ be positive integers that denote the number of constraints, the number of variables, and the number of public inputs respectively. The \gls{r1cs} relation consists of matrices $\mathbf{A},\mathbf{B},\mathbf{C} \in \mathbb{F}^{d_1\times (d_2+1)}$ and public inputs $\vec{{v}} \in \mathbb{F}^{d_3}$. A vector $\vec{{w}} \in \mathbb{F}^{d_2-d_3}$, denoting private (auxiliary) inputs, satisfies the system if
 	\(
 	\mathbf{A}\vec{{z}} \circ \mathbf{B}\vec{{z}} = \mathbf{C}\vec{{z}}
 	\), 
@@ -471,8 +471,8 @@ Different \gls{zksnark} constructions result in varying proof sizes. For instanc
 
 The extractable polynomial commitment scheme underlying a \gls{zksnark} determines whether the protocol requires a trusted or transparent setup. Protocols using polynomial commitments such as the KZG scheme, proposed by Kate, Zaverucha, and Goldberg~\cite{KZG2010}, require a one-time trusted setup to generate a structured common reference string (\gls{crs}). In contrast, polynomial commitment schemes like Bulletproofs~\cite{Bulletproofs2018} do not require such a trusted setup. However, the security of both KZG commitments and Bulletproofs relies fundamentally on the discrete logarithm assumption.
 
-Conversely, polynomial commitment schemes based on \gls{rs} interactive oracle proofs (\gls{iop}) of proximity, such as \gls{fri}~\cite{FRI2018}, enable transparent setups. These schemes avoid reliance on the discrete logarithm assumption and other cryptographic assumptions known to be vulnerable to quantum computing attacks. Instead, their security relies on the existence and security properties of cryptographic hash functions (\glspl{crh}). T
-%his transparent polynomial commitment scheme is detailed further in Section~\ref{sec:prel_FRI}.
+Conversely, polynomial commitment schemes based on \gls{rs} interactive oracle proofs (\gls{iop}) of proximity, such as \gls{fri}~\cite{FRI2018}, enable transparent setups. These schemes avoid reliance on the discrete logarithm assumption and other cryptographic assumptions known to be vulnerable to quantum computing attacks. Instead, their security relies on the existence and security properties of cryptographic hash functions (\glspl{crh}). 
+%This transparent polynomial commitment scheme is detailed further in Section~\ref{sec:prel_FRI}.
 
 
 
@@ -521,7 +521,7 @@ To verify $z_1$ and $z_2$, $\mathcal{V}$ aims to \textit{reduce} these verificat
 \begin{equation*}
 	\widetilde{W}_{\ell+1}(r_{\ell+1}) = \sum_{b,c \in \{0, 1\}^{k_{\ell+2}}} f_{r_{\ell+1}}^{(\ell+1)}(b,c).
 \end{equation*}
-To do so, let define the unique line  $\lambda: \mathbb{F} \rightarrow \mathbb{F}^{k_{\ell+1}}$, such that $\lambda(0) = b^*$ and $\lambda(1) = c^*$. $\mathcal{P}$ then sends the polynomial $q=\widetilde{W}_{\ell+1} \big|_\lambda$ to $\mathcal{V}$, representing the restriction of $\widetilde{W}_{\ell+1}$ to the line $\lambda$. Upon receiving the polynomial, $\mathcal{V}$ first verifies that $q(0) = z_1$ and $q(1) = z_2$. Subsequently, $\mathcal{V}$ selects a random $r^* \in \mathbb{F}$ and sets $r_{\ell+1} = \lambda(r^*)$, then checks if $q(r^*) = \widetilde{W}_{\ell+1}(r_{\ell+1})$, which is the claim made by $\mathcal{P}$ for the next round.\\
+To do so, we define the unique line  $\lambda: \mathbb{F} \rightarrow \mathbb{F}^{k_{\ell+1}}$, such that $\lambda(0) = b^*$ and $\lambda(1) = c^*$. $\mathcal{P}$ then sends the polynomial $q=\widetilde{W}_{\ell+1} \big|_\lambda$ to $\mathcal{V}$, representing the restriction of $\widetilde{W}_{\ell+1}$ to the line $\lambda$. Upon receiving the polynomial, $\mathcal{V}$ first verifies that $q(0) = z_1$ and $q(1) = z_2$. Subsequently, $\mathcal{V}$ selects a random $r^* \in \mathbb{F}$ and sets $r_{\ell+1} = \lambda(r^*)$, then checks if $q(r^*) = \widetilde{W}_{\ell+1}(r_{\ell+1})$, which is the claim made by $\mathcal{P}$ for the next round.\\
 
 \noindent\textbf{Final Round Check.}
 In the final round, $\mathcal{V}$ independently checks $ \widetilde{W}_{d}(r_{d})$.
@@ -1092,7 +1092,7 @@ Consider the subspace $G = \langle \gamma_0, \gamma_1, \ldots, \gamma_{m-2} \ran
 \end{proof}
 
 \begin{corollary}
-	$G$ is a subspace of dimension $m-1$.
+	Let  $G = \langle \gamma_0, \gamma_1, \ldots, \gamma_{m-2} \rangle$, where $\gamma_i = \beta_i \cdot \beta_{m-1}^{-1}$ for $i = 0, 1, \ldots, m-2$. Then, $G$ is a subspace of dimension $m-1$.
 \end{corollary}
 
 \begin{proof}
@@ -1100,7 +1100,7 @@ Consider the subspace $G = \langle \gamma_0, \gamma_1, \ldots, \gamma_{m-2} \ran
 \end{proof}
 
 \begin{theorem}
-	$D$ is a subspace of dimension $m-1$.
+	Let $D = \langle \delta_0, \delta_1, \ldots, \delta_{m-2} \rangle$, where $\delta_i = \gamma_i^2 + \gamma_i$.	Then, $D$ is a subspace of dimension $m-1$.
 \end{theorem}
 
 \begin{proof}
@@ -1137,7 +1137,7 @@ where $\theta_0= \beta_{m-1}^{-1} \theta$. Therefore, we have
 	\end{aligned}
 \end{equation*}
 
-For $\beta=\theta_0+\alpha \in \theta_0+G$, let $\beta'=(\theta_0+\alpha)^2+\theta_0+\alpha$ be the corresponding element in $\theta_0^2+\theta_0+D$. Suppose that the Taylor expansion~\footnote{We provide a detailed discussion of the Taylor expansion in Section~\ref{sec:Taylor Expansion}.} of $g(x)$ at $x^2+x$ is
+For $\beta=\theta_0+\alpha \in \theta_0+G$, let $\beta'=(\theta_0+\alpha)^2+\theta_0+\alpha$ be the corresponding element in $\theta_0^2+\theta_0+D$. Suppose that the Taylor expansion\footnote{We provide a detailed discussion of the Taylor expansion in Section~\ref{sec:Taylor Expansion}.} of $g(x)$ at $x^2+x$ is
 
 \begin{equation}\label{Eqn:g_Taylor}
 	g(x)=\displaystyle{\sum_{i=0}^{\ell-1}(g_{i0}+g_{i1}x)(x^2+x)^i }, \text{ where } \ell=2^{m-1} \text{ and } g_{ij}\in \mathbb{F}_{2^k}.

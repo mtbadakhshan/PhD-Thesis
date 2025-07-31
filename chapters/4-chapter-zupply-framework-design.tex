@@ -299,7 +299,7 @@ Whenever an entity wants to upload a data record on \gls{dcs}, the entity (prove
     \item $\texttt{cm}_i =\mathsf{COMM}_{\rho_i}(\Tilde{T}_i)$
 	\item $\texttt{path}_i$ is a valid path from leaf  $\texttt{cm}_i$ to root $\texttt{rt}_\tau$,
 \end{itemize}
-where $\Tilde{T}_i = (q_i, \text{PKsig}_i, \rho_i)$. To prove that the used \texttt{rt} is a valid value stored on $\mathcal{C}_Z$, the entity provides the \gls{pi} $\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt})$.
+where $\Tilde{T}_i = (q_i, \text{PKsig}_i, \rho_i)$ and public inputs are denoted as $x_\texttt{Auth} = (\texttt{rt}_\tau, \text{PKsig}_{i})$. To prove that the used \texttt{rt} is a valid value stored on $\mathcal{C}_Z$, the entity provides the \gls{pi} $\mathbf{L}_\tau^\mathsf{PI}(\texttt{rt})$.
 
 
 
@@ -314,7 +314,7 @@ When an entity wishes to transfer the ownership of an \gls{aat} ($T_{i_1}$), it 
 	\item $\texttt{cm}_{i_2} = \mathsf{COMM}_{\rho_{i_2}}(\Tilde{T}_{i_2})$
 	\item $q_{i_1} = q_{i_2} $,
 \end{itemize}
-where  $\Tilde{T}_{i_1} = (q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1})$, $\Tilde{T}_{i_2} = (q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2})$, and $x_\mathsf{Trans} = (\texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}_\tau)$ denotes the public inputs.
+where  $\Tilde{T}_{i_1} = (q_{i_1}, \text{PKsig}_{i_1}, \rho_{i_1})$, $\Tilde{T}_{i_2} = (q_{i_2}, \text{PKsig}_{i_2}, \rho_{i_2})$, and public inputs are denoted as $x_\mathsf{Trans} = (\texttt{eol}_{i_1}, \texttt{cm}_{i_2}, \texttt{rt}_\tau)$.
 
 \subsubsection{Mergeability proof ($\pi_\textsf{Merge}$)}
 An entity may merge two \gls{aat}s $T_{i_1}$ and $T_{i_2}$ to create $T_{i_3}$. The entity proves that the quantity in $T_{i_3}$ is the same as the summation of quantities in $T_{i_1}$ and $T_{i_2}$ (i.e., $q_{i_1} + q_{i_2} = q_{i_3}$).  The \gls{zkp} $\pi_\mathsf{Merge}$ follows the same approach as $\pi_\mathsf{Trans}$. The \gls{np} problems associated with this proof are explained as follows:
@@ -361,7 +361,7 @@ Zupply framework $\Pi$ Consists of a tuple of polynomial-time algorithms and pro
 
 \subsection{Algorithms} \label{sec:Zupply-Algorithms}%
 % Using security parameter $\lambda$, we define Zupply Scheme. // explain $i$
-All algorithms have read-only access to $\mathbf{TX}\tau$, $\mathbf{C}\tau$, \textsf{MHT}, $\mathbf{X}\tau$, and $\mathbf{D}\tau$ (accessible via \textsf{DCS} queries). The smart contract is responsible for updating $\mathbf{TX}\tau$, $\mathbf{C}\tau$, $\mathbf{X}_\tau$, and the root of \textsf{MHT} when the \textsf{VerifyTX} algorithm outputs 1.
+All algorithms have read-only access to $\mathbf{TX}_\tau$, $\mathbf{C}_\tau$, \textsf{MHT}, $\mathbf{X}_\tau$, and $\mathbf{D}_\tau$ (accessible via \textsf{DCS} queries). The smart contract is responsible for updating $\mathbf{TX}_\tau$, $\mathbf{C}_\tau$, $\mathbf{X}_\tau$, and the root of \textsf{MHT} when the \textsf{VerifyTX} algorithm outputs 1.
 
 \subsubsection{\textsf{Setup} ($1^{\lambda}$) $\rightarrow$ $\textsc{pp}$}
 Given a security parameter $\lambda$, \textsf{Setup} generates a set of global public parameters, denoted as \textsc{pp}. The specific implementation of \textsf{Setup} depends on the \gls{zksnark} algorithm in use: it may require a trusted party, or it may rely on a transparent (public) setup. The resulting \textsc{pp} is made publicly available. The pseudocode for \textsf{Setup} is provided in Algorithm~\ref{alg:Setup}.
@@ -396,7 +396,7 @@ Initiates a \gls{dag}. The algorithm gets $q_{i_1}$, which will be maintained in
  \[
  \texttt{tx}_{\mathsf{Init}} := (\texttt{cm}_{i_1}, \texttt{rt}^{\text{new}}, \mathsf{ind}_{i_1}, \mathsf{path}_{\mathsf{ind}_{i_1}})
  \]
- to the blockchain. The pseudocode for \textsf{Init} is provided in Algorithm~\ref{alg:Init} is provided in Appendix \ref{a_ch:zupply_algorithms}.
+ to the blockchain. The pseudocode for \textsf{Init} is provided in Algorithm~\ref{alg:Init} in Appendix~\ref{a_ch:zupply_algorithms}.
 
 
 
@@ -521,7 +521,7 @@ Let \textit{A} and \textit{B} be two consecutive entities within a supply chain.
 \subsubsection{Merkle Hash Tree (\textsf{MHT-Protocol})}
 \label{sec:MerkleTreeStructure}
 
-Storing all $2^{L}-1$ nodes of an $L$-layer \textsf{MHT} on the blockchain is costly. However, in $\mathcal{C}_Z$, it suffices to maintain $\texttt{rt}_\tau$. Therefore, \textsf{MHT} populating follows a  mechanism to let $\mathcal{C}_Z$ verify consistency among the current $\texttt{rt}_\tau$, the new \texttt{cm}, and the new $\texttt{rt}^\text{new}$. Such that, 
+Storing all $2^{L}-1$ nodes of an $L$-layer \textsf{MHT} on the blockchain is costly. However, in $\mathcal{C}_Z$, it suffices to maintain $\texttt{rt}_\tau$. Therefore, the \textsf{MHT} populating follows a  mechanism to let $\mathcal{C}_Z$ verify consistency among the current $\texttt{rt}_\tau$, the new \texttt{cm}, and the new $\texttt{rt}^\text{new}$. Such that, 
 \textsf{MHT} leaves are initialized with their  $\textsf{ind} \in [ 2^{L-1}]$. 
 \textsf{MHT}.\textsf{Add} adds the new $\texttt{cm}$ to the smallest unassigned \textsf{ind}, which is tracked in $\mathcal{C}_Z$. \textsf{MHT}.\textsf{Verify} first investigates $\textsf{path}_\textsf{ind}$ to ensure it is consistent with $\texttt{rt}_\tau$ for the leaf that holds the value \textsf{ind}.
 Then, it passes $\texttt{cm}$ to $\textsf{path}_\textsf{ind}$ and expects $\texttt{rt}^\text{new}$. If both conditions passes, the root  updates from $\texttt{rt}_{\tau}$ to $ \texttt{rt}^\text{new}$ in $\mathcal{C}_Z$. The pseudocodes for \textsf{MHT}.\textsf{Add} and \textsf{MHT}.\textsf{Verify} are presented in Algorithms \ref{alg:mht.add} and \ref{alg:ٰMHTVerify}, respectively.
@@ -561,177 +561,512 @@ Then, it passes $\texttt{cm}$ to $\textsf{path}_\textsf{ind}$ and expects $\text
 \end{algorithm}
 
 
-\begin{property}
-\label{theorem:CorrectLeafPosition}
-\textsf{MHT}.\textsf{Verify} Algorithm guarantees that $\texttt{rt}^\text{new}$ is the new root after a new $\texttt{cm}$ is appropriately assigned to  \textsf{ind}.
+Considering the properties of hash functions and the structure of the Merkle Tree, the tree provides collision resistance, meaning that it is computationally infeasible for any \gls{ppt} adversary to find two different sets of leaves that produce the same Merkle root.  Moreover, it is computationally infeasible for any \gls{ppt} adversary to generate the same valid Merkle proof and root combination for two different leaves in a tree. Namely, a valid Merkle proof ($\text{Path}_i$) and Merkle root ($\texttt{rt}$) for a leaf with index $i$ uniquely determine the leaf at index $i$. 
 
-% the accurate computation of $\texttt{rt}^\text{new}$, ensuring that it reflects the state of the \textsf{MHT} after a new authentication token commitment $\texttt{cm}$ is appropriately assigned to its designated leaf at the index \textsf{ind}.
-\end{property}
+%In other words, it is computationally infeasible for any \gls{ppt} adversary to generate the same valid Merkle proof and root combination for two different leaves in a Merkle tree.
 
-To prove Property \ref{theorem:CorrectLeafPosition}, we first need to present and prove Lemmas \ref{lemma:collision-resistant} and \ref{lemma:consistent_path}.
+%\begin{property}
+%\label{theorem:CorrectLeafPosition}
 
+%\end{property}
 
-\begin{lemma}\label{lemma:collision-resistant}
-	The Merkle Hash Tree provides collision resistance, meaning that it is computationally infeasible to find two different sets of leaves that produce the same Merkle root. 
-\end{lemma}
-\begin{proof}
-    we can make use of the properties of hash functions and the structure of the Merkle Tree to justify this lemma.
-\end{proof}
+%To prove Property \ref{theorem:CorrectLeafPosition}, we first need to present and prove Lemmas \ref{lemma:collision-resistant} and \ref{lemma:consistent_path}.
 
 
-\begin{lemma}\label{lemma:consistent_path}
-	 A valid Merkle proof ($\text{Path}_i$) and Merkle root ($\texttt{rt}$) for a leaf with index $i$ uniquely determine the leaf at index $i$. In other words, it is computationally infeasible to generate the same valid Merkle proof and root combination for two different leaves in a Merkle tree.
-\end{lemma}
-\begin{proof}
-    Due to the cryptographic properties of hash functions and the construction of Merkle trees, it is computationally impractical for an adversary to generate the same valid Merkle proof and root combination for two different leaves.
-\end{proof}
+%\begin{lemma}\label{lemma:collision-resistant}
+%	The Merkle Hash Tree provides collision resistance, meaning that it is computationally infeasible for any \gls{ppt} adversary to find two different sets of leaves that produce the same Merkle root. 
+%\end{lemma}
+%\begin{proof}
+%    we can make use of the properties of hash functions and the structure of the Merkle Tree to justify this lemma.
+%\end{proof}
 
-\begin{proof} [Proof of Property \ref{theorem:CorrectLeafPosition}]
-	The algorithm initially executes \textsf{VerifyPath} to ascertain if the provided Merkle proof ($\textsf{path}_\mathsf{ind}$) corresponds to  the leaf at index \textsf{ind}, which also contains the value \textsf{ind}. This step also ensures that the leaf has not previously held any commitment.
- 
-    Then, the algorithm executes \textsf{VerifyPath} again. However, this time it changes the value of $\textsf{ind}$ to $\texttt{cm}$. While the Merkle proof $\textsf{path}_\mathsf{ind}$ remains the same, the root is updated to $\texttt{rt}^\text{new}$. 
+
+%\begin{lemma}\label{lemma:consistent_path}
+%	 A valid Merkle proof ($\text{Path}_i$) and Merkle root ($\texttt{rt}$) for a leaf with index $i$ uniquely determine the leaf at index $i$. In other words, it is computationally infeasible for any \gls{ppt} adversary to generate the same valid Merkle proof and root combination for two different leaves in a Merkle tree.
+%\end{lemma}
+%\begin{proof}
+%    Due to the cryptographic properties of hash functions and the construction of Merkle trees, it is computationally impractical for any \gls{ppt} adversary to generate the same valid Merkle proof and root combination for two different leaves.
+%\end{proof}
+
+%\begin{proof} [Proof of Property \ref{theorem:CorrectLeafPosition}]
+	The $\textsf{MHT}.\textsf{Verify}$ algorithm (Algorithm~\ref{alg:ٰMHTVerify}) initially executes \textsf{VerifyPath}  to ascertain if the provided Merkle proof ($\textsf{path}_\mathsf{ind}$) corresponds to  the leaf at index \textsf{ind}, which also contains the value \textsf{ind}. This step also ensures that the leaf has not previously held any commitment. Then, the algorithm executes \textsf{VerifyPath} again. However, this time it changes the value of $\textsf{ind}$ to $\texttt{cm}$. While the Merkle proof $\textsf{path}_\mathsf{ind}$ remains the same, the root is updated to $\texttt{rt}^\text{new}$.  If both calls to \textsf{VerifyPath} return 1, indicating success, it can be concluded that $\texttt{cm}$ has been added to the index $\textsf{ind}$, and $\texttt{rt}^\text{new}$ represents the new root after the addition of the new authentication token commitment.
+
+    If an adversary attempts to overwrite an existing commitment $\texttt{cm}^*$ at index $\textsf{ind}^*$, the first \textsf{VerifyPath} execution will return 0, as the value of the leaf at that index does not equal $\textsf{ind}^*$. Moreover, as previously mentioned, it is computationally infeasible to generate an identical valid Merkle proof and root combination for different leaf indices in a Merkle tree. Additionally, there is a negligible probability of two Merkle trees having the same Merkle root, where one holds the value $\texttt{cm}^*$ at index $\textsf{ind}^*$ and the other holds $\textsf{ind}^*$ at the same index. Therefore, the algorithm can ascertain that the new commitment is added to the index $\textsf{ind}$, which has not previously held any commitment. Additionally, if the adversary aims to corrupt the root by passing $\texttt{rt}^{*}$ as an argument to the second \textsf{VerifyPath} execution, where $\texttt{rt}^{*}$ is not computed correctly from adding the new $\texttt{cm}$ to \textsf{MHT}, \textsf{VerifyPath} will return 0. This is because $\textsf{path}_\mathsf{ind}$ is not consistent with $\texttt{rt}^{*}$ and the commitment.
     
-    If both calls to \textsf{VerifyPath} return 1, indicating success, it can be concluded that $\texttt{cm}$ has been added to the index $\textsf{ind}$, and $\texttt{rt}^\text{new}$ represents the new root after the addition of the new authentication token commitment.
-
-    If an adversary attempts to overwrite an existing commitment $\texttt{cm}^*$ at index $\textsf{ind}^*$, the first \textsf{VerifyPath} execution will return 0, as the value of the leaf at that index does not equal $\textsf{ind}^*$. Moreover, according to Lemma \ref{lemma:consistent_path}, it is computationally infeasible to generate a valid Merkle proof and root combination for different leaf indices in a Merkle tree. Additionally, Lemma \ref{lemma:collision-resistant} states that there is a negligible probability of two Merkle trees having the same Merkle root, where one holds the value $\texttt{cm}^*$ at index $\textsf{ind}^*$ and the other holds $\textsf{ind}^*$ at the same index. Therefore, the algorithm can ascertain that the new commitment is added to the index $\textsf{ind}$, which has not previously held any commitment.
-    
-    If the adversary aims to corrupt the root by passing $\texttt{rt}^{*}$ as an argument to the second \textsf{VerifyPath} execution, where $\texttt{rt}^{*}$ is not computed correctly from adding the new $\texttt{cm}$ to \textsf{MHT}, \textsf{VerifyPath} will return 0. This is because $\textsf{path}_\mathsf{ind}$ is not consistent with $\texttt{rt}^{*}$ and the commitment.
-\end{proof}
+    Consequently, The $\textsf{MHT}.\textsf{Verify}$ algorithm guarantees that no \gls{ppt} adversary can propose a root $\texttt{rt}^\text{new}$ that is accepted as valid without assigning the input commitment $\texttt{cm}$ to the specified leaf index \textsf{ind}.
+%\end{proof}
 
 \section{Security Analysis}
 
-\subsection{Adversary Assumptions}
+The Zupply framework \textbf{appears} to offer security properties such as anonymity, unlinkability, and integrity given its structural similarities to Zerocash~\cite{zcash-proc}. Before delving into the technical details, we first provide an informal overview of the privacy-preserving properties expected against a potential adversary.
 
-In the Zupply framework $\Pi$, The adversary $\mathcal{A}$ is probabilistic polynomial-time (\gls{ppt}) and has access to $\mathbf{TX}_\tau$, $\mathbf{E}_\tau$, $\mathbf{C}_\tau$,  $\mathbf{X}_\tau$, $\mathsf{MHT}$ and $\mathbf{D}_\tau$ and is capable of executing either the exact or modified versions of the algorithms defined in $\Pi$, except the $\mathsf{Setup}$ algorithm, when a trusted setup \gls{zksnark} is employed. The capabilities of the adversary can be enhanced by assuming it has oracle access to the following two functionalities:
-
-\begin{enumerate}
-	\item \textit{\gls{aat} commitment attribution oracle}: The adversary $\mathcal{A}$ can query an oracle, denoted as $\mathcal{O}^\mathsf{Attr}: \mathbf{C}_\tau \mapsto \mathbf{E}_\tau$. This oracle acts as a mapping function, $\mathcal{O}^\mathsf{Attr}(\texttt{cm}_i) = e_j$, where it assigns each commitment $\texttt{cm}_i$ to the entity $e_j$ that created it. 
-	
-	\item \textit{\gls{aat} commitment classification oracle}: The adversary $\mathcal{A}$ has the capability to categorize commitments based on the type of transaction they're contained in. The Adversary's oracle access for classifying \gls{aat} commitments is:\\ $\mathcal{O}^\mathsf{Class}: \mathbf{C}_\tau \mapsto \{\textsf{Init}, \textsf{Trans}, \textsf{Merge}, \textsf{Div}\}$. 
-\end{enumerate}
-
-If we assume that blockchain public addresses reveal the identities of their owners, the first assumption becomes realistic. Many existing on-chain privacy-preserving protocols~\cite{altawy2019mesh,ZEXE,zkLedger2018,ZeeStar} do not adequately address this assumption. We formally define this assumption later in Section \ref{sec:ind_experiment}. Under this assumption, measuring the anonymity and unlinkability of entities within the Zupply framework requires evaluating the probability that each entity sends a specific transaction type to the blockchain within a given time interval (e.g., during block generation). The second assumption states that an adversary cannot distinguish between transactions of different types, as their contents are indistinguishable. This assumption is adopted without further elaboration. 
-
-Potentially, in the Zupply framework, the adversary $\mathcal{A}$ may attempt to 
-
-        \begin{enumerate}        
-	
-	\item Link a data record, $d_n$, to its corresponding \gls{aat} commitment, $\texttt{cm}_i$ (\textit{Data de-anonymizing attack}).
-	
-	
-	\item Determine whether two \gls{aat} commitments, $\texttt{cm}_i$ and $\texttt{cm}_j$, which are created by different entities are consecutive authentication tokens, with one having been transferred to the other (\textit{Linking attack}).
-	
-	\item
-	Forge $\pi_\mathsf{Auth}^\ast$ and $\sigma^\ast$ such that they are consistent to an \gls{aat} that the attacker does not have access to (\textit{Data forging attack}). 
-	
-	
-	\item
-	Generate transactions $\texttt{tx}_\mathsf{Trans}$, $\texttt{tx}_\mathsf{Merge}$, $\texttt{tx}_\mathsf{Div}$ to  transfer, merge, or divide\gls{aat}s that the attacker does not have access to (\textit{\gls{aat} ownership spoofing attack}).
-	
-	
-	\item
-	Alter any existing $d_{n} \in \mathbf{D}_\tau$ (\textit{Data tampering attack}).
-	
-	\item
-	 Re-transfers a token that is already transferred, merged, or divided (\textit{\gls{aat} double transfer attack}).
-\end{enumerate}
-
-
-
-\subsection{Indistinguishability Experiment} \label{sec:ind_experiment}
-In this section, we do not provide security proofs, deferring them to future work.
-Instead, we discuss the formalization of the privacy property within the Zupply framework. Informally, consider an adversary $\mathcal{A}$ that constructs two ledgers and two corresponding \glspl{dag} by inducing honest entities, ensuring consistency between the public information of  ledgers and \gls{dag}s. If the adversary is then provided with both ledgers but only one \gls{dag}, it should not be able to distinguish the ledgers. Thus, the adversary remains uncertain about the association between the given \gls{dag} and the respective ledgers.
-
-
- To formalize this, we present the experimental setup for evaluating ledger indistinguishability. To characterize the ledger indistinguishability of the Zupply framework $Pi$, we design an \textsf{L-IND} experiment following the similarly named experiment in Zerocash~\cite{zcash-proc}.  
-Recall that a ledger $L$ includes a set of transactions $\mathbf{TX}$. From $\mathbf{TX}$,  the ordered set $\mathbf{C}$, which stores commitments to \gls{aat}s (\texttt{cm}s), and the set of \gls{eol}s, denoted as $\mathbf{X}$ can be computed. Furthermore, the \textsf{MHT} can be constructed from $\mathbf{C}$.
-Each \texttt{cm} in $\mathbf{C}$  can be replaced by a tuple $(\texttt{cm}, \text{TXtype}, e)$, where $\texttt{cm}$ is the commitment added to the ledger by an entity $e$ through a transaction of type TXtype. Here, for simplicity, the transaction type is either \textsf{Trans} or \textsf{Init}. We denote this new set as $\mathbf{C}_G$ as the generalized form of $\mathbf{C}$.  Notably, if $\text{TXtype} = \textsf{Trans}$, the entity $e$ does not \textit{own} the corresponding \gls{aat}; rather, it only adds it to the ledger. The adversary’s capabilities determine whether they can extract the entity $e$ associated with each commitment in the transactions ($\mathcal{A}$'s access to $\mathcal{O}^\mathsf{Attr}$). 
-
-Let $\mathcal{C}$ denote the challenger in the \textsf{L-IND} experiment, which receives queries from the adversary $\mathcal{A}$, performs sanity checks, and forwards them to the Zupply framework oracle, denoted as $\mathcal{O}^\Pi$. In the \textsf{L-IND} experiment, we instantiate two oracles, $\mathcal{O}_0^\Pi$ and $\mathcal{O}_1^\Pi$.  Each oracle $\mathcal{O}^\Pi$ internally stores:  
-\begin{enumerate}
-	\item The set $\mathbf{C}_G$ (generalized form).
-	\item A set of entities $\mathbf{E}$.
-	\item A set of \gls{eol}s, denoted as $\mathbf{X}$.
-	\item Sets of \gls{aat}s \textit{owned} by each entity $e \in \mathbf{E}$, denoted as $\mathbf{T}^e$.
-	\item A set of data records, denoted as $\mathbf{D}$.
-\end{enumerate}
-
-The oracle $\mathcal{O}^\Pi$ is initialized by public parameters \textsc{pp} and can receive and process the following queries:
-
-%% INIT
 \begin{itemize}
-	\item $Q(\textbf{Init}, q, e)$ 
-	\begin{enumerate}
-		\item Compute $\textsf{Init}(\textsc{pp}, q) \rightarrow (\texttt{tx}_\textsf{Init}, T)$, where $\texttt{tx}_\textsf{Init} = \big(\texttt{cm}, \texttt{rt}^{\text{new}}, \mathsf{ind}, \mathsf{path}_{\mathsf{ind}}\big)$,
-		\item  Add $(\texttt{cm}, \textsf{Init}, e)$ to $\mathbf{C}_G$.
-		\item Add $T$ to $\mathbf{T}^e$
-	\end{enumerate}
-
-
-%% TRANS
-	\item $Q(\textbf{Trans}, \texttt{cm}^\text{old}, e^\text{new})$ 
-	\begin{enumerate}
-		\item Assert $\texttt{cm}^\text{old}$ is in $\mathbf{C}$, otherwise output $\perp$.
-		\item Let $T^{e^\text{old}} \in \mathbf{T}^{e^\text{old}}$ be the \gls{aat} corresponding to $\texttt{cm}^\text{old}$.
-		\item Sample $ (\text{PKsig}^\text{new}, \text{SKsig}^\text{new})  \leftarrow {\mathcal{K}_\mathsf{sig}} (\textsc{pp})$
-		\item \sloppy Compute \textsf{Trans}$\big($\textsc{pp}$, T^{e^\text{old}},  \text{PKsig}^\text{new} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Trans}}, \Tilde{T}^{e^\text{new}}, \texttt{Tag}\big)$, where $\texttt{tx}_{\textsf{Trans}} = \big(\pi_{\textsf{Trans}}, x_{\textsf{Trans}}, \texttt{eol}, \texttt{cm}^{\text{new}}, \texttt{rt}^{\text{new}}, \mathsf{ind}, \mathsf{path}_{\mathsf{ind}} \big)$ and $x_\textsf{Trans} = \big(\texttt{eol}, \texttt{cm}^{\text{new}}, \texttt{rt}^{\text{old}}\big)$
-		\item  Add $(\texttt{cm}, \textsf{Trans}, e^\text{old})$ to $\mathbf{C}_G$.
-		\item Add $T^{e^\text{new}} = (\Tilde{T}^{e^\text{new}},  \text{PKsig}^\text{new})$ to $\mathbf{T}^{e^{\text{new}}}$
-	\end{enumerate}
+	\item \textit{Data anonymity} guarantees that the adversary cannot establish a link between an arbitrary data record $d_n$ and an \gls{aat} commitment  $\texttt{cm}_i \in \mathbf{C}_\tau$, where the  \gls{zkp} of knowledge of the \gls{aat} associated with $\texttt{cm}_i$ is included in $d_n$ for authentication. 
 	
-	\item $Q(\textbf{Upload}, \text{IsTransferred}, d^\text{old}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$, where $d_{\text{pub}, \text{pri}}^\text{new}$ represents the public and private parts of the new data to be added to $D$, succeeding $d^\text{old}$, which is already in $D$. The Boolean variable $\text{IsTransferred}$ indicates whether the new data has a different $\text{PKsig}$ than $d^\text{old}$; it is set to \texttt{True} if $\text{PKsig}$ differs and \texttt{False} otherwise.\footnote{The query $Q(\textbf{Upload}, \text{False}, \text{Null}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$ initiates a \gls{dag}.}
+	\item  \textit{Token anonymity} guarantees that the adversary cannot decide which entity in $\mathbf{E}_\tau$ is the \textbf{owner} of any  $\texttt{cm} \in \mathbf{C}_\tau$ where the type of the transaction that publishes $\texttt{cm}$ is either \textsf{Trans}, \textsf{Merge}, or \textsf{Div}.  
 	
-	\begin{enumerate}
-		\item Assert $d^\text{old}$ is either Null or is in $D$ and it is the last data in a progressive data sequence, otherwise output $\perp$.
-		\item If  $d^\text{old} \neq \text{Null}$, find the $T^\text{old}$ with $\text{PKsig}^\text{old}$ in all $\mathbf{T}^e$s and from that determine  $\text{SKsig}^\text{old}$ otherwise do nothing.
-		\item \sloppy If $\text{IsTransferred} = \texttt{True}$, then commit to $T^\text{old}$ to compute $\texttt{cm}^\text{old}$, and execute  $Q(\textbf{Trans}, \texttt{cm}^\text{old}, e^\text{new})$ to produce $T^{e^\text{new}}$. Otherwise, $T^{e^\text{new}} = T^\text{old}$.
-		\item Sample a random \textsc{k} and Compute \textsf{Upload} $\big($\textsc{pp}$, d^\text{old}, T^{e^\text{new}}, d^\text{new}_{\mathsf{pub}, \mathsf{pri}}, \textsc{k}, [\textsf{tags}]  \big)$ $\rightarrow$ $d^\text{new}$.
-		\item Add $d^\text{new}$ to $D$.
-	\end{enumerate}
+	\item  \textit{Token unlinkability} guarantees that the adversary cannot determine which commitment in $\texttt{cm}^\ast\in\mathbf{C}_\tau$ corresponds to the \gls{aat} used in the execution of a \textsf{Trans}, \textsf{Merge}, or \textsf{Divide} algorithm that resulted in publishing any new commitment $\texttt{cm}$ via a transaction of type \textsf{Trans}, \textsf{Merge}, or \textsf{Div}, respectively.
 	
-	\item $Q(\textbf{InsertTX}, \texttt{tx})$, where $\texttt{tx}$ is either the type of \textsf{Trans} or  \textsf{Init}.
-	\begin{enumerate}
-		\item If \textsf{VerifyTX} $\big($\textsc{pp}$, \texttt{tx} \big)$  returns 0, return $\perp$.
-		\item Add the $(\texttt{cm}, \text{TXtype}, e^*)$ to  $\mathbf{C}$, where $e^*$ denote the type of entities where the oracle does not hold their $T^{e^*}$.
-		\item If $ \text{TXtype} = \textsf{Trans}$ and the receiver of the \gls{aat} is not of type $e^*$, add   Add $T^{e^\text{new}}$ to $\mathbf{T}^{e^{\text{new}}}$.
-	\end{enumerate}
+	\item  \textit{Data integrity} guarantees that the adversary cannot generate an authenticatiod data record $d^*$ (see Definition~\ref{def:Authenticated Data}) where $d^*.\textsf{pred}$ includes the \textsc{CID} of any $d \in \mathbf{D}_\tau$ created by an honest entity.
 	
-		\item $Q(\textbf{InsertData}, d)$, 
-	\begin{enumerate}
-		\item If \textsf{Audit} $\big($\textsc{pp}$, d \big)$  returns 0, return $\perp$.
-		\item Add $d$ to  $\mathbf{D}$.
-	\end{enumerate}
+	
 \end{itemize}
 
-In the \textsf{L-IND} experiment, the challenger $\mathcal{C}$ instantiates two oracles, denoted as $\mathcal{O}_0^\Pi$ and $\mathcal{O}_1^\Pi$. Then, $\mathcal{C}$ randomly selects $b \in \{0,1\}$ and provides the adversary $\mathcal{A}$ with two ledgers: $L_\text{Left} = L_b$ and $L_\text{Right} = L_{1-b}$. The adversary then submits two queries, $Q$ and $Q'$, to $\mathcal{C}$, where both queries are of the same type and are publicly consistent, meaning all public values in these queries are identical.  Let $D_b$ and $D_{1-b}$ denote the data sets corresponding to each ledger. If the queries are of type \textbf{InsertTX} or \textbf{InsertData}, the challenger $\mathcal{C}$ sends $Q$ to $(L_b, D_b)$ and $Q'$ to $(L_{1-b}, D_{1-b})$. Otherwise, $\mathcal{C}$ sends $Q$ to $(L_0, D_0)$ and $Q'$ to $(L_1, D_1)$.
-
-
-Notably, here we do not assume that the adversary has access to the $\mathcal{O}^\mathsf{Attr}$ oracle. As a result, the adversary is restricted to constructing $\mathbf{C}$ from each ledger and cannot derive $\mathbf{C}_G$ from them. Consequently, selecting different entities in queries $Q$ and $Q'$ does not violate the public consistency of the queries. Furthermore,  selecting different entities  does not provide $\mathcal{A}$ with any advantage in distinguishing the ledgers.
-
-
-The adversary's advantage in this experiment, denoted as $\mathsf{Adv}^{\textsf{L-IND}}_{\Pi}$, is the probability that the adversary can correctly guess $b$ given $L_b$, $L_{1-b}$, and $D_0$. The core idea of the experiment is that each random-looking value is either randomly sampled or simulated, rather than being generated according to the actual algorithm. Later, in the proof, it must be shown that the simulated results are indistinguishable from those produced by the actual algorithm execution. This can be achieved by leveraging the security properties of the underlying building blocks.
-
-
-
-Here, we provide an overview of the \textsf{L-IND} experiment without delving into the details. In this experiment, when $\mathbf{C}$ receives an \textbf{Init} query, it modifies the \textsf{Init} algorithm for each $Q$ and $Q'$, constructing the commitments \texttt{cm} by committing to random values instead of \gls{aat}s. 
-When $\mathbf{C}$ receives a \textbf{Trans} query, it modifies the \textsf{Trans} algorithm such that the \texttt{eol} value included in the created transaction is randomly sampled. If $e^\text{new}$ is not one of the entities whose secrets the adversary knows (i.e., $e^\text{new} \neq e^*$), $\mathbf{C}$ randomly samples $T^{e^\text{new}}$ and \texttt{cm}; otherwise, it follows the original \textsf{Trans} algorithm. 
-Finally, the \gls{zkp}s in \textbf{Trans} and \textbf{Upload} queries are simulated based on their public inputs. We leave the detailed description of the experiment and its proof for future work. 
-
-Now, suppose the adversary has access to $\mathcal{O}^\mathsf{Attr}$. In this case, $\mathcal{C}$ should not enforce $\mathcal{A}$ to use identical entities in both $Q$ and $Q'$ queries to satisfy the public consistency requirement. Consequently, the adversary would be able to distinguish between the two ledgers (i.e., guess $b$) with a significant probability. 
-To address this scenario, additional assumptions are required, such as assigning a probability to each entity in an anonymity set for sending a specific transaction type within a given time interval.
-The formalization of this scenario and the measurement of anonymity based on the aforementioned probability will be addressed in future research.
+To formalize more these privacy properties, we assume three properties for the commitments to \glspl{aat}: \textbf{attribution}, \textbf{ownership} and \textbf{class}. A commitment \texttt{cm} is attributed to an entity $e$ if and only if $e$ uploads \texttt{cm}; this is denoted as
+\[
+ \texttt{cm}.\texttt{attr} = e.
+ \] 
+A commitment \texttt{cm} is said to be owned by an entity $e' \neq e$, denoted as 
+\[
+\texttt{cm}.\texttt{owner} = e',
+\]
+ if and only if  $e'$ receives \texttt{cm} through a transaction of type $\texttt{tx}_\textsf{Trans}$, $\texttt{tx}_\textsf{Merge}$, or $\texttt{tx}_\textsf{Div}$. Also, the attribution and ownership of a commitment coincide (i.e., \( \texttt{cm}.\texttt{attr}  = \texttt{cm}.\texttt{owner}\)) when the commitment is uploaded to the blockchain via a transaction of type $\texttt{tx}_\textsf{Init}$ or an entity transfers the ownership to itself, as described in \textsf{OT-Protocol} (see Figure~\ref{fig:Ownership Transfer}). Recall from Section~\ref{sec:zupply-terms-and-concepts} that each entity $e$ is uniquely associated with a single $\text{BPAddr}^{e}$. This blockchain address may reveal information about the entities uploading transactions to the blockchain, which we will discuss in more detail later. Finally, the class of each commitment is the \textit{type} of the transaction that uploads the commitment to the blockchain.  Figure~\ref{fig:attr-owner-cm} illustrates how the attribution, ownership and class properties of a commitment are determined. 
 
 
 
+Additionally, we assume certain properties for transactions in the Zupply framework to formalize the underlying privacy guarantees. Our analysis focuses on transactions of type $\texttt{tx}_\textsf{Init}$ and $\texttt{tx}_\textsf{Trans}$. Both transaction types possess the properties of \textbf{attribution} and \textbf{new commitment}: the attribution property identifies the entity that submitted the transaction, denoted by
+\[
+ \texttt{tx}.\texttt{attr} = e,
+\]
+and the new commitment property specifies the commitment published on the blockchain, denoted by
+\[
+ \texttt{tx}.\texttt{cm\_new} = \texttt{cm}^{\text{new}}.
+ \]
+Transactions of type $\texttt{tx}_\textsf{Trans}$,which can be generalized to $\texttt{tx}_\textsf{Merge}$ and $\texttt{tx}_\textsf{Div}$, additionally include the \textbf{old commitment} property, denoted by 
+\[
+\texttt{tx}.\texttt{cm\_old} = \texttt{cm}^{\text{old}}.
+\]
+which identifies the commitment corresponding to the \gls{aat} whose ownership is being transferred.
 
+
+Moreover, we assume a \textbf{commitment} property for each data record $d$, denoted as 
+\[
+d.\texttt{cm}=\texttt{cm}, 
+\]
+which links the data record to its corresponding commitment. This implies that the data record $d$ includes a \gls{zkp} demonstrating knowledge of the value committed to in \texttt{cm}. Also, $d$ is signed using the secret key associated with the \gls{aat} that is committed to in \texttt{cm}.
+
+\begin{figure}[h]
+
+	\centering
+	    \begin{subfigure}[t]{0.35\textwidth}
+	    	\centering
+
+	    		\begin{tikzpicture}[node distance=1.8cm]
+	    		\node (e1) {${e_1}$ initiates an \gls{aat}};
+	    		
+	    			   			\node[draw, rounded corners,below=1cm of $(e1)$] (txInit) {
+	    			\begin{tabular}{c}
+	    				Transaction $\texttt{tx}_\mathsf{Init}$ \\
+	    				\hline
+	    				$\texttt{cm\_new} = \texttt{cm}_1$ \\
+	    				$\texttt{attr} = e_1$ 
+	    			\end{tabular}
+	    		};
+	    		
+	    		\node[draw, rounded corners,below=1.4cm of $(txInit)$] (cm) {
+	    			\begin{tabular}{c}
+	    				Commitment $\texttt{cm}_1$ \\
+	    				\hline
+	    				$\texttt{attr} = e_1$ \\
+	    				$\texttt{owner} = e_1$ \\
+	    				$\texttt{class} = \mathsf{Init}$
+	    			\end{tabular}
+	    		};
+	    		
+	    			   			\node[below=2cm of $(cm)$,xshift=.5cm](note){\	 };
+	    		
+%	    		\draw[->, thick, >=Stealth] (e1) -- node[above,sloped] {$\texttt{tx}_\textsf{Init}$} (cm);
+
+	    	\end{tikzpicture}
+
+	    	\caption{$\texttt{cm}_1$ is created through $\texttt{tx}_\textsf{Init}$}
+	    		    		\label{fig:attr-owner-cm-txinit}
+	   	\end{subfigure}%
+	   		    \begin{subfigure}[t]{0.65\textwidth}
+
+	   		\centering
+	   		
+	   		\begin{tikzpicture}[node distance=3.5cm]
+	   			\node (e1) {$e_1$};
+	   			\node[right of=e1] (e2) {$e_2$};
+	   			
+	   			\node[draw, rounded corners,below=1cm of $(e1)!0.5!(e2)$] (txTrans) {
+	   				\begin{tabular}{c}
+	   					Transaction $\texttt{tx}_\mathsf{Trans}$ \\
+	   					\hline
+	   					{\scriptsize\faLock[regular]{}} $\texttt{cm\_old} = \texttt{cm}_1$ \\
+	   					$\texttt{cm\_new} = \texttt{cm}_2$ \\
+	   					$\texttt{attr} = e_1$ 
+	   				\end{tabular}
+	   			};
+	   			
+	   			\node[draw, rounded corners,below=1.4cm of $(txTrans)$,xshift=2.2cm] (cm2) {
+	   				\begin{tabular}{c}
+	   					Commitment $\texttt{cm}_2$ \\
+	   					\hline
+	   					$\texttt{attr} = e_1$ \\
+	   					{\scriptsize\faLock[regular]{}} $\texttt{owner} = e_2$ \\
+	   					$\texttt{class} = \mathsf{Trans}$
+	   				\end{tabular}
+	   			};
+	   			
+	   			\node[draw, rounded corners,below=1.4cm of $(txTrans)$,xshift=-2.2cm] (cm1) {
+	   				\begin{tabular}{c}
+	   					Commitment $\texttt{cm}_1$ \\
+	   					\hline
+	   					$\texttt{attr} = \ast$\\
+	   					{\scriptsize\faLock[regular]{}} $\texttt{owner} = e_1$ \\
+	   					$\texttt{class} = \ast$
+	   				\end{tabular}
+	   			};
+	   			\node[below=1.2cm of $(cm1)$,xshift=.5cm](note){
+	   				\begin{tabular}{l}
+	   					{\scriptsize\faLock[regular]{}} \footnotesize{denotes a confidential value}\\
+	   					 \footnotesize{$\ast$ denotes a context-dependent value}
+	   				\end{tabular}};
+	   			
+%	   			\draw[->, thick, >=Stealth] (e1) -- node[above,sloped] {$\texttt{tx}_\textsf{Trans}$} (cm);
+	   			\draw[->, thick, >=Stealth, bend left=10] (e1) to node[above] {ownership transfer} (e2);
+	   			
+	   		\end{tikzpicture}
+	   		\caption{$\texttt{cm}_2$ is created through $\texttt{tx}_\textsf{Trans}$}
+	   			   		    		\label{fig:attr-owner-cm-txtrans}
+	   	\end{subfigure}%
+    \caption[Security properties of commitments and transactions]{Illustration of how properties of commitment and transactions are determined. In Figure~\ref{fig:attr-owner-cm-txinit}, the commitment is both attributed to and owned by $e_1$ via a $\texttt{tx}_\textsf{Init}$ transaction. In Figure~\ref{fig:attr-owner-cm-txtrans}, the commitment $\texttt{cm}_2$ is attributed to $e_1$ but the ownership is transferred to $e_2$ via a $\texttt{tx}_\textsf{Trans}$ transaction.}
+    	\label{fig:attr-owner-cm}
+\end{figure}
+
+Based on the modeling of commitments and their associated properties,  we present the assumptions about adversaries in the Zupply framework in the following subsection. This is followed by a description of the required security properties, and finally, an explanation of the security measures implemented to achieve them.
+
+%we define the core privacy-preserving properties required by the framework in Section~\ref{sec:Required Security Properties}, following the presentation of the threat model.
+
+%This section also presents an indistinguishability experiment, where the adversary $\mathcal{A}$  builds two ledgers which are publicly consistent (i.e., the public values are the same) through a challenger. 
+
+%The entities used as the owners of  the \gls{aat} commitments published through  transactions of type \textsf{Trans}, \textsf{Merge}, or \textsf{Div} are not public and the random looking data (including the Merkle roots on data records) are either sampled or simulated. 
+%Hence, the $\mathcal{A}$  should not be able to distinguish these two ledgers. Consequently, the adversary cannot determine that a data record corresponds to which ledger and is not able to determine the preceding commitment and the owner of  a $\texttt{cm}_j$ that is published via a transaction of type \textsf{Trans}, \textsf{Merge}, or \textsf{Div}.
+%\begin{itemize}
+%	\item   Note
+%\end{itemize}
+
+
+%  This property is going to be expressed using the indistinguishability experiment presented in Section~\ref{sec:ind_experiment}  
+
+
+
+\subsection{Threat Model}\label{sec:threat_model}
+
+In the Zupply framework $\Pi$, the set of honest entities is denoted by $\mathbf{E}_\tau$ and is assumed to be predetermined. We consider three types of adversaries
+\begin{itemize}
+	\item eavesdropper adversary $\mathcal{A}_E$,
+	\item strong eavesdropper adversary $\mathcal{A}_S$, and
+	\item forgery adversary $\mathcal{A}_F$, 
+\end{itemize}
+each characterized by different assumptions and goals. 
+
+\subsubsection{Adversary Assumptions}\label{sec:adv_assumption}
+
+%The superior adversary $\mathcal{A}_s$ inherits all the capabilities of $\mathcal{A}_c$, and additionally has access to the \gls{aat} commitment attribution oracle $\mathcal{O}^\mathsf{Attr}$, which will be detailed later in this section. Below, we outline the assumptions associated with the common adversary.
+
+\underline{Eavesdropper adversary  $\mathcal{A}_E$}:
+\begin{itemize}
+	\item is a probabilistic polynomial-time (\gls{ppt});
+	 \item does not send or receive \glspl{aat} to or from honest entities in  $\mathbf{E}_\tau$;
+	\item has read access to $\mathbf{E}_\tau$, $\mathbf{TX}_\tau$, $\mathbf{C}_\tau$, $\mathbf{X}_\tau$, $\mathsf{MHT}$, and $\mathbf{D}_\tau$;
+	\item can execute either the original or modified versions of the algorithms defined in $\Pi$, excluding the $\mathsf{Setup}$ algorithm when a trusted setup \gls{zksnark} is used;
+	\item can query the commitment classification oracle $\mathcal{O}^\mathsf{Class}$, which categorizes commitments based on the type of transaction in which they appear, such that	$\mathcal{O}^\mathsf{Class}: \mathbf{C}_\tau \mapsto \{\textsf{Init}, \textsf{Trans}, \textsf{Merge}, \textsf{Div}\}$.
+	\item \textit{does not} have access to the attribution properties (i.e., \texttt{attr})  of transactions in $\mathbf{TX}_\tau$ or commitments in $\mathbf{C}_\tau$.
+\end{itemize}
+
+
+
+
+\noindent \underline{Strong eavesdropper adversary  $\mathcal{A}_S$}:
+\begin{itemize}
+	\item has all the capabilities of $\mathcal{A}_E$;
+	\item can query the commitment attribution oracle $\mathcal{O}^\mathsf{Attr} : \mathbf{C}_\tau \rightarrow \mathbf{E}_\tau$. This oracle maps each commitment $\texttt{cm}_i$ to the entity $e_j$ that put that on the blockchain,  i.e., $\mathcal{O}^\mathsf{Attr}(\texttt{cm}_i) = e_j$;
+	\item as a result, has access to the attribution properties (i.e., \texttt{attr}) of transactions in $\mathbf{TX}_\tau$ and commitments in $\mathbf{C}_\tau$.
+\end{itemize}
+If we assume that blockchain public addresses reveal the identities of their owners, the strong eavesdropper adversary $\mathcal{A}_S$ becomes realistic. Many existing on-chain privacy-preserving protocols~\cite{altawy2019mesh,ZEXE,zkLedger2018,ZeeStar} do not adequately address this assumption. Also, the use of address anonymization techniques in Ethereum, such as Tornado Cash~\cite{pertsev2019tornado}, makes the assumptions underlying  $\mathcal{A}_E$ more realistic than those of $\mathcal{A}_S$.
+%We formally define this assumption later in Section \ref{sec:ind_experiment}. 
+
+
+
+\noindent \underline{Forgery adversary $\mathcal{A}_F$}:
+\begin{itemize}
+	\item has all the capabilities of $\mathcal{A}_S$;
+	\item has write access to $\mathbf{TX}_\tau$, $\mathbf{C}_\tau$, $\mathbf{X}_\tau$, $\mathsf{MHT}$, and $\mathbf{D}_\tau$,
+	\item as a result, can send  \glspl{aat} to honest entities in  $\mathbf{E}_\tau$, but does not receive any \gls{aat} from them and can add or modify data records in $\mathbf{D}_\tau$;
+\end{itemize}
+
+%the adversary $\mathcal{A}$ is probabilistic polynomial-time (\gls{ppt}) and has access to $\mathbf{TX}_\tau$, $\mathbf{E}_\tau$, $\mathbf{C}_\tau$,  $\mathbf{X}_\tau$, $\mathsf{MHT}$ and $\mathbf{D}_\tau$ and is capable of executing either the exact or modified versions of the algorithms defined in $\Pi$, except the $\mathsf{Setup}$ algorithm, when a trusted setup \gls{zksnark} is employed. The capabilities of the adversary can be enhanced by assuming it has oracle access to the following two functionalities:
 
 %\begin{enumerate}
-%	\item .
-%	\item 
+%	\item \textit{\gls{aat} commitment attribution oracle}: The adversary $\mathcal{A}$ can query an oracle, denoted as $\mathcal{O}^\mathsf{Attr}: \mathbf{C}_\tau \mapsto \mathbf{E}_\tau$. This oracle acts as a mapping function, $\mathcal{O}^\mathsf{Attr}(\texttt{cm}_i) = e_j$, where it assigns each commitment $\texttt{cm}_i$ to the entity $e_j$ that created it. 
+%	
+%	\item \textit{\gls{aat} commitment classification oracle}: The adversary $\mathcal{A}$ has the capability to categorize commitments based on the type of transaction they're contained in. The Adversary's oracle access for classifying \gls{aat} commitments is:\\ $\mathcal{O}^\mathsf{Class}: \mathbf{C}_\tau \mapsto \{\textsf{Init}, \textsf{Trans}, \textsf{Merge}, \textsf{Div}\}$. 
 %\end{enumerate}
 
 
-%One diffenece between our experiment and the experiment in Zerocash is that in our experiment there exist a data table, denoted as $D$, where the adversary can either induce honest parties to upload data into the table.
+%Potentially, in the Zupply framework, the adversary $\mathcal{A}$ may attempt to 
+%\newpage
+\subsubsection{Adversary Goals}\label{sec:adv_goals}
+\noindent \underline{Eavesdropper adversary  $\mathcal{A}_E$}:
+\begin{itemize}
+    \item \textit{Data de-anonymization attack}: Given a data record $d \in \mathbf{D}_\tau$, the adversary attempts to guess a commitment $\texttt{cm}^* \in \mathbf{C}_\tau$ such that $d.\texttt{cm} = \texttt{cm}^*$.
+	\item \textit{Token de-anonymization attack}: Given a commitment $\texttt{cm} \in \mathbf{C}_\tau$ published through a transaction of type $\texttt{tx}_\textsf{Trans}$, $\texttt{tx}_\textsf{Merge}$, or $\texttt{tx}_\textsf{Div}$, the adversary attempts to guess an entity $e^* \in \mathbf{E}_\tau$ such that $\texttt{cm}.\texttt{owner} = e^*$.
+	\item \textit{Token linking attack}: Given a commitment $\texttt{cm} \in \mathbf{C}_\tau$ that is published through a transaction \texttt{tx} of type $\texttt{tx}_\textsf{Trans}$, $\texttt{tx}_\textsf{Merge}$, or $\texttt{tx}_\textsf{Div}$ 
+%	(i.e., $\texttt{tx}.\texttt{cm\_new} = \texttt{cm}$ and $\texttt{cm}.\texttt{class} \in \{\textsf{Trans}, \textsf{Merge}, \textsf{Div}\}$)
+	 the adversary attempts to guess a prior commitment $\texttt{cm}^* \in \mathbf{C}_\tau$ that was used to generate $\texttt{cm}$, such that $\texttt{tx}.\texttt{cm\_old} = \texttt{cm}^*$.
+\end{itemize}
+
+\noindent \underline{Strong eavesdropper adversary  $\mathcal{A}_S$}:
+\begin{itemize}
+\item has the same goals as the eavesdropper adversary  $\mathcal{A}_E$.
+\end{itemize}
+
+\noindent \underline{Forgery adversary $\mathcal{A}_F$}:
+\begin{itemize}
+	\item \textit{Proof forgery attack}: Given a public key $\text{PKsig}^\ast$, the adversary attempts to forge a proof $\pi_\mathsf{Auth}^\ast$ with the public input $x^\ast_\texttt{Auth} = (\texttt{rt}_\tau, \text{PKsig}^\ast_{i})$ such that they satisfy $\mathsf{Verify}(\mathsf{vk}_\mathsf{Auth}, x^\ast_\texttt{Auth}, \pi^\ast_\texttt{Auth}) = 1$.
+	
+	\item \textit{Signature forgery attack}: given a $\text{PKsig}^\ast$, the adversary samples a message (data record) $m^\ast$ and attepts to forge a signature $\sigma^\ast$ such that it satisfies $\mathcal{V}_\mathsf{sig}(\text{PKsig}, m^\ast, \sigma^\ast) = 1$.
+\end{itemize}
+
+%        \begin{enumerate}        
+%	
+%	\item Link a data record, $d_n$, to its corresponding \gls{aat} commitment, $\texttt{cm}_i$ (\textit{Data de-anonymizing attack}).
+%	
+%	
+%	\item Determine whether two \gls{aat} commitments, $\texttt{cm}_i$ and $\texttt{cm}_j$, which are created by different entities are consecutive authentication tokens, with one having been transferred to the other (\textit{Linking attack}).
+%	
+%	\item
+%	Forge $\pi_\mathsf{Auth}^\ast$ and $\sigma^\ast$ such that they are consistent to an \gls{aat} that the attacker does not have access to (\textit{Data forging attack}). 
+%	
+%	
+%	\item
+%	Generate transactions $\texttt{tx}_\mathsf{Trans}$, $\texttt{tx}_\mathsf{Merge}$, $\texttt{tx}_\mathsf{Div}$ to  transfer, merge, or divide\gls{aat}s that the attacker does not have access to (\textit{\gls{aat} ownership spoofing attack}).
+%	
+%	
+%	\item
+%	Alter any existing $d_{n} \in \mathbf{D}_\tau$ (\textit{Data tampering attack}).
+%	
+%	\item
+%	 Re-transfers a token that is already transferred, merged, or divided (\textit{\gls{aat} double transfer attack}).
+%\end{enumerate}
+
+\subsection{Required Security Properties} \label{sec:Required Security Properties}
+The Zupply framework is designed to satisfy the following security properties:
+\begin{itemize}
+\item \textit{Data anonymity}: The Zupply framework satisfies (strong) data anonymity if the eavesdropper adversary $\mathcal{A}_E$ (the strong eavesdropper adversary $\mathcal{A}_S$) has only a negligible probability of succeeding in the data de-anonymization attack.
+%	\item \textit{Strong data anonymity}: The Zupply framework has strong data anonymity, if $\mathcal{A}_S$ has a negligible chance to success the data de-anonymization attack.
+\item \textit{Token anonymity}: The Zupply framework satisfies (strong) token anonymity if the eavesdropper adversary $\mathcal{A}_E$ (the strong eavesdropper adversary $\mathcal{A}_S$) has only a negligible probability of succeeding in the token de-anonymization attack.
+
+%	\item \textit{Strong token anonymity}: The Zupply framework has strong token anonymity, if $\mathcal{A}_E$ has a negligible chance to success the token de-anonymization attack.
+\item \textit{Token unlinkability}: The Zupply framework satisfies (strong) token unlinkability if the eavesdropper adversary $\mathcal{A}_E$ (the strong eavesdropper adversary $\mathcal{A}_S$) has only a negligible probability of succeeding in the token linking attack.
+
+\item \textit{Data integrity}: The Zupply framework satisfies data integrity if the forgery adversary $\mathcal{A}_F$ has only a negligible probability of succeeding in either a proof forgery or a signature forgery attack.
+
+\end{itemize}
+
+\subsection{Implemented Security Measures} \label{sec:Implemented Security Measures}
+
+This section outlines the design rationale of the Zupply framework in achieving the security properties introduced earlier. 
+For the security properties of data anonymity, token anonymity, and token unlinkability, we first demonstrate how each property is preserved against the eavesdropper adversary $\mathcal{A}_E$. We then analyze whether the strong eavesdropper adversary $\mathcal{A}_S$, equipped with additional capabilities, can compromise any of these properties. 
+
+
+\subsubsection{Data Anonymity}
+The Zupply framework must ensure that, given any $d \in \mathbf{D}_\tau$,  $\mathcal{A}_E$ has only a negligible probability of correctly guessing a corresponding $\texttt{cm}^\ast \in \mathbf{C}_\tau$.  Let
+\begin{align*}
+	d = \left( 
+	\begin{array}{l@{\hspace{0.05em}}l}
+		\text{pred} & = \texttt{p-set}, \\
+		d_{\mathsf{pub}}, & c, \\
+		\text{tag} & = \texttt{t-set}, \\
+		\pi_{\texttt{Auth}}, & \\
+		x_{\texttt{Auth}} & = \{\texttt{rt}, \text{PKsig}\}, \\
+		\sigma, & \mathbf{L}_\tau^\mathsf{PI}(\texttt{rt})
+	\end{array} 
+	\right)
+\end{align*}
+be the data record given to the adversary, where \texttt{p-set} denotes a set of at most two data records from \( d \in \mathbf{D}_\tau \), and \texttt{t-set} is a set of at most two ownership transfer tags. Let \( d.\texttt{cm} = \texttt{cm}_d \) denote the commitment associated with \( d \). 
+If we assume both  \texttt{p-set} and \texttt{t-set} are empty, and the data record is uploaded by an honest entity, then \(\texttt{cm}_d.\texttt{class} = \mathsf{Init}\). The fields in the data record are either computationally indistinguishable from random, due to the security guarantees of the underlying cryptographic protocols, or are irrelevant to \( \texttt{cm}_d \). We now provide a more detailed explanation of why \( \mathcal{A}_E \) cannot learn anything about \( \texttt{cm}_d \) from the elements of the data record that are relevant to \( \texttt{cm}_d \):
+\begin{enumerate}
+	\item $\text{PKsig}$ is directly came frome one part of the \gls{aat} whose commitment is $\texttt{cm}_d$. If $\mathcal{A}$ be able to decide whether $\text{PKsig}$ is a part of the pre-image of which $\texttt{cm}\in  \mathbf{C}_\tau$, they will be able to deduce $\texttt{cm}_d$. According to the \textit{Statistically Hiding} property of the commitment scheme \textsf{COMM},  $\mathcal{A}_E$ has a negligible chance to determine $\texttt{cm}_d$ from $\text{PKsig}$.
+	
+	\item $\sigma = \mathcal{S}_\mathsf{sig}(\text{SKsig}, m)$ does not include any pre-image of the \gls{aat} without needing to consider the security properties of the signature scheme. We have discussed above that $\text{PKsig}$ used for verifying $\sigma$, also does not help $\mathcal{A}_E$ guess $\texttt{cm}_d$. Hence, the attacker will not gain any advantage from $\sigma$.
+	
+	\item According to the \textit{Statistical Zero-knowledge} property of the zkSNARK scheme,  $\mathcal{A}_E$ has a negligible chance of learning the private inputs (witnesses) of the \gls{zkp} $\pi_{\texttt{Auth}}$. The public inputs to consider are $\texttt{rt}$ and $\text{PKsig}$.  $\texttt{rt}_2$ is independent of which commitment is used. As previously mentioned, having knowledge of $\text{PKsig}$ doesn’t reveal any information about $\texttt{cm}_d$.
+\end{enumerate}
+
+Consequently, since \texttt{p-set} and \texttt{t-set} are empty, \( \mathcal{A}_E \) learns that \( \texttt{cm}_d.\texttt{class} = \mathsf{Init} \). Therefore, \( \mathcal{A}_E \) can attempt to guess \( \texttt{cm}_d \) from among the commitments whose class is \( \mathsf{Init} \).
+
+Now, we consider different scenarios where \texttt{p-set} and \texttt{t-set} are not both empty:
+\begin{enumerate}
+	\item If \( \texttt{p-set} = \{d_1^{\text{old}}\} \) and \( \texttt{t-set} = \varnothing \), then this indicates that the current data record reuses the same commitment as a previous one, i.e., \( d.\texttt{cm} = d_1^{\text{old}}.\texttt{cm} = \texttt{cm}_d \). In this scenario, all fields in \( d_1^{\text{old}} \) that are relevant to \( \texttt{cm}_d \), except for \( \sigma \), are identical to those in \( d \). Consequently, \( \mathcal{A}_E \) does not gain any additional information about \( \texttt{cm}_d \) from this observation. However,  by traversing the data sequence retrospectively, \( \mathcal{A}_E \) may still deduce the class of \( \texttt{cm}_d \) and attempt to guess the commitment from among those belonging to the same class.
+	
+	\item If \( \texttt{p-set} = \{d_1^{\text{old}}\} \) and \( \texttt{t-set} = \{\texttt{Tag}_1\} \), then this indicates that the current data record uses a different commitment from the previous one, i.e., \( d.\texttt{cm} \neq d_1^{\text{old}}.\texttt{cm} \). In this scenario, all fields in \( d_1^{\text{old}} \) that are relevant to its corresponding commitment, denoted \( \texttt{cm}_{d_1^{\text{old}}} \), are irrelevant to \( \texttt{cm}_d \). Additionally, given that \( \texttt{Tag}_1 = \mathcal{S}_\mathsf{sig}(\text{SKsig}_1, \text{PKsig}) \), where \( \text{SKsig}_1 \) is associated with \( \texttt{cm}_{d_1^{\text{old}}} \), \( \mathcal{A}_E \) does not learn anything about either \( \texttt{cm}_d \) or \( \texttt{cm}_{d_1^{\text{old}}} \). Consequently, \( \mathcal{A}_E \) gains no additional information about \( \texttt{cm}_d \) from this observation. However, since the class of \( \texttt{cm}_d \) must be either \( \mathsf{Trans} \) or \( \mathsf{Div} \), \( \mathcal{A}_E \) may still attempt to guess the commitment from among those belonging to the same class.
+	
+	\item If \( \texttt{p-set} = \{d_1^{\text{old}}, d_2^{\text{old}}\} \) and \( \texttt{t-set} = \{\texttt{Tag}_1, \texttt{Tag}_2\} \), his implies that the current record uses a commitment distinct from both  \(d_1^{\text{old}}\) and \(d_2^{\text{old}}\). As in the previous case, \( \mathcal{A}_E \) gains no knowledge about  \( \texttt{cm}_d \)or the commitments in the prior data records. However, given that the class of  \( \texttt{cm}_d \) must be  \( \mathsf{Merge} \), \( \mathcal{A}_E \) may still attempt to guess the commitment from among others of that class.
+	
+\end{enumerate}
+
+Therefore, \( \mathcal{A}_E \) may not learn the exact commitment \( \texttt{cm}_d \). However, inferring its class still enables a bounded guessing strategy. Moreover, the strong eavesdropper adversary \( \mathcal{A}_S \) does not have any advantage over \( \mathcal{A}_E \) in guessing \( \texttt{cm}_d \), since knowledge of the attributes (\texttt{attr}) associated with commitments does not reveal which specific commitment is used in \( d \), given our assumption that data records do not contain any information identifying the entity who uploaded them.
+
+\subsubsection{Token Anonymity}
+The Zupply framework must ensure that  given a commitment $\texttt{cm} \in \mathbf{C}_\tau$ published through a transaction of type $\texttt{tx}_\textsf{Trans}$, $\texttt{tx}_\textsf{Merge}$, or $\texttt{tx}_\textsf{Div}$, the adversary   \( \mathcal{A}_E \)  has a negligible chance of correctly guessing an entity $e^* \in \mathbf{E}_\tau$ such that $\texttt{cm}.\texttt{owner} = e^*$. Let transaction
+\begin{align}\label{eq:tx_trans}
+	\texttt{tx}_\mathsf{Trans} & = \left( 
+	\begin{array}{l@{\hspace{0.05em}}l}
+		\pi_{\mathsf{Trans}}, & \\
+		x_{\mathsf{Trans}} & = (\texttt{eol}, \texttt{cm}, \texttt{rt}) ,\\
+		\texttt{eol}, & \texttt{cm}, \\
+		\texttt{rt}, & \mathsf{ind}, \mathsf{path}
+	\end{array} 
+	\right)
+\end{align}
+publishes \texttt{cm} on the blockchain. Assuming that \( \mathcal{A}_E \) does not have access to the oracle \( \mathcal{O}^\mathsf{Attr} \), and consequently to \( \texttt{cm}.\texttt{attr} \), no information regarding any entity is retrievable from this transaction or any other transaction in \( \mathbf{TX}_\tau \). This assumption implies that blockchain addresses do not reveal the identities of the entities. Accordingly, \( \mathcal{A}_E \) has to guess \( \texttt{cm}.\texttt{owner} \) from among \( \mathbf{E}_\tau \).
+
+On the other hand, \( \mathcal{A}_S \) has access to the oracle \( \mathcal{O}^\mathsf{Attr} \), and thus to the \( \texttt{attr} \) field of every commitment in \( \mathbf{C}_\tau \). This assumption implies that the blockchain addresses used to pay the gas fees for transactions reveal the identities of the entities who submitted them. Therefore, we examine whether and how this knowledge enables \( \mathcal{A}_S \) to narrow its guessing strategy.
+
+Let us assume that \( \texttt{cm}.\texttt{attr} = e \) denotes the entity who submits the transaction \( \texttt{tx}_\mathsf{Trans} \), as defined in~\eqref{eq:tx_trans}, to the blockchain, thereby transferring ownership of one of its \glspl{aat} to an entity \( e^* \). The transaction itself does not contain any element dependent on \( e^* \), and the \gls{aat} committed to by \( \texttt{cm} \) is transferred to \( e^* \) via a secure off-chain channel. Hence, the transaction does not include any information about \( e^* \).
+
+Now, suppose it is known that \( e^* \) will transfer ownership of \( \texttt{cm} \) within a time window \( \delta \) via a new transaction of type \( \texttt{tx}^\text{new}_\mathsf{Trans} \), \( \texttt{tx}^\text{new}_\mathsf{Merge} \), or \( \texttt{tx}^\text{new}_\mathsf{Div} \), and subsequently publishes \( \texttt{cm}^\text{new} \) on-chain. At this point, we assume that \( \mathcal{A}_S \) is unable to link \( \texttt{cm}^\text{new} \) to \( \texttt{cm} \); the validity of this assumption will be discussed later under the token unlinkability property.
+
+Consequently, \( \mathcal{A}_S \) may attempt to identify \( e^* \) among all entities who submit a transaction of type \( \texttt{tx}_\mathsf{Trans} \), \( \texttt{tx}_\mathsf{Merge} \), or \( \texttt{tx}_\mathsf{Div} \) within the time window \( \delta \). We conclude that the higher the volume of \gls{aat} transfers occurring through the Zupply framework during \( \delta \), the lower the probability that \( \mathcal{A}_S \) correctly identifies \( e^* \).
+
+\subsubsection{Token Unlinkability}
+The Zupply framework must ensure that given a commitment $\texttt{cm} \in \mathbf{C}_\tau$ that is published through a transaction \texttt{tx} of type $\texttt{tx}_\textsf{Trans}$, $\texttt{tx}_\textsf{Merge}$, or $\texttt{tx}_\textsf{Div}$  the adversary \( \mathcal{A}_E \) has a negligable chance to correctly guess a prior commitment $\texttt{cm}^* \in \mathbf{C}_\tau$ that was used to generate $\texttt{cm}$, such that $\texttt{tx}.\texttt{cm\_old} = \texttt{cm}^*$. 
+
+Let us assume, without loss of generality, that the transaction \( \texttt{tx}_\mathsf{Trans} \), defined in~\eqref{eq:tx_trans}, is submitted to the blockchain by entity \( e \), i.e., \( \texttt{tx}.\texttt{attr} = e \), and it publishes the commitment \( \texttt{cm} \). This transaction transfers the ownership of one of the \glspl{aat}, whose commitments is in \( \mathbf{C}_\tau \), to either the same entity or another entity in \( \mathbf{E}_\tau \). Let \( \texttt{cm}^* \) denote the commitment corresponding to the specific \gls{aat}, where \( \texttt{cm}^*.\texttt{owner} = e \), and its ownership is transferred in this transaction. The published commitment \( \texttt{cm} \) satisfies \( \texttt{cm}.\texttt{attr} = e \), and \( \texttt{cm}.\texttt{owner} \) is either \( e \), if the \gls{aat} is transferred to the same entity, or another entity in \( \mathbf{E}_\tau \), if it is transferred to a different one.
+
+
+As the goal of \( \mathcal{A}_E \) is to determine \( \texttt{cm}^* \), we examine the components of \( \texttt{tx}_\mathsf{Trans} \), as described in~\eqref{eq:tx_trans}, to assess whether any of them reveal information about \( \texttt{cm}^* \). Among these components, \( \pi_{\mathsf{Trans}} \) and \texttt{eol} are related to the \gls{aat} denoted by \( T^* \), which is committed to in \( \texttt{cm}^*\).
+\begin{enumerate}
+	\item \( \pi_{\mathsf{Trans}} \) is a \gls{zkp} attesting to the knowledge of the pre-image (i.e., \( T^* \)) of a commitment (i.e., \( \texttt{cm}^* \)) in \( \mathbf{C}_\tau \), as well as the consistency of the \gls{aat} with \texttt{eol} and  \( \texttt{cm} \). The value \texttt{eol} represents the hash of \( \rho^* \) in \( T^* \) and the \gls{aat} corresponding to the  new commitment \( \texttt{cm} \) has the same product quantity parameter as  \( T^* \). Due to the \textit{Statistical Zero-knowledge} property of the employed zero-knowledge protocol, $\mathcal{A}_E$ has a negligible chance to deduce \( \texttt{cm}^* \) or \( T^* \) from $\pi_{\mathsf{Trans}}$.
+	\item Let $\texttt{eol} \leftarrow \mathcal{H}(\rho^*)$ where $\rho^*$ is in $T^*$. Since $\mathcal{H}$ is a \textit{Preimage Resistance} hash function, the adversary $\mathcal{A}_E$ has a negligible chance to deduce $\rho^*$, \( \texttt{cm}^* \) or \( T^* \) from $\texttt{eol}$. 
+\end{enumerate}
+Therefore, the adversary \( \mathcal{A}_E \) has only a negligible probability of identifying \( \texttt{cm}^* \) among the commitments in \( \mathbf{C}_\tau \), based on the transaction \( \texttt{tx}_\mathsf{Trans} \) that publishes \( \texttt{cm} \). This conclusion similarly holds for transactions of types \( \texttt{tx}_\mathsf{Merge} \) and \( \texttt{tx}_\mathsf{Div} \).
+
+
+
+We now examine whether \( \mathcal{A}_S \) has any advantage over \( \mathcal{A}_E \) in identifying \( \texttt{cm}^* \), given its superior knowledge of the attribution properties of transactions and commitments. We begin by analyzing the possible values of \( \texttt{cm}^*.\texttt{attr} \) to assess whether \( \mathcal{A}_S \) can narrow its guessing domain. Specifically, \( \texttt{cm}^*.\texttt{attr} = e \) in two cases: (i) when \( \texttt{cm}^* \) is published via a transaction of type \( \texttt{tx}_\mathsf{Init} \) with \( \texttt{tx}_\mathsf{Init}.\texttt{attr} = e \); or (ii) when entity \( e \) transfers ownership of one of its previous \glspl{aat} to itself via a transaction of type \( \texttt{tx}_\mathsf{Trans} \), \( \texttt{tx}_\mathsf{Merge} \), or \( \texttt{tx}_\mathsf{Div} \), in which the attribution is again \( e \). 
+
+In all other cases, \( \texttt{cm}^*.\texttt{attr} \) may correspond to any entity in \( \mathbf{E}_\tau \), implying that \( \texttt{cm}^* \) could be any commitment in \( \mathbf{C}_\tau \) whose \texttt{class} is not \( \mathsf{Init} \). Thus, \( \mathcal{A}_S \) can discard those commitments in \( \mathbf{C}_\tau \) whose \texttt{class} is \( \mathsf{Init} \) and whose \texttt{attr} is not \( e \), since \( e \) is not their owner and therefore cannot transfer their ownership. However, \( \mathcal{A}_S \) does not have any further advantage in determining the ownership of the remaining commitments. Hence, the probability of correctly identifying \( \texttt{cm}^* \) among the remaining commitments in \( \mathbf{C}_\tau \) remains negligible.
+
+\subsubsection{Data Integrity}
+The Zupply framework must ensure that, given a public key \( \text{PKsig}^\ast \), the adversary \( \mathcal{A}_F \) has only a negligible probability of forging a proof \( \pi_\mathsf{Auth}^\ast \) with public input \( x^\ast_\texttt{Auth} = (\texttt{rt}_\tau, \text{PKsig}^\ast_i) \) such that
+\[
+\mathsf{Verify}(\mathsf{vk}_\mathsf{Auth}, x^\ast_\texttt{Auth}, \pi^\ast_\texttt{Auth}) = 1.
+\]
+Moreover, given \( \text{PKsig}^\ast \), the adversary \( \mathcal{A}_F \) must also have only a negligible probability of forging a signature \( \sigma^\ast \) for any sampled message \( m^\ast \) such that
+\[
+\mathcal{V}_\mathsf{sig}(\text{PKsig}^\ast, m^\ast, \sigma^\ast) = 1.
+\]
+
+In the first case, \( \mathcal{A}_E \) attempts to generate an invalid \gls{zkp} \( \pi^\ast_\mathsf{Auth} \) along with its public input \( x^\ast_\mathsf{Auth} \), without knowledge of the corresponding witness \( w^\ast_\mathsf{Auth} \), which must be derived from the associated \gls{aat}. The goal is to deceive the \( \mathsf{Verify} \) algorithm into outputting 1. However, due to the \textit{soundness} property of the zkSNARK scheme employed in the Zupply framework, the probability that \( \mathcal{A}_E \) successfully deceives the verifier is negligible.
+
+In the second case, \( \mathcal{A}_E \) attempts to forge a signature \( \sigma^\ast \) that should have been generated using the secret key \( \text{SKsig}^\ast \in T^\ast \). Since \( \mathcal{A}_E \) does not know \( \text{SKsig}^\ast \), it must forge \( \sigma^\ast \) such that the signature verification algorithm \( \mathcal{V}_\mathsf{sig} \) accepts it. As the digital signature scheme used in the Zupply framework satisfies the \textit{SUF-CMA} (Strong Unforgeability under Chosen Message Attack) security property, \( \mathcal{A}_E \) cannot produce a valid \( \sigma^\ast \) for any data record \( m^\ast \) with more than negligible probability.
+
+
+
+%Under this assumption, measuring the anonymity and unlinkability of entities within the Zupply framework requires evaluating the probability that each entity sends a specific transaction type to the blockchain within a given time interval (e.g., during block generation). The second assumption states that an adversary cannot distinguish between transactions of different types, as their contents are indistinguishable. This assumption is adopted without further elaboration. 
+
+
+%\subsection{Indistinguishability Experiment} \label{sec:ind_experiment}
+%In this section, we do not provide security proofs, deferring them to future work.
+%Instead, we discuss the formalization of the privacy property within the Zupply framework. Informally, consider an adversary $\mathcal{A}$ that constructs two ledgers and two corresponding \glspl{dag} by inducing honest entities, ensuring consistency between the public information of  ledgers and \gls{dag}s. If the adversary is then provided with both ledgers but only one \gls{dag}, it should not be able to distinguish the ledgers. Thus, the adversary remains uncertain about the association between the given \gls{dag} and the respective ledgers.
+%
+%
+% To formalize this, we present the experimental setup for evaluating ledger indistinguishability. To characterize the ledger indistinguishability of the Zupply framework $\Pi$, we design an \textsf{L-IND} experiment following the similarly named experiment in Zerocash~\cite{zcash-proc}.  
+%Recall that a ledger $L$ includes a set of transactions $\mathbf{TX}$. From $\mathbf{TX}$,  the ordered set $\mathbf{C}$, which stores commitments to \gls{aat}s (\texttt{cm}s), and the set of \gls{eol}s, denoted as $\mathbf{X}$ can be computed. Furthermore, the \textsf{MHT} can be constructed from $\mathbf{C}$.
+%Each \texttt{cm} in $\mathbf{C}$  can be replaced by a tuple $(\texttt{cm}, \text{TXtype}, e)$, where $\texttt{cm}$ is the commitment added to the ledger by an entity $e$ through a transaction of type TXtype. Here, for simplicity, the transaction type is either \textsf{Trans} or \textsf{Init}. We denote this new set as $\mathbf{C}_G$ as the generalized form of $\mathbf{C}$.  Notably, if $\text{TXtype} = \textsf{Trans}$, the entity $e$ does not \textit{own} the corresponding \gls{aat}; rather, it only adds it to the ledger. The adversary’s capabilities determine whether they can extract the entity $e$ associated with each commitment in the transactions ($\mathcal{A}$'s access to $\mathcal{O}^\mathsf{Attr}$). 
+%
+%Let $\mathcal{C}$ denote the challenger in the \textsf{L-IND} experiment, which receives queries from the adversary $\mathcal{A}$, performs sanity checks, and forwards them to the Zupply framework oracle, denoted as $\mathcal{O}^\Pi$. In the \textsf{L-IND} experiment, we instantiate two oracles, $\mathcal{O}_0^\Pi$ and $\mathcal{O}_1^\Pi$.  Each oracle $\mathcal{O}^\Pi$ internally stores:  
+%\begin{enumerate}
+%	\item The set $\mathbf{C}_G$ (generalized form).
+%	\item A set of entities $\mathbf{E}$.
+%	\item A set of \gls{eol}s, denoted as $\mathbf{X}$.
+%	\item Sets of \gls{aat}s \textit{owned} by each entity $e \in \mathbf{E}$, denoted as $\mathbf{T}^e$.
+%	\item A set of data records, denoted as $\mathbf{D}$.
+%\end{enumerate}
+%
+%The oracle $\mathcal{O}^\Pi$ is initialized by public parameters \textsc{pp} and can receive and process the following queries:
+%
+%%% INIT
+%\begin{itemize}
+%	\item $Q(\textbf{Init}, q, e)$ 
+%	\begin{enumerate}
+%		\item Compute $\textsf{Init}(\textsc{pp}, q) \rightarrow (\texttt{tx}_\textsf{Init}, T)$, where $\texttt{tx}_\textsf{Init} = \big(\texttt{cm}, \texttt{rt}^{\text{new}}, \mathsf{ind}, \mathsf{path}_{\mathsf{ind}}\big)$,
+%		\item  Add $(\texttt{cm}, \textsf{Init}, e)$ to $\mathbf{C}_G$.
+%		\item Add $T$ to $\mathbf{T}^e$
+%	\end{enumerate}
+%
+%
+%%% TRANS
+%	\item $Q(\textbf{Trans}, \texttt{cm}^\text{old}, e^\text{new})$ 
+%	\begin{enumerate}
+%		\item Assert $\texttt{cm}^\text{old}$ is in $\mathbf{C}$, otherwise output $\perp$.
+%		\item Let $T^{e^\text{old}} \in \mathbf{T}^{e^\text{old}}$ be the \gls{aat} corresponding to $\texttt{cm}^\text{old}$.
+%		\item Sample $ (\text{PKsig}^\text{new}, \text{SKsig}^\text{new})  \leftarrow {\mathcal{K}_\mathsf{sig}} (\textsc{pp})$
+%		\item \sloppy Compute \textsf{Trans}$\big($\textsc{pp}$, T^{e^\text{old}},  \text{PKsig}^\text{new} \big)$ $\rightarrow$ \big($\texttt{tx}_{\textsf{Trans}}, \Tilde{T}^{e^\text{new}}, \texttt{Tag}\big)$, where $\texttt{tx}_{\textsf{Trans}} = \big(\pi_{\textsf{Trans}}, x_{\textsf{Trans}}, \texttt{eol}, \texttt{cm}^{\text{new}}, \texttt{rt}^{\text{new}}, \mathsf{ind}, \mathsf{path}_{\mathsf{ind}} \big)$ and $x_\textsf{Trans} = \big(\texttt{eol}, \texttt{cm}^{\text{new}}, \texttt{rt}^{\text{old}}\big)$
+%		\item  Add $(\texttt{cm}, \textsf{Trans}, e^\text{old})$ to $\mathbf{C}_G$.
+%		\item Add $T^{e^\text{new}} = (\Tilde{T}^{e^\text{new}},  \text{PKsig}^\text{new})$ to $\mathbf{T}^{e^{\text{new}}}$
+%	\end{enumerate}
+%	
+%	\item $Q(\textbf{Upload}, \text{IsTransferred}, d^\text{old}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$, where $d_{\text{pub}, \text{pri}}^\text{new}$ represents the public and private parts of the new data to be added to $D$, succeeding $d^\text{old}$, which is already in $D$. The Boolean variable $\text{IsTransferred}$ indicates whether the new data has a different $\text{PKsig}$ than $d^\text{old}$; it is set to \texttt{True} if $\text{PKsig}$ differs and \texttt{False} otherwise.\footnote{The query $Q(\textbf{Upload}, \text{False}, \text{Null}, d_{\text{pub}, \text{pri}}^\text{new},  e^\text{new})$ initiates a \gls{dag}.}
+%	
+%	\begin{enumerate}
+%		\item Assert $d^\text{old}$ is either Null or is in $D$ and it is the last data in a progressive data sequence, otherwise output $\perp$.
+%		\item If  $d^\text{old} \neq \text{Null}$, find the $T^\text{old}$ with $\text{PKsig}^\text{old}$ in all $\mathbf{T}^e$s and from that determine  $\text{SKsig}^\text{old}$ otherwise do nothing.
+%		\item \sloppy If $\text{IsTransferred} = \texttt{True}$, then commit to $T^\text{old}$ to compute $\texttt{cm}^\text{old}$, and execute  $Q(\textbf{Trans}, \texttt{cm}^\text{old}, e^\text{new})$ to produce $T^{e^\text{new}}$. Otherwise, $T^{e^\text{new}} = T^\text{old}$.
+%		\item Sample a random \textsc{k} and Compute \textsf{Upload} $\big($\textsc{pp}$, d^\text{old}, T^{e^\text{new}}, d^\text{new}_{\mathsf{pub}, \mathsf{pri}}, \textsc{k}, [\textsf{tags}]  \big)$ $\rightarrow$ $d^\text{new}$.
+%		\item Add $d^\text{new}$ to $D$.
+%	\end{enumerate}
+%	
+%	\item $Q(\textbf{InsertTX}, \texttt{tx})$, where $\texttt{tx}$ is either the type of \textsf{Trans} or  \textsf{Init}.
+%	\begin{enumerate}
+%		\item If \textsf{VerifyTX} $\big($\textsc{pp}$, \texttt{tx} \big)$  returns 0, return $\perp$.
+%		\item Add the $(\texttt{cm}, \text{TXtype}, e^*)$ to  $\mathbf{C}$, where $e^*$ denote the type of entities where the oracle does not hold their $T^{e^*}$.
+%		\item If $ \text{TXtype} = \textsf{Trans}$ and the receiver of the \gls{aat} is not of type $e^*$, add   Add $T^{e^\text{new}}$ to $\mathbf{T}^{e^{\text{new}}}$.
+%	\end{enumerate}
+%	
+%		\item $Q(\textbf{InsertData}, d)$, 
+%	\begin{enumerate}
+%		\item If \textsf{Audit} $\big($\textsc{pp}$, d \big)$  returns 0, return $\perp$.
+%		\item Add $d$ to  $\mathbf{D}$.
+%	\end{enumerate}
+%\end{itemize}
+%
+%In the \textsf{L-IND} experiment, the challenger $\mathcal{C}$ instantiates two oracles, denoted as $\mathcal{O}_0^\Pi$ and $\mathcal{O}_1^\Pi$. Then, $\mathcal{C}$ randomly selects $b \in \{0,1\}$ and provides the adversary $\mathcal{A}$ with two ledgers: $L_\text{Left} = L_b$ and $L_\text{Right} = L_{1-b}$. The adversary then submits two queries, $Q$ and $Q'$, to $\mathcal{C}$, where both queries are of the same type and are publicly consistent, meaning all public values in these queries are identical.  Let $D_b$ and $D_{1-b}$ denote the data sets corresponding to each ledger. If the queries are of type \textbf{InsertTX} or \textbf{InsertData}, the challenger $\mathcal{C}$ sends $Q$ to $(L_b, D_b)$ and $Q'$ to $(L_{1-b}, D_{1-b})$. Otherwise, $\mathcal{C}$ sends $Q$ to $(L_0, D_0)$ and $Q'$ to $(L_1, D_1)$.
+%
+%
+%Notably, here we do not assume that the adversary has access to the $\mathcal{O}^\mathsf{Attr}$ oracle. As a result, the adversary is restricted to constructing $\mathbf{C}$ from each ledger and cannot derive $\mathbf{C}_G$ from them. Consequently, selecting different entities in queries $Q$ and $Q'$ does not violate the public consistency of the queries. Furthermore,  selecting different entities  does not provide $\mathcal{A}$ with any advantage in distinguishing the ledgers.
+%
+%
+%The adversary's advantage in this experiment, denoted as $\mathsf{Adv}^{\textsf{L-IND}}_{\Pi}$, is the probability that the adversary can correctly guess $b$ given $L_b$, $L_{1-b}$, and $D_0$. The core idea of the experiment is that each random-looking value is either randomly sampled or simulated, rather than being generated according to the actual algorithm. Later, in the proof, it must be shown that the simulated results are indistinguishable from those produced by the actual algorithm execution. This can be achieved by leveraging the security properties of the underlying building blocks.
+%
+%
+%
+%Here, we provide an overview of the \textsf{L-IND} experiment without delving into the details. In this experiment, when $\mathbf{C}$ receives an \textbf{Init} query, it modifies the \textsf{Init} algorithm for each $Q$ and $Q'$, constructing the commitments \texttt{cm} by committing to random values instead of \gls{aat}s. 
+%When $\mathbf{C}$ receives a \textbf{Trans} query, it modifies the \textsf{Trans} algorithm such that the \texttt{eol} value included in the created transaction is randomly sampled. If $e^\text{new}$ is not one of the entities whose secrets the adversary knows (i.e., $e^\text{new} \neq e^*$), $\mathbf{C}$ randomly samples $T^{e^\text{new}}$ and \texttt{cm}; otherwise, it follows the original \textsf{Trans} algorithm. 
+%Finally, the \gls{zkp}s in \textbf{Trans} and \textbf{Upload} queries are simulated based on their public inputs. We leave the detailed description of the experiment and its proof for future work. 
+%
+%Now, suppose the adversary has access to $\mathcal{O}^\mathsf{Attr}$. In this case, $\mathcal{C}$ should not enforce $\mathcal{A}$ to use identical entities in both $Q$ and $Q'$ queries to satisfy the public consistency requirement. Consequently, the adversary would be able to distinguish between the two ledgers (i.e., guess $b$) with a significant probability. 
+%To address this scenario, additional assumptions are required, such as assigning a probability to each entity in an anonymity set for sending a specific transaction type within a given time interval.
+%The formalization of this scenario and the measurement of anonymity based on the aforementioned probability will be addressed in future research.
+%
+%
+%
+%
+%
+%%\begin{enumerate}
+%%	\item .
+%%	\item 
+%%\end{enumerate}
+%
+%
+%%One diffenece between our experiment and the experiment in Zerocash is that in our experiment there exist a data table, denoted as $D$, where the adversary can either induce honest parties to upload data into the table.
+%
+%
 
 
 \section{Discussion}
@@ -811,4 +1146,4 @@ This chapter proposed a novel anonymous authentication token (\gls{aat}) framewo
 %Zupply adopted a stronger adversary model that previous methods, in which the underlying blockchain platform does not preserve the anonymity of the transaction issuer (adversary's access to $\mathcal{O}^\mathsf{Attr}$). 
 
 Compared with previous methods,  which overlooked the fact that the underlying blockchain platform does not preserve the anonymity of transaction issuers (adversary's access to $\mathcal{O}^\mathsf{Attr}$)  Zupply incorporates a \gls{zkp}-based privacy-preserving mechanism to ensure both the anonymity of transaction issuers and secure ownership transfer within transactions.
-Moreover, transactions scale independently of participant count, Zupply requires no centralized servers or layer-1 changes, and let auditors focus only on relevant records. In contrast, zkLedger \cite{zkLedger2018}has to involve all entities per transaction, Mesh \cite{altawy2019mesh} lacks unlinkability and needs a central server, and DECOUPLES \cite{Maouchi2019DECOUPLES} modifies the base blockchain. 
+Moreover, transactions scale independently of participant count, Zupply requires no centralized servers or layer-1 changes, and let auditors focus only on relevant records. In contrast, zkLedger \cite{zkLedger2018} has to involve all entities per transaction, Mesh \cite{altawy2019mesh} lacks unlinkability and needs a central server, and DECOUPLES \cite{Maouchi2019DECOUPLES} modifies the base blockchain. 

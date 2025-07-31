@@ -3,7 +3,7 @@
 %======================================================================
 
 \section*{Declaration of Contributions}
-This chapter is based on~\cite{Badakhshan2024Zupply} and~\cite{Badakhshan2025AuroraZupply}. I am the sole author of this chapter under the supervision of Professor Guang Gong.
+This chapter is based on~\cite{Badakhshan2024Zupply} and~\cite{Badakhshan2025AuroraZupply} (\copyright \hspace{.1em}2025 IEEE). I am the sole author of this chapter under the supervision of Professor Guang Gong.
 
 \section{Introduction}
 
@@ -124,8 +124,8 @@ The collision resistance hash function $\mathcal{H}$ is a 512-bit input to a 256
 \subsection{Statistically-hiding Commitment}
 We instantiate the commitment scheme \textsf{COMM} via $\mathcal{H}$. Such that 
 % for computing the commitment to $\Tilde{T} := (q, \text{PKsig}, \rho)$, 
-$\texttt{cm}:=\mathsf{COMM}_\rho(\Tilde{T}) = \mathcal{H}(q||\text{PKsig}||[\rho]_{224})$
-Where, $q \in \{0, 1\}^{32}$, $\text{PKsig} \in \{0, 1\}^{256}$, and $\rho \in \{0, 1\}^{512}$. Moreover, $[\rho]_{224}$ denotes that the $512$-bit $\rho$ is truncated to $224$ bits by dropping most significant bits. Both $\text{PKsig}$ and $\rho$ 
+$\texttt{cm}:=\mathsf{COMM}_\rho(\Tilde{T}) = \mathcal{H}(q||\text{PKsig}||[\rho]_{192})$
+Where, $q \in \{0, 1\}^{64}$, $\text{PKsig} \in \{0, 1\}^{256}$, and $\rho \in \{0, 1\}^{512}$. Moreover, $[\rho]_{192}$ denotes that the $512$-bit $\rho$ is truncated to $224$ bits by dropping most significant bits. Both $\text{PKsig}$ and $\rho$ 
 % (which is the output of a cryptographically strong random number generator (RNG) \cite{NISTPRNG}) 
 can serve as randomness for the commitment. 
 % Operator $\xleftarrow{R}$ is a cryptographically strong random number generator (RNG) \cite{NISTPRNG}.  The Digital signature algorithm used in the experiment is  the curve Secp256k1 \cite{brown2009standards}.
@@ -162,7 +162,7 @@ Let \(|x_\mathbbm{x}|\) represent the number of public inputs for an instance \(
 In the Zupply framework, every public input is represented as either a 256-bit hash or a 256-bit public key. However, like other scalar elements in \gls{r1cs} instances, these inputs must belong to the scalar prime field of the underlying elliptic curve. Since the scalar numbers in BN254 and BLS12-381 have bit-lengths of 254 and 255 bits, respectively, each 256-bit value is split into two 128-bit public inputs to minimize the public input size. In contrast, the original implementation of the SHA-256 arithmetic circuit in \cite{libsnark} treats each 256-bit hash as 256 distinct public inputs, significantly increasing the size of the verification keys. Based on our construction, the number of public inputs represented as $n(x_\mathbbm{x})$ in Table \ref{tab:zksize} are double the count of public inputs as per the arithmetic circuits presented in Section \ref{sec:Zupply Arithmetic Circuits}. Moreover, the size of the proving key \textsf{pk} is determined by the number of constraints in each instance and the proving keys in the Zupply framework are stored off-chain on the devices of entities. The number of constraints is determined by the size of the circuit implementing \gls{np} statements in Section \ref{sec:Zero-knowledge Proofs}. 
 
 \subsubsection{Over BN254 Curve}
-We initially implement the Groth16 \gls{zksnark} over the BN254 curve. The curve was generally assumed to offer around 128 bits of security \cite{BNcurve}; However, research by Kim et al. \cite{Kim2015Extended} suggests that its actual security level might be lower. In Groth16, the proof size is constant, denoted as \(\pi \in \mathbb{G}_1^2 \times \mathbb{G}_2\), where \(\mathbb{G}_1\) consists of points on the BN254 elliptic curve, and \(\mathbb{G}_2\) comprises points on a twist of the BN254. Consequently, the proof size is 128 bytes, regardless of the size of the number of constraints in the \gls{r1cs} related to the proof.
+We initially implement the Groth16 \gls{zksnark} over the BN254 curve. The curve was generally assumed to offer around 128 bits of security \cite{BNcurve}; however, research by Kim et al. \cite{Kim2015Extended} suggests that its actual security level might be lower. In Groth16, the proof size is constant, denoted as \(\pi \in \mathbb{G}_1^2 \times \mathbb{G}_2\), where \(\mathbb{G}_1\) consists of points on the BN254 elliptic curve, and \(\mathbb{G}_2\) comprises points on a twist of the BN254. Consequently, the proof size is 128 bytes, regardless of the size of the number of constraints in the \gls{r1cs} related to the proof.
 Since Ethereum only provides pre-compiled contracts for the BN254 curve \cite{EIP197, Housni2022Families}, we selected this pairing-friendly curve for the on-chain Groth16 verification algorithms implementation. 
 
 \subsubsection{Over BLS12-381 Curve}
